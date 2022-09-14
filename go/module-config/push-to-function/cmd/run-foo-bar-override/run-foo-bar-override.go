@@ -1,16 +1,16 @@
 /*
  *  Copyright © 2021 Paulo Villela. All rights reserved.
- *  Use of this source code is governed by the Apache 2.0 license
+ *  Use of this source code is governed by the MIT license
  *  that can be found in the LICENSE file.
  */
 
 package main
 
 import (
-	"github.com/pvillela/moduleconfig/go/arch/util"
-	"github.com/pvillela/moduleconfig/go/module-config/push-to-function/config"
-	"github.com/pvillela/moduleconfig/go/module-config/push-to-function/fs"
-	"github.com/pvillela/moduleconfig/go/module-config/push-to-function/fs/boot"
+	"github.com/pvillela/module-config/go/arch/util"
+	"github.com/pvillela/module-config/go/module-config/push-to-function/config"
+	"github.com/pvillela/module-config/go/module-config/push-to-function/fs"
+	"github.com/pvillela/module-config/go/module-config/push-to-function/fs/boot"
 )
 
 func main() {

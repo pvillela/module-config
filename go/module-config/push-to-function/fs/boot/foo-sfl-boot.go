@@ -7,9 +7,9 @@
 package boot
 
 import (
-	"github.com/pvillela/moduleconfig/go/module-config/push-to-function/config"
-	"github.com/pvillela/moduleconfig/go/module-config/push-to-function/fs"
-	"github.com/pvillela/moduleconfig/go/module-config/push-to-function/fwk"
+	"github.com/pvillela/module-config/go/module-config/push-to-function/config"
+	"github.com/pvillela/module-config/go/module-config/push-to-function/fs"
+	"github.com/pvillela/module-config/go/module-config/push-to-function/fwk"
 )
 
 func fooSflCfgAdapter(appCfgInfo config.AppCfgInfo) fs.FooSflCfgInfo {

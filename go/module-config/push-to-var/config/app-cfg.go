@@ -1,6 +1,6 @@
 package config
 
-import "github.com/pvillela/moduleconfig/go/module-config/push-to-var/fwk"
+import "github.com/pvillela/module-config/go/module-config/push-to-var/fwk"
 
 type AppCfgInfo struct {
 	X string
