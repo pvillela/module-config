@@ -47,6 +47,6 @@ There are three main configuration approaches:
 
 ## Examples
 
-This directory demonstrates simple frameworks and patterns for the above configuration approaches.
+This repo demonstrates simple frameworks and patterns for the above configuration approaches.
 
 Notice that the _push_ frameworks demonstrated here have a _pull_ aspect to them as what is pushed is a thunk function that returns the configuration data, not the configuration data itself. The reason for that is to provide the flexibility to support configuration properties that change dynamically at runtime. There is no real performance penalty associated with the use a thunk instead of the data structure itself since the thunk can simply return a cached data structure by reference.
