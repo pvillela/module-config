@@ -8,7 +8,7 @@ package fs
 
 import (
 	"fmt"
-	"github.com/pvillela/module-config/go/module-config/pull-with-push-override/config"
+	"github.com/pvillela/moduleconfig/go/module-config/pull-with-push-override/config"
 )
 
 type BarBfCfgInfo struct {

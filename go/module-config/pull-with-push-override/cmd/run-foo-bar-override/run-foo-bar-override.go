@@ -7,8 +7,8 @@
 package main
 
 import (
-	"github.com/pvillela/module-config/go/arch/util"
-	"github.com/pvillela/module-config/go/module-config/pull-with-push-override/fs"
+	"github.com/pvillela/moduleconfig/go/arch/util"
+	"github.com/pvillela/moduleconfig/go/module-config/pull-with-push-override/fs"
 )
 
 func main() {

@@ -1,3 +1,3 @@
-module github.com/pvillela/module-config/go
+module github.com/pvillela/moduleconfig/go
 
 go 1.19

@@ -6,7 +6,7 @@
 
 package main
 
-import "github.com/pvillela/module-config/go/module-config/push-to-function/startup"
+import "github.com/pvillela/moduleconfig/go/module-config/push-to-function/startup"
 
 func main() {
 	startup.FooSfl()

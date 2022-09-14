@@ -7,8 +7,8 @@
 package main
 
 import (
-	"github.com/pvillela/module-config/go/arch/util"
-	"github.com/pvillela/module-config/go/module-config/push-to-var/fs"
+	"github.com/pvillela/moduleconfig/go/arch/util"
+	"github.com/pvillela/moduleconfig/go/module-config/push-to-var/fs"
 )
 
 func main() {

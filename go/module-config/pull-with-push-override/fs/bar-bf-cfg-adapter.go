@@ -7,7 +7,7 @@
 package fs
 
 import (
-	"github.com/pvillela/module-config/go/module-config/pull-with-push-override/config"
+	"github.com/pvillela/moduleconfig/go/module-config/pull-with-push-override/config"
 )
 
 func BarBfCfgAdapter(appCfg config.AppCfgInfo) BarBfCfgInfo {

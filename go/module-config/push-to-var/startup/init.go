@@ -7,8 +7,8 @@
 package startup
 
 import (
-	"github.com/pvillela/module-config/go/module-config/push-to-var/config"
-	"github.com/pvillela/module-config/go/module-config/push-to-var/fs/cfgadapt"
+	"github.com/pvillela/moduleconfig/go/module-config/push-to-var/config"
+	"github.com/pvillela/moduleconfig/go/module-config/push-to-var/fs/cfgadapt"
 )
 
 func Initialize() struct{} {

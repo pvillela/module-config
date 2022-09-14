@@ -7,9 +7,9 @@
 package cfgadapt
 
 import (
-	"github.com/pvillela/module-config/go/module-config/push-to-var/config"
-	"github.com/pvillela/module-config/go/module-config/push-to-var/fs"
-	"github.com/pvillela/module-config/go/module-config/push-to-var/fwk"
+	"github.com/pvillela/moduleconfig/go/module-config/push-to-var/config"
+	"github.com/pvillela/moduleconfig/go/module-config/push-to-var/fs"
+	"github.com/pvillela/moduleconfig/go/module-config/push-to-var/fwk"
 )
 
 func fooSflCfgAdapter(appCfgInfo config.AppCfgInfo) fs.FooSflCfgInfo {

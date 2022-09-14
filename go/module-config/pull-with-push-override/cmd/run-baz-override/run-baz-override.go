@@ -6,7 +6,7 @@
 
 package main
 
-import "github.com/pvillela/module-config/go/module-config/pull-with-push-override/fs"
+import "github.com/pvillela/moduleconfig/go/module-config/pull-with-push-override/fs"
 
 func main() {
 	fs.BazCfgSrcV = func() fs.BazCfgInfo {

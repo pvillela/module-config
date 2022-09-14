@@ -6,7 +6,7 @@
 
 package main
 
-import "github.com/pvillela/module-config/go/module-config/push-to-var/fs"
+import "github.com/pvillela/moduleconfig/go/module-config/push-to-var/fs"
 
 func main() {
 	fs.FooSfl()

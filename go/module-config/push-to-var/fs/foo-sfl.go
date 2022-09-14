@@ -8,7 +8,7 @@ package fs
 
 import (
 	"fmt"
-	"github.com/pvillela/module-config/go/module-config/push-to-var/fwk"
+	"github.com/pvillela/moduleconfig/go/module-config/push-to-var/fwk"
 )
 
 type FooSflCfgInfo struct {
