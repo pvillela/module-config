@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    // From https://www.npmjs.com/package/@tsconfig/node14
+    "lib": [
+      "es2020",
+      "dom" // remove this; added temporarily to support console
+    ],
+    "module": "commonjs",
+    "target": "es2020",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,  // emit .d.ts definitions
+    // Additional configs
+    "outDir": "./dist",
+    "sourceMap": false, // default is false; included here to facilitate change if necessary
+    "noEmitOnError": true,
+    "allowJs": true,
+    "watch": true,
+  },
+  "include": [
+    "src/**/*",
+    "tests/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+  ]
+}

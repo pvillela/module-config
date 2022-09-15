@@ -1,0 +1,21 @@
+/*
+ *  Copyright © 2021 Paulo Villela. All rights reserved.
+ *  Use of this source code is governed by the MIT license
+ *  that can be found in the LICENSE file.
+ */
+
+package startup
+
+import (
+	"github.com/pvillela/module-config/go/push-to-var/config"
+	cfgadapt2 "github.com/pvillela/module-config/go/push-to-var/fs/cfgadapt"
+)
+
+func Initialize() struct{} {
+	c := config.GetAppConfiguration
+	cfgadapt2.FooSflCfgAdaptation.SetOrigin(c)
+	cfgadapt2.BarBfCfgAdaptation.SetOrigin(c)
+	return struct{}{}
+}
+
+var _ = Initialize()

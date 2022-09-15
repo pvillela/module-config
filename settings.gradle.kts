@@ -1,3 +1,3 @@
 
-rootProject.name = "moduleconfig"
+rootProject.name = "module-config"
 
