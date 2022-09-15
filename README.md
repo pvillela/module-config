@@ -49,4 +49,8 @@ There are three main configuration approaches:
 
 This repo demonstrates simple frameworks and patterns for the above configuration approaches.
 
+The code examples for Kotlin, TypeScript, and Go are under the `kt`, `ts`, and `go` directories, respectively.
+
+_Note: Unlike the `ts` and `go` directories, the project definition files for Kotlin code are not under the `kt` directory. That is because this code was created with IntelliJ IDEA, which currently has a bug that requires a project containing a Kotlin module to be a top-level Kotlin project._
+
 Notice that the _push_ frameworks demonstrated here have a _pull_ aspect to them as what is pushed is a thunk function that returns the configuration data, not the configuration data itself. The reason for that is to provide the flexibility to support configuration properties that change dynamically at runtime. There is no real performance penalty associated with the use a thunk instead of the data structure itself since the thunk can simply return a cached data structure by reference.
