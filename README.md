@@ -13,7 +13,7 @@ The key considerations when designing/selecting a configuration framework are:
 There are three main configuration approaches:
 
 - *pull*
-- *push-to-file*
+- *push-to-variable*
 - *push-to-function*
 
 ### _Pull_ approach
