@@ -1,15 +1,17 @@
 # Module Configuration
 
-This repo contains examples of simple frameworks and patterns for module configuration in Kotlin, TypeScript, and Go.
+Every nontrivial application requires some form of external configuration capability that allows configuration properties to be defined separately from application code.
 
 The key considerations when designing/selecting a configuration framework are:
-- Type safety
-- Fail-fast
-- Minimization of module dependencies
-- Unit testing ease
-- Ease of use
+
+- Type safety -- have the compiler detect many or most configuration problems rather than waiting for a runtime error.
+- Fail-fast -- if there are runtime configuration errors, they should happen at application startup.
+- Minimization of module dependencies -- the configuration approach and framework should support low coupling/dependence among modules. Any dependence on a configuration framework should be minimal and unobtrusive.
+- Unit testing ease -- the configuration approach and framework should facilitate and not get in the way of unit testing.
+- Ease of use -- the configuration approach should be easy to adopt and use in the application code.
 
 There are three main configuration approaches:
+
 - *pull*
 - *push-to-file*
 - *push-to-function*
@@ -47,10 +49,8 @@ There are three main configuration approaches:
 
 ## Examples
 
-This repo demonstrates simple frameworks and patterns for the above configuration approaches.
-
-The code examples for Kotlin, TypeScript, and Go are under the `kt`, `ts`, and `go` directories, respectively.
+[This repo](https://github.com/pvillela/module-config) demonstrates simple frameworks and patterns for the above configuration approaches, written in Kotlin, TypeScript, and Go (under the `kt`, `ts`, and `go` directories, respectively).
 
 _Note: Unlike the `ts` and `go` directories, the project definition files for Kotlin code are not under the `kt` directory. That is because this code was created with IntelliJ IDEA, which currently has a bug that requires a project containing a Kotlin module to be a top-level Kotlin project._
 
-Notice that the _push_ frameworks demonstrated here have a _pull_ aspect to them as what is pushed is a thunk function that returns the configuration data, not the configuration data itself. The reason for that is to provide the flexibility to support configuration properties that change dynamically at runtime. There is no real performance penalty associated with the use a thunk instead of the data structure itself since the thunk can simply return a cached data structure by reference.
+Notice that the _push_ framework examples have a _pull_ aspect to them as what is pushed is a thunk function that returns the configuration data, not the configuration data itself. The reason for that is to provide the flexibility to support configuration properties that change dynamically at runtime. There is no real performance penalty associated with the use a thunk instead of the data structure itself since the thunk can simply return a cached data structure by reference.
