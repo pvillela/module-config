@@ -1,9 +1,11 @@
 use pullwithpushoverride::{
     config::app_cfg_info::{getAppConfiguration, AppCfgInfo},
     config::cfg_src::{makeCfgSrc, makeCfgSrc0},
+    fs::bar_bf::{barBf, barBfCfgSrc, BarBfCfgInfo},
 };
 
 use std::{cell::RefCell, sync::Mutex};
+use std::{ops::DerefMut, sync::Arc};
 
 static y: Mutex<RefCell<i32>> = Mutex::new(RefCell::new(1));
 
@@ -35,4 +37,18 @@ fn main() {
     cfg_src.set_src(getAppConfiguration);
     let cfg = cfg_src.get();
     println!("{:?}", cfg);
+
+    barBf();
+
+    fn another_bar_src() -> Arc<BarBfCfgInfo> {
+        Arc::new(BarBfCfgInfo { z: 99 })
+    }
+
+    println!("was getting stuck here");
+    let mut x = barBfCfgSrc.lock().unwrap();
+    // .expect("Error acquiring mutex for barBfCfgSrc");
+    x.set_src(another_bar_src);
+    drop(x);
+
+    barBf();
 }

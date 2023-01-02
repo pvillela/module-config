@@ -6,11 +6,11 @@ fn nilCfgSrc<T>() -> Arc<T> {
 }
 
 pub struct CfgSrc<'a, T: 'a> {
-    src: Box<dyn 'a + Fn() -> Arc<T>>,
+    src: Box<dyn 'a + Fn() -> Arc<T> + Send + Sync>,
 }
 
 impl<'a, T: 'a> CfgSrc<'a, T> {
-    pub fn new(src: impl 'a + Fn() -> Arc<T>) -> Self {
+    pub fn new(src: impl 'a + Fn() -> Arc<T> + Send + Sync) -> Self {
         CfgSrc { src: Box::new(src) }
     }
 
@@ -18,7 +18,7 @@ impl<'a, T: 'a> CfgSrc<'a, T> {
         makeCfgSrc(adapter)
     }
 
-    pub fn set_src(&mut self, src: impl 'a + Fn() -> Arc<T>) {
+    pub fn set_src(&mut self, src: impl 'a + Fn() -> Arc<T> + Send + Sync) {
         self.src = Box::new(src);
     }
 
@@ -36,18 +36,10 @@ pub fn makeCfgSrc0<'a, T: 'a>(
     } else {
         RefCell::new(Box::new(nilCfgSrc))
     }
-
-    // if adapter.is_some() {
-    //     let adapter = adapter.unwrap();
-    //     let x = adapter(getAppConfiguration().as_ref());
-    //     Box::new(move || x.clone())
-    // } else {
-    //     Box::new(nilCfgSrc)
-    // }
 }
 
 pub fn makeCfgSrc1<'a, T: 'a>(adapter: Option<fn(&AppCfgInfo) -> Arc<T>>) -> CfgSrc<'a, T> {
-    let src: Box<dyn 'a + Fn() -> Arc<T>> = if let Some(adapter) = adapter {
+    let src: Box<dyn 'a + Fn() -> Arc<T> + Send + Sync> = if let Some(adapter) = adapter {
         Box::new(move || adapter(getAppConfiguration().as_ref()))
     } else {
         Box::new(nilCfgSrc)

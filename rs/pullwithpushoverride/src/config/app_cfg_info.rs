@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct AppCfgInfo {
-    x: String,
-    y: i32,
+    pub x: String,
+    pub y: i32,
 }
 
 pub fn getAppConfiguration() -> Arc<AppCfgInfo> {
