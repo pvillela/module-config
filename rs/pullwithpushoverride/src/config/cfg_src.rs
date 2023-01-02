@@ -10,7 +10,15 @@ pub struct CfgSrc<'a, T: 'a> {
 }
 
 impl<'a, T: 'a> CfgSrc<'a, T> {
-    pub fn setup(&mut self, src: impl 'a + Fn() -> Arc<T>) {
+    pub fn new(src: impl 'a + Fn() -> Arc<T>) -> Self {
+        CfgSrc { src: Box::new(src) }
+    }
+
+    pub fn from_adapter(adapter: Option<fn(&AppCfgInfo) -> Arc<T>>) -> CfgSrc<'a, T> {
+        makeCfgSrc(adapter)
+    }
+
+    pub fn set_src(&mut self, src: impl 'a + Fn() -> Arc<T>) {
         self.src = Box::new(src);
     }
 
@@ -38,24 +46,20 @@ pub fn makeCfgSrc0<'a, T: 'a>(
     // }
 }
 
-// Change this to be the `new` static method in CfgSrc
+pub fn makeCfgSrc1<'a, T: 'a>(adapter: Option<fn(&AppCfgInfo) -> Arc<T>>) -> CfgSrc<'a, T> {
+    let src: Box<dyn 'a + Fn() -> Arc<T>> = if let Some(adapter) = adapter {
+        Box::new(move || adapter(getAppConfiguration().as_ref()))
+    } else {
+        Box::new(nilCfgSrc)
+    };
+
+    CfgSrc { src }
+}
+
 pub fn makeCfgSrc<'a, T: 'a>(adapter: Option<fn(&AppCfgInfo) -> Arc<T>>) -> CfgSrc<'a, T> {
     if let Some(adapter) = adapter {
-        // let x = adapter(getAppConfiguration().as_ref());
-        CfgSrc {
-            src: Box::new(move || adapter(getAppConfiguration().as_ref())),
-        }
+        CfgSrc::new(move || adapter(getAppConfiguration().as_ref()))
     } else {
-        CfgSrc {
-            src: Box::new(nilCfgSrc),
-        }
+        CfgSrc::new(nilCfgSrc)
     }
-
-    // if adapter.is_some() {
-    //     let adapter = adapter.unwrap();
-    //     let x = adapter(getAppConfiguration().as_ref());
-    //     Box::new(move || x.clone())
-    // } else {
-    //     Box::new(nilCfgSrc)
-    // }
 }
