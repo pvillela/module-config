@@ -30,7 +30,7 @@ fn main() {
 
     let mut cfg_src = makeCfgSrc::<AppCfgInfo>(None);
     // cfg_src.borrow()();
-    cfg_src.setup(Box::new(getAppConfiguration));
+    cfg_src.setup(getAppConfiguration);
     let cfg = cfg_src.get();
     println!("{:?}", cfg);
 }

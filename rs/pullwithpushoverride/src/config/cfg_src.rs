@@ -10,8 +10,8 @@ pub struct CfgSrc<'a, T: 'a> {
 }
 
 impl<'a, T: 'a> CfgSrc<'a, T> {
-    pub fn setup(&mut self, src: Box<dyn Fn() -> Arc<T>>) {
-        self.src = src;
+    pub fn setup(&mut self, src: impl 'a + Fn() -> Arc<T>) {
+        self.src = Box::new(src);
     }
 
     pub fn get(&self) -> Arc<T> {
