@@ -1,12 +1,14 @@
-#[derive(Debug)]
+use std::sync::Arc;
+
+#[derive(Debug, Clone)]
 pub struct AppCfgInfo {
-	x: String,
-	y: i32,
+    x: String,
+    y: i32,
 }
 
-pub fn getAppConfiguration() -> AppCfgInfo {
-	AppCfgInfo {
-		x: "xxx".to_owned(),
-		y: 42,
-	}
+pub fn getAppConfiguration() -> Arc<AppCfgInfo> {
+    Arc::new(AppCfgInfo {
+        x: "xxx".to_owned(),
+        y: 42,
+    })
 }
