@@ -1,9 +1,10 @@
 use pullwithpushoverride::{
     config::app_cfg_info::{getAppConfiguration, AppCfgInfo},
-    config::cfg_src::{makeCfgSrc, makeCfgSrc0},
-    fs::bar_bf::{barBf, barBfCfgSrc, BarBfCfgInfo},
+    config::cfg_src::{makeCfgSrc, makeCfgSrc0, CfgSrc},
+    fs::bar_bf::{barBf, barBf1, barBfCfgSrc, barBfCfgSrc1, BarBfCfgInfo},
 };
 
+use std::sync::atomic::AtomicPtr;
 use std::{cell::RefCell, sync::Mutex};
 use std::{ops::DerefMut, sync::Arc};
 
@@ -26,7 +27,7 @@ fn main0() {
     println!("{:?}", cfg);
 }
 
-fn main() {
+fn main_mutex() {
     let app_cfg = getAppConfiguration();
     println!("AppConfiguration: {:?}", app_cfg);
 
@@ -51,4 +52,27 @@ fn main() {
     drop(x);
 
     barBf();
+}
+
+fn main() {
+    // let app_cfg = getAppConfiguration();
+    // println!("AppConfiguration: {:?}", app_cfg);
+
+    // foo();
+
+    // let mut cfg_src = makeCfgSrc::<AppCfgInfo>(None);
+    // // cfg_src.borrow()();
+    // cfg_src.set_src(getAppConfiguration);
+    // let cfg = cfg_src.get();
+    // println!("{:?}", cfg);
+
+    barBf1();
+
+    fn another_bar_src() -> Arc<BarBfCfgInfo> {
+        Arc::new(BarBfCfgInfo { z: 99 })
+    }
+
+    barBfCfgSrc1.store(Arc::new(CfgSrc::new(another_bar_src)));
+
+    barBf1();
 }
