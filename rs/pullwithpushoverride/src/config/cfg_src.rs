@@ -5,20 +5,20 @@ fn nilCfgSrc<T>() -> Arc<T> {
     panic!("Module used before being initialized");
 }
 
-pub struct CfgSrc<'a, T: 'a> {
-    src: Box<dyn 'a + Fn() -> Arc<T> + Send + Sync>,
+pub struct CfgSrc<T: 'static> {
+    src: Box<dyn 'static + Fn() -> Arc<T> + Send + Sync>,
 }
 
-impl<'a, T: 'a> CfgSrc<'a, T> {
-    pub fn new(src: impl 'a + Fn() -> Arc<T> + Send + Sync) -> Self {
+impl<T: 'static> CfgSrc<T> {
+    pub fn new(src: impl 'static + Fn() -> Arc<T> + Send + Sync) -> Self {
         CfgSrc { src: Box::new(src) }
     }
 
-    pub fn from_adapter(adapter: Option<fn(&AppCfgInfo) -> Arc<T>>) -> CfgSrc<'a, T> {
+    pub fn from_adapter(adapter: Option<fn(&AppCfgInfo) -> Arc<T>>) -> CfgSrc<T> {
         makeCfgSrc(adapter)
     }
 
-    pub fn set_src(&mut self, src: impl 'a + Fn() -> Arc<T> + Send + Sync) {
+    pub fn set_src(&mut self, src: impl 'static + Fn() -> Arc<T> + Send + Sync) {
         self.src = Box::new(src);
     }
 
@@ -27,9 +27,9 @@ impl<'a, T: 'a> CfgSrc<'a, T> {
     }
 }
 
-pub fn makeCfgSrc0<'a, T: 'a>(
+pub fn makeCfgSrc0<T: 'static>(
     adapter: Option<fn(&AppCfgInfo) -> Arc<T>>,
-) -> RefCell<Box<dyn 'a + Fn() -> Arc<T>>> {
+) -> RefCell<Box<dyn 'static + Fn() -> Arc<T>>> {
     if let Some(adapter) = adapter {
         // let x = adapter(getAppConfiguration().as_ref());
         RefCell::new(Box::new(move || adapter(getAppConfiguration().as_ref())))
@@ -38,8 +38,8 @@ pub fn makeCfgSrc0<'a, T: 'a>(
     }
 }
 
-pub fn makeCfgSrc1<'a, T: 'a>(adapter: Option<fn(&AppCfgInfo) -> Arc<T>>) -> CfgSrc<'a, T> {
-    let src: Box<dyn 'a + Fn() -> Arc<T> + Send + Sync> = if let Some(adapter) = adapter {
+pub fn makeCfgSrc1<T: 'static>(adapter: Option<fn(&AppCfgInfo) -> Arc<T>>) -> CfgSrc<T> {
+    let src: Box<dyn 'static + Fn() -> Arc<T> + Send + Sync> = if let Some(adapter) = adapter {
         Box::new(move || adapter(getAppConfiguration().as_ref()))
     } else {
         Box::new(nilCfgSrc)
@@ -48,7 +48,7 @@ pub fn makeCfgSrc1<'a, T: 'a>(adapter: Option<fn(&AppCfgInfo) -> Arc<T>>) -> Cfg
     CfgSrc { src }
 }
 
-pub fn makeCfgSrc<'a, T: 'a>(adapter: Option<fn(&AppCfgInfo) -> Arc<T>>) -> CfgSrc<'a, T> {
+pub fn makeCfgSrc<T: 'static>(adapter: Option<fn(&AppCfgInfo) -> Arc<T>>) -> CfgSrc<T> {
     if let Some(adapter) = adapter {
         CfgSrc::new(move || adapter(getAppConfiguration().as_ref()))
     } else {

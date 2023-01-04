@@ -10,7 +10,7 @@ pub struct BarBfCfgInfo {
     pub z: i32,
 }
 
-pub static barBfCfgSrc: Lazy<Mutex<CfgSrc<'static, BarBfCfgInfo>>> =
+pub static barBfCfgSrc: Lazy<Mutex<CfgSrc<BarBfCfgInfo>>> =
     Lazy::new(|| Mutex::new(makeCfgSrc(Some(barBfCfgAdapter))));
 
 // lazy_static! {
@@ -18,7 +18,7 @@ pub static barBfCfgSrc: Lazy<Mutex<CfgSrc<'static, BarBfCfgInfo>>> =
 //         Mutex::new(makeCfgSrc(Some(barBfCfgAdapter)));
 // }
 
-pub static barBfCfgSrc1: Lazy<ArcSwap<CfgSrc<'static, BarBfCfgInfo>>> =
+pub static barBfCfgSrc1: Lazy<ArcSwap<CfgSrc<BarBfCfgInfo>>> =
     Lazy::new(|| ArcSwap::from_pointee(makeCfgSrc(Some(barBfCfgAdapter))));
 
 pub fn barBf() {
