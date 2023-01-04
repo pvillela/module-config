@@ -3,27 +3,13 @@ use pullwithpushoverride::{
         app_cfg_info::{init_app_configuration, refresh_app_configuration},
         cfg_src::CfgSrc,
     },
-    fs::bar_bf::{barBf, barBfCfgSrc, barBfCfgSrc_arc, barBf_arc, BarBfCfgInfo},
+    fs::bar_bf::{barBf, barBfCfgSrc, BarBfCfgInfo},
 };
 
 use std::sync::Arc;
 
 fn main() {
     init_app_configuration();
-
-    // With Arc
-
-    barBf_arc();
-
-    fn another_bar_src_arc() -> Arc<BarBfCfgInfo> {
-        Arc::new(BarBfCfgInfo { z: 99 })
-    }
-
-    barBfCfgSrc_arc.store(Arc::new(CfgSrc::new(another_bar_src_arc)));
-
-    barBf_arc();
-
-    // Without Arc
 
     barBf();
 
