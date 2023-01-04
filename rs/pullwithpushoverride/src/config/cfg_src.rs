@@ -1,5 +1,5 @@
 use crate::config::app_cfg_info::{getAppConfiguration, AppCfgInfo};
-use std::{cell::RefCell, sync::Arc};
+use std::sync::Arc;
 
 fn nilCfgSrc<T>() -> Arc<T> {
     panic!("Module used before being initialized");
@@ -25,27 +25,6 @@ impl<T: 'static> CfgSrc<T> {
     pub fn get(&self) -> Arc<T> {
         self.src.as_ref()()
     }
-}
-
-pub fn makeCfgSrc0<T: 'static>(
-    adapter: Option<fn(&AppCfgInfo) -> Arc<T>>,
-) -> RefCell<Box<dyn 'static + Fn() -> Arc<T>>> {
-    if let Some(adapter) = adapter {
-        // let x = adapter(getAppConfiguration().as_ref());
-        RefCell::new(Box::new(move || adapter(getAppConfiguration().as_ref())))
-    } else {
-        RefCell::new(Box::new(nilCfgSrc))
-    }
-}
-
-pub fn makeCfgSrc1<T: 'static>(adapter: Option<fn(&AppCfgInfo) -> Arc<T>>) -> CfgSrc<T> {
-    let src: Box<dyn 'static + Fn() -> Arc<T> + Send + Sync> = if let Some(adapter) = adapter {
-        Box::new(move || adapter(getAppConfiguration().as_ref()))
-    } else {
-        Box::new(nilCfgSrc)
-    };
-
-    CfgSrc { src }
 }
 
 pub fn makeCfgSrc<T: 'static>(adapter: Option<fn(&AppCfgInfo) -> Arc<T>>) -> CfgSrc<T> {
