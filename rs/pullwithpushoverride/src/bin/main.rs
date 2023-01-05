@@ -1,21 +1,14 @@
 use pullwithpushoverride::{
-    config::{
-        app_cfg_info::{init_app_configuration, refresh_app_configuration},
-        cfg_src::{update_cfg_src, CfgSrc},
-    },
-    fs::bar_bf::{barBf, barBfCfgSrc, BarBfCfgInfo},
+    config::{app_cfg_info::refresh_app_configuration, cfg_src::update_cfg_src_with_fn},
+    fs::bar_bf::{bar_bf, BarBfCfgInfo, BAR_BF_CFG_SRC},
 };
 
-use std::sync::Arc;
-
 fn main() {
-    init_app_configuration();
-
-    barBf();
+    bar_bf();
 
     refresh_app_configuration();
 
-    barBf();
+    bar_bf();
 
     // Override BAR_CFG_SRC
 
@@ -23,7 +16,7 @@ fn main() {
         BarBfCfgInfo { z: 99 }
     }
 
-    update_cfg_src(&barBfCfgSrc, another_bar_src);
+    update_cfg_src_with_fn(&BAR_BF_CFG_SRC, another_bar_src);
 
-    barBf();
+    bar_bf();
 }

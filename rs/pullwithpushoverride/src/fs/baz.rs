@@ -7,9 +7,12 @@ pub struct BazCfgInfo {
     pub w: String,
 }
 
-pub static bazCfgSrc: Lazy<ArcSwap<CfgSrc<BazCfgInfo>>> =
+pub static BAZ_CFG_SRC: Lazy<ArcSwap<CfgSrc<BazCfgInfo>>> =
     Lazy::new(|| ArcSwap::from_pointee(CfgSrc::<BazCfgInfo>::nil()));
 
 pub fn baz() {
-    println!("bazCfgSrc().w.length(): {}", bazCfgSrc.load().get().w.len());
+    println!(
+        "bazCfgSrc().w.length(): {}",
+        BAZ_CFG_SRC.load().get().w.len()
+    );
 }

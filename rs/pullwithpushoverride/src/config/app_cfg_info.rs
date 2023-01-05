@@ -8,19 +8,15 @@ pub struct AppCfgInfo {
     pub y: i32,
 }
 
-pub static APP_CONFIGURATION: Lazy<ArcSwap<AppCfgInfo>> = Lazy::new(|| {
-    ArcSwap::from_pointee(AppCfgInfo {
-        x: "".to_owned(),
-        y: 0,
-    })
-});
+pub static APP_CONFIGURATION: Lazy<ArcSwap<AppCfgInfo>> =
+    Lazy::new(|| ArcSwap::from_pointee(initial_app_configuration()));
 
-// Simulates initialization of APP_CONFIGURATION
-pub fn init_app_configuration() {
-    APP_CONFIGURATION.store(Arc::new(AppCfgInfo {
+// Simulates initial APP_CONFIGURATION
+pub fn initial_app_configuration() -> AppCfgInfo {
+    AppCfgInfo {
         x: "xxx".to_owned(),
         y: 42,
-    }));
+    }
 }
 
 // Simulates refresh of APP_CONFIGURATION
@@ -31,6 +27,6 @@ pub fn refresh_app_configuration() {
     }));
 }
 
-pub fn getAppConfiguration() -> Arc<AppCfgInfo> {
+pub fn get_app_configuration() -> Arc<AppCfgInfo> {
     APP_CONFIGURATION.load().clone()
 }
