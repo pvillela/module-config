@@ -4,16 +4,15 @@
  *  that can be found in the LICENSE file.
  */
 
-package pullwithpushoverride.fs
+package pushtovar.fs
 
-import pullwithpushoverride.config.CfgSrc
-import pullwithpushoverride.config.makeCfgSrc
+import pushtovar.fwk.CfgSrc
 
 data class FooSflCfgInfo(
 	val x: String
 )
 
-var fooSflCfgSrc: CfgSrc<FooSflCfgInfo> = makeCfgSrc(::fooSflCfgAdapter)
+val fooSflCfgSrc = CfgSrc<FooSflCfgInfo>()
 
 fun fooSfl() {
 	println(fooSflCfgSrc().x)

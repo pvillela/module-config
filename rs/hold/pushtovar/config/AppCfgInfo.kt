@@ -1,4 +1,4 @@
-package pullwithpushoverride.config
+package pushtovar.config
 
 data class AppCfgInfo (
 	val x: String,

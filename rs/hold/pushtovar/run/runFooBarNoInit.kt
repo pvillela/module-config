@@ -4,10 +4,10 @@
  *  that can be found in the LICENSE file.
  */
 
-package pullwithpushoverride.run
+package pushtovar.run
 
-import pullwithpushoverride.fs.baz
+import pushtovar.fs.fooSfl
 
 fun main() {
-	baz()
+	fooSfl()
 }

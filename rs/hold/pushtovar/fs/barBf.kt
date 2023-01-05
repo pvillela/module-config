@@ -4,16 +4,15 @@
  *  that can be found in the LICENSE file.
  */
 
-package pullwithpushoverride.fs
+package pushtovar.fs
 
-import pullwithpushoverride.config.CfgSrc
-import pullwithpushoverride.config.makeCfgSrc
+import pushtovar.fwk.CfgSrc
 
 data class BarBfCfgInfo(
 	val z: Int
 )
 
-var barBfCfgSrc: CfgSrc<BarBfCfgInfo> = makeCfgSrc(::barBfCfgAdapter)
+val barBfCfgSrc = CfgSrc<BarBfCfgInfo>()
 
 fun barBf() {
 	println(barBfCfgSrc().z)
