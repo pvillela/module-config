@@ -1,7 +1,7 @@
 use pullwithpushoverride::{
     config::{
         app_cfg_info::{init_app_configuration, refresh_app_configuration},
-        cfg_src::CfgSrc,
+        cfg_src::{update_cfg_src, CfgSrc},
     },
     fs::bar_bf::{barBf, barBfCfgSrc, BarBfCfgInfo},
 };
@@ -23,7 +23,7 @@ fn main() {
         BarBfCfgInfo { z: 99 }
     }
 
-    barBfCfgSrc.store(Arc::new(CfgSrc::new(another_bar_src)));
+    update_cfg_src(&barBfCfgSrc, another_bar_src);
 
     barBf();
 }

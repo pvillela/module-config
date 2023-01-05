@@ -1,11 +1,13 @@
 use crate::config::app_cfg_info::{getAppConfiguration, AppCfgInfo};
-
-fn nilCfgSrc<T>() -> T {
-    panic!("Module used before being initialized");
-}
+use arc_swap::ArcSwap;
+use std::sync::Arc;
 
 pub struct CfgSrc<T: 'static> {
     src: Box<dyn 'static + Fn() -> T + Send + Sync>,
+}
+
+fn nil_cfg_src_fn<T: 'static>() -> T {
+    panic!("Module used before being initialized");
 }
 
 impl<T: 'static> CfgSrc<T> {
@@ -13,8 +15,12 @@ impl<T: 'static> CfgSrc<T> {
         CfgSrc { src: Box::new(src) }
     }
 
-    pub fn from_adapter(adapter: Option<fn(&AppCfgInfo) -> T>) -> CfgSrc<T> {
-        makeCfgSrc(adapter)
+    pub fn from_adapter(adapter: fn(&AppCfgInfo) -> T) -> Self {
+        Self::new(move || adapter(getAppConfiguration().as_ref()))
+    }
+
+    pub fn nil() -> Self {
+        Self::new(nil_cfg_src_fn)
     }
 
     pub fn set_src(&mut self, src: impl 'static + Fn() -> T + Send + Sync) {
@@ -26,10 +32,9 @@ impl<T: 'static> CfgSrc<T> {
     }
 }
 
-pub fn makeCfgSrc<T: 'static>(adapter: Option<fn(&AppCfgInfo) -> T>) -> CfgSrc<T> {
-    if let Some(adapter) = adapter {
-        CfgSrc::new(move || adapter(getAppConfiguration().as_ref()))
-    } else {
-        CfgSrc::new(nilCfgSrc)
-    }
+pub fn update_cfg_src<T: 'static>(
+    cfg_src_static: &ArcSwap<CfgSrc<T>>,
+    cfg_src_fn: impl 'static + Fn() -> T + Send + Sync,
+) {
+    cfg_src_static.store(Arc::new(CfgSrc::new(cfg_src_fn)));
 }
