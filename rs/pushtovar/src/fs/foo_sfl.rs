@@ -1,5 +1,4 @@
 use crate::fs::bar_bf::bar_bf;
-use crate::fs::cfgadapt::foo_sfl_cfg_adapter::foo_sfl_cfg_adapter;
 use crate::fwk::cfg_src::CfgSrc;
 use arc_swap::ArcSwap;
 use once_cell::sync::Lazy;
@@ -10,7 +9,7 @@ pub struct FooSflCfgInfo {
 }
 
 pub static FOO_SFL_CFG_SRC: Lazy<ArcSwap<CfgSrc<FooSflCfgInfo>>> =
-    Lazy::new(|| ArcSwap::from_pointee(CfgSrc::from_adapter(foo_sfl_cfg_adapter)));
+    Lazy::new(|| ArcSwap::from_pointee(CfgSrc::nil()));
 
 pub fn foo_sfl() {
     println!("fooSflCfgSrc().x: {}", FOO_SFL_CFG_SRC.load().get().x);
