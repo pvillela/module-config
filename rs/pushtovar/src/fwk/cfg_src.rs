@@ -56,13 +56,14 @@ pub const fn nil_cfg_src<T: 'static>() -> Lazy<ArcSwap<CfgSrc<T>>> {
 pub type CfgSrcAdapter<S, T> = fn(S) -> T;
 
 pub struct CfgSrcAdaptation<S: 'static, T: 'static> {
-    targetSrc: CfgSrc<T>,
-    adapter: fn(&S) -> T,
+    pub targetSrc: &'static ArcSwap<CfgSrc<T>>,
+    pub adapter: fn(&S) -> T,
 }
 
 impl<S: 'static, T: 'static> CfgSrcAdaptation<S, T> {
     fn setOrigin(&mut self, originSrc: fn() -> S) {
         let adapter = self.adapter.clone();
-        self.targetSrc.set_src(move || adapter(&(originSrc())))
+        self.targetSrc
+            .store(Arc::new(CfgSrc::new(move || adapter(&(originSrc())))));
     }
 }

@@ -1,1 +1,1 @@
-mod cfg_src;
+pub mod cfg_src;

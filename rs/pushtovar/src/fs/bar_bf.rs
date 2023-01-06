@@ -1,5 +1,5 @@
-use crate::config::cfg_src::CfgSrc;
-use crate::fs::bar_bf_cfg_adapter::bar_bf_cfg_adapter;
+use crate::fs::cfgadapt::bar_bf_cfg_adapter::bar_bf_cfg_adapter;
+use crate::fwk::cfg_src::CfgSrc;
 use arc_swap::ArcSwap;
 use once_cell::sync::Lazy;
 
