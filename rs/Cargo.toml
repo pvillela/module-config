@@ -1,4 +1,4 @@
 [workspace]
 members = [ "*" ]
-exclude = ["target", "hold", "pushtovar"]
+exclude = ["target", "hold"]
 resolver = "2"

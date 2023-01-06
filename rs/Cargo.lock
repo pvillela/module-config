@@ -21,3 +21,11 @@ dependencies = [
  "arc-swap",
  "once_cell",
 ]
+
+[[package]]
+name = "pushtovar"
+version = "0.1.0"
+dependencies = [
+ "arc-swap",
+ "once_cell",
+]
