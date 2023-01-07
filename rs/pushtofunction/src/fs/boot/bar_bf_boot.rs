@@ -1,7 +1,7 @@
 use crate::config::app_cfg_info::AppCfgInfo;
 use crate::fs::bar_bf::{bar_bf_c, BarBfCfgInfo, BarBfCfgSrc, BarBfT};
-use crate::fwk::lift_to_nullary::lift_to_nullary;
-use crate::fwk::lift_to_nullary::DressedCfgAdapter;
+use crate::fwk::cfg_adapter::lift_to_nullary;
+use crate::fwk::cfg_adapter::DressedCfgAdapter;
 use once_cell::sync::Lazy;
 use std::sync::Arc;
 

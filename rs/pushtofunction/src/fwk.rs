@@ -1,2 +1,1 @@
-pub mod cfg_src;
-pub mod lift_to_nullary;
+pub mod cfg_adapter;

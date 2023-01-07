@@ -3,7 +3,7 @@ use pushtofunction::fs::bar_bf::BarBfCfgInfo;
 use pushtofunction::fs::boot::bar_bf_boot::BAR_BF_CFG_ADAPTER;
 use pushtofunction::fs::boot::foo_sfl_boot::{foo_sfl_boot, FOO_SFL_CFG_ADAPTER};
 use pushtofunction::fs::foo_sfl::FooSflCfgInfo;
-use pushtofunction::fwk::lift_to_nullary::{
+use pushtofunction::fwk::cfg_adapter::{
     nil_app_cfg, update_cfg_adapter_with_const_fn, update_cfg_adapter_with_value,
 };
 
