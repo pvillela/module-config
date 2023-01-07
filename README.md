@@ -49,8 +49,10 @@ There are three main configuration approaches:
 
 ## Examples
 
-[This repo](https://github.com/pvillela/module-config) demonstrates simple frameworks and patterns for the above configuration approaches, written in Kotlin, TypeScript, and Go (under the `kt`, `ts`, and `go` directories, respectively).
+[This repo](https://github.com/pvillela/module-config) demonstrates simple frameworks and patterns for the above configuration approaches, written in Kotlin, TypeScript, Go, and Rust (under the `kt`, `ts`, `go`, and `rs` directories, respectively).
 
-_Note: Unlike the `ts` and `go` directories, the project definition files for Kotlin code are not under the `kt` directory. That is because this code was created with IntelliJ IDEA, which currently has a bug that requires a project containing a Kotlin module to be a top-level Kotlin project._
+_Note: Unlike the `ts` , `go` , and `rs` directories, the project definition files for Kotlin code are not under the `kt` directory. That is because this code was created with IntelliJ IDEA, which at the time this code was created had a bug that required a project containing a Kotlin module to be a top-level Kotlin project._
 
-Notice that the _push_ framework examples have a _pull_ aspect to them as what is pushed is a thunk function that returns the configuration data, not the configuration data itself. The reason for that is to provide the flexibility to support configuration properties that change dynamically at runtime. There is no real performance penalty associated with the use a thunk instead of the data structure itself since the thunk can simply return a cached data structure by reference.
+Notice that the _push_ framework examples have a _pull_ aspect to them as what is pushed is a thunk function that returns the configuration data, not the configuration data itself. The reason for that is to provide the flexibility to support configuration properties that change dynamically at runtime. There is no significant performance penalty associated with the use a thunk instead of the data structure itself since the thunk can simply return a cached data structure by reference.
+
+It is worth comparing the Rust examples with those in the other languages, especially Kotlin, to see how much more complex these patterns are to implement in Rust. That is due to Rust's complex type system, which keeps track of memory allocation and ownership. In particular, Rust differentiates between functions and closures, and requires multiple levels of wrapping and detailed type annotations to accomplish tasks that are straightforward in the other three languages.
