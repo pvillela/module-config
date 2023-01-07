@@ -35,6 +35,13 @@ fn lift_to_nullary1<S: 'static, T: 'static>(f: fn() -> T) -> ArcedCfgAdapter<S, 
     }))
 }
 
+fn lift_to_nullary2<S: 'static, T: 'static + Clone + Send + Sync>(x: T) -> ArcedCfgAdapter<S, T> {
+    Arc::new(Box::new(move |_s_src: fn() -> Arc<S>| {
+        let y = x.clone();
+        Box::new(move || Arc::new(y.clone()))
+    }))
+}
+
 pub fn nil_app_cfg<T>() -> Arc<T> {
     todo!("Configuration source not provided.")
 }
@@ -51,4 +58,11 @@ pub fn update_cfg_adapter_with_const_fn<S: 'static, T: 'static + Send + Sync>(
     f: fn() -> T,
 ) {
     cfg_adapter.store(lift_to_nullary1(f));
+}
+
+pub fn update_cfg_adapter_with_value<S: 'static, T: 'static + Clone + Send + Sync>(
+    cfg_adapter: &DressedCfgAdapter<S, T>,
+    x: T,
+) {
+    cfg_adapter.store(lift_to_nullary2(x));
 }
