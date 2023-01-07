@@ -1,7 +1,7 @@
 use crate::config::app_cfg_info::AppCfgInfo;
 use crate::fs::foo_sfl::{foo_sfl_c, FooSflCfgInfo, FooSflCfgSrc, FooSflT};
 use crate::fwk::cfg_adapter::lift_to_nullary;
-use crate::fwk::cfg_adapter::DressedCfgAdapter;
+use crate::fwk::cfg_adapter::StaticCfgAdapter;
 use once_cell::sync::Lazy;
 use std::sync::Arc;
 
@@ -13,7 +13,7 @@ fn foo_sfl_cfg_adapter0(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
     }
 }
 
-pub static FOO_SFL_CFG_ADAPTER: Lazy<DressedCfgAdapter<AppCfgInfo, FooSflCfgInfo>> =
+pub static FOO_SFL_CFG_ADAPTER: Lazy<StaticCfgAdapter<AppCfgInfo, FooSflCfgInfo>> =
     Lazy::new(|| lift_to_nullary(foo_sfl_cfg_adapter0));
 
 pub fn foo_sfl_boot(app_cfg: fn() -> Arc<AppCfgInfo>) -> FooSflT {
