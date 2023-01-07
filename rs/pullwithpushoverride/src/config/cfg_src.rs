@@ -1,6 +1,5 @@
 use crate::config::app_cfg_info::{get_app_configuration, AppCfgInfo};
 use arc_swap::ArcSwap;
-use once_cell::sync::Lazy;
 use std::sync::Arc;
 
 pub struct CfgSrc<T: 'static> {
@@ -24,10 +23,6 @@ impl<T: 'static> CfgSrc<T> {
         Self::new(nil_cfg_src_fn)
     }
 
-    pub fn set_src(&mut self, src: impl 'static + Fn() -> T + Send + Sync) {
-        self.src = Box::new(src);
-    }
-
     pub fn get(&self) -> T {
         self.src.as_ref()()
     }
@@ -38,17 +33,4 @@ pub fn update_cfg_src_with_fn<T: 'static>(
     cfg_src_fn: impl 'static + Fn() -> T + Send + Sync,
 ) {
     cfg_src_static.store(Arc::new(CfgSrc::new(cfg_src_fn)));
-}
-
-pub fn update_cfg_src_with_adapter<T: 'static>(
-    cfg_src_static: &ArcSwap<CfgSrc<T>>,
-    adapter: fn(&AppCfgInfo) -> T,
-) {
-    update_cfg_src_with_fn(cfg_src_static, move || {
-        adapter(get_app_configuration().as_ref())
-    });
-}
-
-pub const fn nil_cfg_src<T: 'static>() -> Lazy<ArcSwap<CfgSrc<T>>> {
-    Lazy::new(|| ArcSwap::from_pointee(CfgSrc::nil()))
 }
