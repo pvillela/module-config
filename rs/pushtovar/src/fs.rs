@@ -1,3 +1,7 @@
-pub mod bar_bf;
+mod bar_bf;
+pub use bar_bf::*;
+
 pub mod cfgadapt;
-pub mod foo_sfl;
+
+mod foo_sfl;
+pub use foo_sfl::*;

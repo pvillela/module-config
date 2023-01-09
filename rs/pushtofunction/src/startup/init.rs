@@ -1,6 +1,6 @@
-use crate::config::app_cfg_info::get_app_configuration;
-use crate::config::app_cfg_info::AppCfgInfo;
-use crate::fs::boot::foo_sfl_boot::foo_sfl_boot;
+use crate::config::get_app_configuration;
+use crate::config::AppCfgInfo;
+use crate::fs::boot::foo_sfl_boot;
 use std::sync::Arc;
 
 pub fn foo_sfl() {

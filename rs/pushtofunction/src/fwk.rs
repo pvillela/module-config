@@ -1,1 +1,2 @@
-pub mod cfg_adapter;
+mod cfg_adapter;
+pub use cfg_adapter::*;

@@ -1,5 +1,5 @@
-use pushtofunction::config::app_cfg_info::refresh_app_configuration;
-use pushtofunction::startup::init::{foo_sfl, foo_sfl1};
+use pushtofunction::config::refresh_app_configuration;
+use pushtofunction::startup::{foo_sfl, foo_sfl1};
 
 fn main() {
     foo_sfl();

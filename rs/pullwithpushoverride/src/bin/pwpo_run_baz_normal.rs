@@ -1,4 +1,4 @@
-use pullwithpushoverride::fs::baz::baz;
+use pullwithpushoverride::fs::baz;
 
 fn main() {
     baz();

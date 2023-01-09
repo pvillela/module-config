@@ -1,6 +1,6 @@
-use crate::config::app_cfg_info::AppCfgInfo;
+use crate::config::AppCfgInfo;
 use crate::fs::bar_bf::{bar_bf_c, BarBfCfgInfo, BarBfCfgSrc, BarBfT};
-use crate::fwk::cfg_adapter::{lift_to_nullary, StaticCfgAdapter};
+use crate::fwk::{lift_to_nullary, StaticCfgAdapter};
 use once_cell::sync::Lazy;
 use std::sync::Arc;
 

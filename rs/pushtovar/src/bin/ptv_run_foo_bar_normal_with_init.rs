@@ -1,5 +1,5 @@
-use pushtovar::fs::foo_sfl::foo_sfl;
-use pushtovar::startup::init::initialize;
+use pushtovar::fs::foo_sfl;
+use pushtovar::startup::initialize;
 
 fn main() {
     initialize();

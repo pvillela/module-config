@@ -1,4 +1,4 @@
-use crate::config::cfg_src::CfgSrc;
+use crate::config::CfgSrc;
 use arc_swap::ArcSwap;
 use once_cell::sync::Lazy;
 

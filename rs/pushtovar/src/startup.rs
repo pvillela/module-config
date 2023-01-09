@@ -1,1 +1,2 @@
-pub mod init;
+mod init;
+pub use init::*;

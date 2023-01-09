@@ -1,11 +1,10 @@
-use crate::config::app_cfg_info::AppCfgInfo;
-use crate::fs::foo_sfl::{foo_sfl_c, FooSflCfgInfo, FooSflCfgSrc, FooSflT};
-use crate::fwk::cfg_adapter::lift_to_nullary;
-use crate::fwk::cfg_adapter::StaticCfgAdapter;
+use crate::config::AppCfgInfo;
+use crate::fs::{foo_sfl_c, FooSflCfgInfo, FooSflCfgSrc, FooSflT};
+use crate::fwk::{lift_to_nullary, StaticCfgAdapter};
 use once_cell::sync::Lazy;
 use std::sync::Arc;
 
-use super::bar_bf_boot::bar_bf_boot;
+use super::bar_bf_boot;
 
 fn foo_sfl_cfg_adapter0(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
     FooSflCfgInfo {

@@ -1,6 +1,6 @@
-use crate::config::app_cfg_info::AppCfgInfo;
+use crate::config::AppCfgInfo;
 use crate::fs::foo_sfl::{FooSflCfgInfo, FOO_SFL_CFG_SRC};
-use crate::fwk::cfg_src::CfgSrcAdaptation;
+use crate::fwk::CfgSrcAdaptation;
 use arc_swap::ArcSwap;
 use once_cell::sync::Lazy;
 use std::ops::Deref;

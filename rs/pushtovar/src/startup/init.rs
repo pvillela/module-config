@@ -1,8 +1,6 @@
-use crate::config::app_cfg_info::get_app_configuration;
-
-use crate::fs::cfgadapt::bar_bf_cfg_adapter::BAR_BF_CFG_ADAPTATION;
-use crate::fs::cfgadapt::foo_sfl_cfg_adapter::FOO_SFL_CFG_ADAPTATION;
-use crate::fwk::cfg_src::set_adaptation_origin;
+use crate::config::get_app_configuration;
+use crate::fs::cfgadapt::{BAR_BF_CFG_ADAPTATION, FOO_SFL_CFG_ADAPTATION};
+use crate::fwk::set_adaptation_origin;
 
 pub fn initialize() {
     println!("initialize() has been called");
