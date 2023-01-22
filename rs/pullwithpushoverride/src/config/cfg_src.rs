@@ -1,4 +1,4 @@
-use crate::config::app_cfg_info::{get_app_configuration, AppCfgInfo};
+use crate::config::{get_app_configuration, AppCfgInfo};
 use arc_swap::ArcSwap;
 use std::sync::Arc;
 
