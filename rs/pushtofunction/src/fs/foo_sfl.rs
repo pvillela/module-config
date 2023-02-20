@@ -1,7 +1,7 @@
 use crate::fs::bar_bf::BarBfT;
 use std::sync::Arc;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FooSflCfgInfo {
     pub x: String,
 }
