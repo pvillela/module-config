@@ -1,17 +1,22 @@
 use crate::fs::bar_bf::bar_bf;
 use crate::fwk::CfgSrc;
-use arc_swap::ArcSwap;
-use once_cell::sync::Lazy;
+use once_cell::sync::OnceCell;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FooSflCfgInfo {
     pub x: String,
 }
 
-pub static FOO_SFL_CFG_SRC: Lazy<ArcSwap<CfgSrc<FooSflCfgInfo>>> =
-    Lazy::new(|| ArcSwap::from_pointee(CfgSrc::nil()));
+pub static FOO_SFL_CFG_SRC: OnceCell<CfgSrc<FooSflCfgInfo>> = OnceCell::new();
 
 pub fn foo_sfl() {
-    println!("fooSflCfgSrc().x: {}", FOO_SFL_CFG_SRC.load().get().x);
+    println!(
+        "fooSflCfgSrc().x: {}",
+        FOO_SFL_CFG_SRC
+            .get()
+            .expect("FOO_SFL_CFG_SRC not initialized")
+            .get()
+            .x
+    );
     bar_bf();
 }
