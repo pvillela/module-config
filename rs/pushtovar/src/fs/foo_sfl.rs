@@ -11,10 +11,7 @@ pub struct FooSflCfgInfo {
 pub static FOO_SFL_CFG_SRC: OnceCell<CfgSrc<FooSflCfgInfo>> = OnceCell::new();
 
 pub fn foo_sfl() -> String {
-    let cfg = FOO_SFL_CFG_SRC
-        .get()
-        .expect("FOO_SFL_CFG_SRC not initialized")
-        .get();
+    let cfg = CfgSrc::get_from_static(&FOO_SFL_CFG_SRC);
     let a = cfg.a.clone() + "-foo";
     let b = cfg.b + 3;
     format!("fooSfl(): a={}, b={}, bar=({})", a, b, bar_bf())

@@ -10,10 +10,7 @@ pub struct BarBfCfgInfo {
 pub static BAR_BF_CFG_SRC: OnceCell<CfgSrc<BarBfCfgInfo>> = OnceCell::new();
 
 pub fn bar_bf() -> String {
-    let cfg = BAR_BF_CFG_SRC
-        .get()
-        .expect("BAR_BF_CFG_SRC not initialized")
-        .get();
+    let cfg = CfgSrc::get_from_static(&BAR_BF_CFG_SRC);
     let u = cfg.u + 1;
     let v = cfg.v.clone() + "-bar";
     format!("barBf(): u={}, v={}", u, v)

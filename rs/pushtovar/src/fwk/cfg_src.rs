@@ -19,6 +19,13 @@ impl<T: 'static> CfgSrc<T> {
     pub fn get(&self) -> Arc<T> {
         self.src.as_ref()()
     }
+
+    pub fn get_from_static(mod_cfg_src: &OnceCell<CfgSrc<T>>) -> Arc<T> {
+        mod_cfg_src
+            .get()
+            .expect("FOO_SFL_CFG_SRC not initialized")
+            .get()
+    }
 }
 
 fn nil_cfg_src_fn<T: 'static>() -> T {

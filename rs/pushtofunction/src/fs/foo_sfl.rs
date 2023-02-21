@@ -14,9 +14,9 @@ pub struct FooSflCfgSrc {
 pub type FooSflT = Box<dyn Fn()>;
 
 pub fn foo_sfl_c(cfg: FooSflCfgSrc) -> FooSflT {
-    let bar_bff = cfg.bar;
+    let bar_bf = cfg.bar;
     Box::new(move || {
         println!("{}", (cfg.get)().x);
-        bar_bff();
+        bar_bf();
     })
 }
