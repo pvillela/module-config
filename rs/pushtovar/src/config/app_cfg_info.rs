@@ -28,5 +28,6 @@ pub fn refresh_app_configuration() {
 }
 
 pub fn get_app_configuration() -> Arc<AppCfgInfo> {
+    println!("get_app_configuration has been called");
     APP_CONFIGURATION.load().clone()
 }

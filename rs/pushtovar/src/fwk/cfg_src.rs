@@ -34,10 +34,9 @@ pub fn update_cfg_src_with_fn<T: 'static>(
     };
 }
 
-pub enum ArcCache<T> {
-    NoCache,
-    EmptyCache,
-    Value(Arc<T>),
+pub enum RefreshMode {
+    Cached,
+    Refreshable,
 }
 
 /// Composes an application info source f with an adapter g for a particular module, then
@@ -45,23 +44,22 @@ pub enum ArcCache<T> {
 pub fn adapt_by_ref<S, T: Clone + Send + Sync, F, G>(
     f: F,
     g: G,
-    cache_ref: &mut ArcCache<T>,
+    refresh_mode: RefreshMode,
     mod_cfg_src: &OnceCell<CfgSrc<T>>,
 ) where
     F: 'static + Fn() -> Arc<S> + Send + Sync,
     G: 'static + Fn(&S) -> T + Send + Sync,
 {
-    let v = if let ArcCache::Value(v) = cache_ref {
-        v.clone()
-    } else {
-        let v = Arc::new(g(f().deref()));
-        if let ArcCache::EmptyCache = cache_ref {
-            *cache_ref = ArcCache::Value(v.clone())
-        }
-        v
+    let cache: Option<Arc<T>> = match refresh_mode {
+        RefreshMode::Cached => Some(Arc::new(g(f().deref()))),
+        RefreshMode::Refreshable => None,
     };
 
-    let h = move || v.clone();
+    let h = move || match cache.clone() {
+        Some(v) => v,
+        None => Arc::new(g(f().deref())),
+    };
+
     if let Err(_) = mod_cfg_src.set(CfgSrc { src: Box::new(h) }) {
         panic!("OnceCell already initialized");
     };

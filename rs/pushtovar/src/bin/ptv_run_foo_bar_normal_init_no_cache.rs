@@ -1,9 +1,9 @@
 use pushtovar::fs::foo_sfl;
-use pushtovar::startup::initialize;
+use pushtovar::startup::init_no_cache;
 use std::thread;
 
 fn main() {
-    initialize();
+    init_no_cache();
 
     let handle1 = thread::spawn(move || {
         foo_sfl();
