@@ -1,3 +1,4 @@
+use pushtovar::config::refresh_app_configuration;
 use pushtovar::fs::foo_sfl;
 use pushtovar::startup::init_no_cache;
 use std::thread;
@@ -5,11 +6,14 @@ use std::thread;
 fn main() {
     init_no_cache();
 
-    let handle1 = thread::spawn(move || {
-        foo_sfl();
-    });
+    let handle = thread::spawn(move || foo_sfl());
+    let res = handle.join().unwrap();
+    println!("{}", res);
 
-    let _ = handle1.join();
+    refresh_app_configuration();
+    println!("App configuration refreshed -- output sould be different.");
 
-    foo_sfl();
+    let handle = thread::spawn(move || foo_sfl());
+    let res = handle.join().unwrap();
+    println!("{}", res);
 }

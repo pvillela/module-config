@@ -5,7 +5,8 @@ use std::sync::Arc;
 
 pub fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
     FooSflCfgInfo {
-        x: app_cfg.x.clone(),
+        a: app_cfg.x.clone(),
+        b: app_cfg.y,
     }
 }
 

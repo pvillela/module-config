@@ -4,19 +4,18 @@ use once_cell::sync::OnceCell;
 
 #[derive(Debug, Clone)]
 pub struct FooSflCfgInfo {
-    pub x: String,
+    pub a: String,
+    pub b: i32,
 }
 
 pub static FOO_SFL_CFG_SRC: OnceCell<CfgSrc<FooSflCfgInfo>> = OnceCell::new();
 
-pub fn foo_sfl() {
-    println!(
-        "fooSflCfgSrc().x: {}",
-        FOO_SFL_CFG_SRC
-            .get()
-            .expect("FOO_SFL_CFG_SRC not initialized")
-            .get()
-            .x
-    );
-    bar_bf();
+pub fn foo_sfl() -> String {
+    let cfg = FOO_SFL_CFG_SRC
+        .get()
+        .expect("FOO_SFL_CFG_SRC not initialized")
+        .get();
+    let a = cfg.a.clone() + "-foo";
+    let b = cfg.b + 3;
+    format!("fooSfl(): a={}, b={}, bar=({})", a, b, bar_bf())
 }

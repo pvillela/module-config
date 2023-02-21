@@ -3,11 +3,18 @@ use once_cell::sync::OnceCell;
 
 #[derive(Debug, Clone)]
 pub struct BarBfCfgInfo {
-    pub z: i32,
+    pub u: i32,
+    pub v: String,
 }
 
 pub static BAR_BF_CFG_SRC: OnceCell<CfgSrc<BarBfCfgInfo>> = OnceCell::new();
 
-pub fn bar_bf() {
-    println!("barBf(): {:?}", BAR_BF_CFG_SRC.get().unwrap().get());
+pub fn bar_bf() -> String {
+    let cfg = BAR_BF_CFG_SRC
+        .get()
+        .expect("BAR_BF_CFG_SRC not initialized")
+        .get();
+    let u = cfg.u + 1;
+    let v = cfg.v.clone() + "-bar";
+    format!("barBf(): u={}, v={}", u, v)
 }

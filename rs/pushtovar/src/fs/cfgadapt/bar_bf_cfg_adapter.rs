@@ -4,7 +4,10 @@ use crate::fwk::{adapt_by_ref, RefreshMode};
 use std::sync::Arc;
 
 fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
-    BarBfCfgInfo { z: app_cfg.y }
+    BarBfCfgInfo {
+        u: app_cfg.y,
+        v: app_cfg.x.clone(),
+    }
 }
 
 pub fn bar_bf_adapt_cfg_src(

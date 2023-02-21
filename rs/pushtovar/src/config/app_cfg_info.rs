@@ -6,6 +6,7 @@ use std::sync::Arc;
 pub struct AppCfgInfo {
     pub x: String,
     pub y: i32,
+    pub z: bool,
 }
 
 static APP_CONFIGURATION: Lazy<ArcSwap<AppCfgInfo>> =
@@ -14,16 +15,18 @@ static APP_CONFIGURATION: Lazy<ArcSwap<AppCfgInfo>> =
 // Simulates initial APP_CONFIGURATION
 fn initial_app_configuration() -> AppCfgInfo {
     AppCfgInfo {
-        x: "xxx".to_owned(),
+        x: "initial".to_owned(),
         y: 42,
+        z: false,
     }
 }
 
 // Simulates refresh of APP_CONFIGURATION
 pub fn refresh_app_configuration() {
     APP_CONFIGURATION.store(Arc::new(AppCfgInfo {
-        x: "yyy".to_owned(),
-        y: 123,
+        x: "refreshed".to_owned(),
+        y: 1042,
+        z: true,
     }));
 }
 
