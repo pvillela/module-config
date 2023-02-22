@@ -1,2 +1,2 @@
-mod cfg_deps_src;
-pub use cfg_deps_src::*;
+mod cfg_deps;
+pub use cfg_deps::*;

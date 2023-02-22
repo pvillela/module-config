@@ -1,14 +1,14 @@
 use pushdepstovar::config::refresh_app_configuration;
 use pushdepstovar::fs::{
-    bar_bf, foo_sfl, BarBfCfgInfo, FooSflCfgInfo, FooSflDeps, BAR_BF_CFG_SRC, FOO_SFL_CFG_SRC,
+    bar_bf, foo_sfl, BarBfCfgInfo, FooSflCfgInfo, FooSflDeps, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS,
 };
-use pushdepstovar::fwk::update_cfg_src_with_fn;
+use pushdepstovar::fwk::CfgDeps;
 use std::sync::Arc;
 use std::thread;
 
 fn main() {
-    update_cfg_src_with_fn(
-        &FOO_SFL_CFG_SRC,
+    CfgDeps::set(
+        &FOO_SFL_CFG_DEPS,
         || {
             Arc::new(FooSflCfgInfo {
                 a: "foo_override".to_owned(),
@@ -18,8 +18,8 @@ fn main() {
         FooSflDeps { bar_bf },
     );
 
-    update_cfg_src_with_fn(
-        &BAR_BF_CFG_SRC,
+    CfgDeps::set(
+        &BAR_BF_CFG_DEPS,
         || {
             Arc::new(BarBfCfgInfo {
                 u: 33,
