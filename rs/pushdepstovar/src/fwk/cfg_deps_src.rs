@@ -3,32 +3,39 @@ use once_cell::sync::OnceCell;
 use std::ops::Deref;
 use std::sync::Arc;
 
-pub struct CfgSrc<T: 'static> {
+pub struct CfgDepsSrc<T: 'static, U: 'static> {
     src: Box<dyn 'static + Fn() -> Arc<T> + Send + Sync>,
+    deps: U,
 }
 
-impl<T: 'static> CfgSrc<T> {
-    fn new(src: impl 'static + Fn() -> Arc<T> + Send + Sync) -> Self {
-        CfgSrc { src: Box::new(src) }
+impl<T: 'static, U: 'static> CfgDepsSrc<T, U> {
+    fn new(src: impl 'static + Fn() -> Arc<T> + Send + Sync, deps: U) -> Self {
+        CfgDepsSrc {
+            src: Box::new(src),
+            deps,
+        }
     }
 
     pub fn get(&self) -> Arc<T> {
         self.src.as_ref()()
     }
 
-    pub fn get_from_static(mod_cfg_src: &OnceCell<CfgSrc<T>>) -> Arc<T> {
-        mod_cfg_src
+    pub fn get_from_static(mod_cfg_src: &OnceCell<CfgDepsSrc<T, U>>) -> (Arc<T>, &U) {
+        let cfg_deps = mod_cfg_src
             .get()
-            .expect("module config source static not initialized")
-            .get()
+            .expect("module config source static not initialized");
+        let cfg = (cfg_deps.src)();
+        let deps = &cfg_deps.deps;
+        (cfg, deps)
     }
 }
 
-pub fn update_cfg_src_with_fn<T: 'static>(
-    cfg_src_static: &OnceCell<CfgSrc<T>>,
+pub fn update_cfg_src_with_fn<T: 'static, U: 'static>(
+    cfg_src_static: &OnceCell<CfgDepsSrc<T, U>>,
     cfg_src_fn: impl 'static + Fn() -> Arc<T> + Send + Sync,
+    deps: U,
 ) {
-    if let Err(_) = cfg_src_static.set(CfgSrc::new(cfg_src_fn)) {
+    if let Err(_) = cfg_src_static.set(CfgDepsSrc::new(cfg_src_fn, deps)) {
         panic!("OnceCell already initialized");
     };
 }
@@ -40,11 +47,12 @@ pub enum RefreshMode {
 
 /// Composes an application info source f with an adapter g for a particular module, then
 /// sets the static module config source.
-pub fn adapt_by_ref<S, T: Clone + Send + Sync, F, G>(
+pub fn adapt_by_ref<S, T: Clone + Send + Sync, U, F, G>(
     f: F,
     g: G,
     refresh_mode: RefreshMode,
-    mod_cfg_src: &OnceCell<CfgSrc<T>>,
+    deps: U,
+    mod_cfg_src: &OnceCell<CfgDepsSrc<T, U>>,
 ) where
     F: 'static + Fn() -> Arc<S> + Send + Sync,
     G: 'static + Fn(&S) -> T + Send + Sync,
@@ -59,7 +67,10 @@ pub fn adapt_by_ref<S, T: Clone + Send + Sync, F, G>(
         None => Arc::new(g(f().deref())),
     };
 
-    if let Err(_) = mod_cfg_src.set(CfgSrc { src: Box::new(h) }) {
+    if let Err(_) = mod_cfg_src.set(CfgDepsSrc {
+        src: Box::new(h),
+        deps,
+    }) {
         panic!("OnceCell already initialized");
     };
 }

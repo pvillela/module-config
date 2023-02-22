@@ -242,6 +242,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "pushdepstovar"
+version = "0.1.0"
+dependencies = [
+ "arc-swap",
+ "futures",
+ "once_cell",
+ "tokio",
+]
+
+[[package]]
 name = "pushtofunction"
 version = "0.1.0"
 dependencies = [
