@@ -23,7 +23,7 @@ impl<T: 'static> CfgSrc<T> {
     pub fn get_from_static(mod_cfg_src: &OnceCell<CfgSrc<T>>) -> Arc<T> {
         mod_cfg_src
             .get()
-            .expect("FOO_SFL_CFG_SRC not initialized")
+            .expect("module config source static not initialized")
             .get()
     }
 }
