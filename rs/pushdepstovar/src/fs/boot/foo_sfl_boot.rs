@@ -1,6 +1,5 @@
 use crate::config::AppCfgInfo;
-use crate::fs::foo_sfl::{FooSflCfgInfo, FOO_SFL_CFG_DEPS};
-use crate::fs::FooSflDeps;
+use crate::fs::{bar_bf, FooSflCfgInfo, FooSflDeps, FOO_SFL_CFG_DEPS};
 use crate::fwk::{CfgDeps, RefreshMode};
 use std::sync::Arc;
 
@@ -23,4 +22,12 @@ pub fn foo_sfl_adapt_cfg_src(
         refresh_mode,
         deps,
     );
+}
+
+pub fn foo_sfl_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
+    foo_sfl_adapt_cfg_src(app_cfg_src, RefreshMode::Refreshable, FooSflDeps { bar_bf });
+}
+
+pub fn foo_sfl_init_cached(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
+    foo_sfl_adapt_cfg_src(app_cfg_src, RefreshMode::Cached, FooSflDeps { bar_bf });
 }

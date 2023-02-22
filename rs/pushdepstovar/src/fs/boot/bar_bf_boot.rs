@@ -23,3 +23,11 @@ pub fn bar_bf_adapt_cfg_src(
         deps,
     );
 }
+
+pub fn bar_bf_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
+    bar_bf_adapt_cfg_src(app_cfg_src, RefreshMode::Refreshable, ());
+}
+
+pub fn bar_bf_init_cached(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
+    bar_bf_adapt_cfg_src(app_cfg_src, RefreshMode::Cached, ());
+}
