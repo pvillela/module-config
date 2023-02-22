@@ -10,7 +10,7 @@ fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
     }
 }
 
-pub fn bar_bf_adapt_cfg_src(
+fn bar_bf_adapt_cfg_src(
     origin: impl Fn() -> Arc<AppCfgInfo> + 'static + Send + Sync,
     refresh_mode: RefreshMode,
     deps: (),

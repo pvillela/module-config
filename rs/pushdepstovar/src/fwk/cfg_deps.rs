@@ -1,5 +1,6 @@
 use core::panic;
 use once_cell::sync::OnceCell;
+use std::fmt::Debug;
 use std::ops::Deref;
 use std::sync::Arc;
 
@@ -13,7 +14,7 @@ pub enum RefreshMode {
     Refreshable,
 }
 
-impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
+impl<T: 'static + Clone + Send + Sync, U: 'static + Debug> CfgDeps<T, U> {
     fn new(src: impl 'static + Fn() -> Arc<T> + Send + Sync, deps: U) -> Self {
         CfgDeps {
             src: Box::new(src),
@@ -34,20 +35,25 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
         (cfg, deps)
     }
 
+    /// Sets a static module CfgDeps with a configuration info source and a dependencies data
+    /// structure.
+    /// Calls against a mod_cfg_deps after the first call result in a panic.
     pub fn set(
-        mod_cfg_src: &OnceCell<CfgDeps<T, U>>,
+        mod_cfg_deps: &OnceCell<CfgDeps<T, U>>,
         cfg_src_fn: impl 'static + Fn() -> Arc<T> + Send + Sync,
         deps: U,
     ) {
-        if let Err(_) = mod_cfg_src.set(CfgDeps::new(cfg_src_fn, deps)) {
+        if let Err(_) = mod_cfg_deps.set(CfgDeps::new(cfg_src_fn, deps)) {
             panic!("OnceCell already initialized");
         };
     }
 
     /// Composes an application info source f with an adapter g for a particular module, then
-    /// sets the static module CfgDeps.
+    /// sets it and the deps data structure to the static module CfgDeps.
+    /// Calls against a mod_cfg_deps after the first call do not modify the mod_cfg_deps but
+    /// log a message.
     pub fn set_with_cfg_adapter<S, F, G>(
-        mod_cfg_src: &OnceCell<CfgDeps<T, U>>,
+        mod_cfg_deps: &OnceCell<CfgDeps<T, U>>,
         f: F,
         g: G,
         refresh_mode: RefreshMode,
@@ -66,11 +72,24 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
             None => Arc::new(g(f().deref())),
         };
 
-        if let Err(_) = mod_cfg_src.set(CfgDeps {
+        let deps_str = format!("{:?}", deps);
+
+        match mod_cfg_deps.set(CfgDeps {
             src: Box::new(h),
-            deps,
+            deps: deps,
         }) {
-            panic!("OnceCell already initialized");
-        };
+            Ok(_) => {
+                println!(
+                    "OnceCell {:p} initialized with deps {}",
+                    mod_cfg_deps, deps_str,
+                )
+            }
+            Err(_) => {
+                println!(
+                    "Attempt to reinitialize OnceCell {:p} with deps {}",
+                    mod_cfg_deps, deps_str,
+                );
+            }
+        }
     }
 }
