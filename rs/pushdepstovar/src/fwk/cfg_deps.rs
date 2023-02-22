@@ -1,8 +1,9 @@
 use core::panic;
 use once_cell::sync::OnceCell;
-use std::fmt::Debug;
 use std::ops::Deref;
 use std::sync::Arc;
+
+use super::type_name;
 
 pub struct CfgDeps<T: 'static, U: 'static> {
     src: Box<dyn 'static + Fn() -> Arc<T> + Send + Sync>,
@@ -14,7 +15,7 @@ pub enum RefreshMode {
     Refreshable,
 }
 
-impl<T: 'static + Clone + Send + Sync, U: 'static + Debug> CfgDeps<T, U> {
+impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
     fn new(src: impl 'static + Fn() -> Arc<T> + Send + Sync, deps: U) -> Self {
         CfgDeps {
             src: Box::new(src),
@@ -72,7 +73,7 @@ impl<T: 'static + Clone + Send + Sync, U: 'static + Debug> CfgDeps<T, U> {
             None => Arc::new(g(f().deref())),
         };
 
-        let deps_str = format!("{:?}", deps);
+        let deps_str = type_name(&deps);
 
         match mod_cfg_deps.set(CfgDeps {
             src: Box::new(h),

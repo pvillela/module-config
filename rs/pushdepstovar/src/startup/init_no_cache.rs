@@ -8,5 +8,8 @@ pub fn init_no_cache() {
     let c = get_app_configuration;
 
     foo_sfl_init_refreshable(c);
+    println!("Redundant init of foo_sfl from init_no_cache(), with no effect:");
+    foo_sfl_init_refreshable(c);
+    println!("Redundant init of bar_bf from init_no_cache(), with no effect:");
     bar_bf_init_refreshable(c);
 }
