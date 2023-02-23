@@ -26,21 +26,11 @@ async fn main() {
     });
 
     let handles1 = (0..N / 2)
-        .map(|_| {
-            tokio::spawn(async move {
-                sleep(Duration::from_millis(200)).await;
-                foo_a_sfl().await.len()
-            })
-        })
+        .map(|_| tokio::spawn(async move { foo_a_sfl(200).await.len() }))
         .collect::<Vec<_>>();
 
     let handles2: Vec<_> = (0..N / 2)
-        .map(|_| {
-            tokio::spawn(async move {
-                sleep(Duration::from_millis(300)).await;
-                foo_a_sfl().await.len()
-            })
-        })
+        .map(|_| tokio::spawn(async move { foo_a_sfl(300).await.len() }))
         .collect();
 
     let _ = handle_r
