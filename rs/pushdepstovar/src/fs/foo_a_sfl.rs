@@ -10,7 +10,8 @@ pub struct FooASflCfgInfo {
 }
 
 pub struct FooASflDeps {
-    pub bar_a_bf: fn() -> Pin<Box<dyn Future<Output = String> + Send + Sync>>,
+    pub bar_a_bf:
+        Box<dyn Fn() -> Pin<Box<dyn Future<Output = String> + Send + Sync>> + Send + Sync>,
 }
 
 pub static FOO_A_SFL_CFG_DEPS: OnceCell<CfgDeps<FooASflCfgInfo, FooASflDeps>> = OnceCell::new();
