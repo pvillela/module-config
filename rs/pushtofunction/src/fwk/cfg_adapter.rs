@@ -1,7 +1,7 @@
 use std::{ops::Deref, sync::Arc};
 
 /// Transforms a value into a nullary closure that returns the value.
-pub fn const_closure<T: Clone>(x: T) -> impl Fn() -> T {
+pub fn const_closure<T: Clone + Send + Sync>(x: T) -> impl Fn() -> T + Send + Sync {
     move || x.clone()
 }
 
@@ -12,10 +12,10 @@ pub fn nil_app_cfg<T>() -> Arc<T> {
 }
 
 /// Composes an application info source f with an adapter g for a particular module.
-pub fn adapt_by_ref<S, T: Clone, F, G>(f: F, g: G) -> Box<dyn Fn() -> Arc<T>>
+pub fn adapt_by_ref<S, T: Clone, F, G>(f: F, g: G) -> Box<dyn Fn() -> Arc<T> + Send + Sync>
 where
-    F: 'static + Fn() -> Arc<S>,
-    G: 'static + Fn(&S) -> T,
+    F: 'static + Fn() -> Arc<S> + Send + Sync,
+    G: 'static + Fn(&S) -> T + Send + Sync,
 {
     let h = move || Arc::new(g(f().deref()));
     Box::new(h)
@@ -23,14 +23,14 @@ where
 
 /// Returns the a const closure that returns the Arc of the deref of the first argument if it is not None,
 /// otherwise returns [adapt_by_ref] of the second and third arguments.
-pub fn const_or_adapt_by_ref<S, T: 'static + Clone, F, G>(
+pub fn const_or_adapt_by_ref<S, T: 'static + Clone + Send + Sync, F, G>(
     k: Option<&T>,
     f: F,
     g: G,
-) -> Box<dyn Fn() -> Arc<T>>
+) -> Box<dyn Fn() -> Arc<T> + Send + Sync>
 where
-    F: 'static + Fn() -> Arc<S>,
-    G: 'static + Fn(&S) -> T,
+    F: 'static + Fn() -> Arc<S> + Send + Sync,
+    G: 'static + Fn(&S) -> T + Send + Sync,
 {
     match k {
         Some(k) => Box::new(const_closure(Arc::new((*k).clone()))),

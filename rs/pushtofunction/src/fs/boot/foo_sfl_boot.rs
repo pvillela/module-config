@@ -8,7 +8,8 @@ use super::bar_bf_boot;
 
 fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
     FooSflCfgInfo {
-        x: app_cfg.x.clone(),
+        a: app_cfg.x.clone(),
+        b: app_cfg.y,
     }
 }
 

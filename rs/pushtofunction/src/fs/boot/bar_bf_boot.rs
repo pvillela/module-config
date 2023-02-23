@@ -5,7 +5,10 @@ use once_cell::sync::OnceCell;
 use std::sync::Arc;
 
 fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
-    BarBfCfgInfo { z: app_cfg.y }
+    BarBfCfgInfo {
+        u: app_cfg.y,
+        v: app_cfg.x.clone(),
+    }
 }
 
 pub static BAR_BF_CFG_INFO_OVERRIDE: OnceCell<BarBfCfgInfo> = OnceCell::new();

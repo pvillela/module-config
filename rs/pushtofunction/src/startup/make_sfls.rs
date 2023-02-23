@@ -11,8 +11,9 @@ pub fn make_foo_sfl() -> FooSflT {
 pub fn make_foo_sfl1() -> FooSflT {
     let app_cfg_src1 = move || {
         Arc::new(AppCfgInfo {
-            x: "foo".to_owned(),
-            y: 99,
+            x: "custom".to_owned(),
+            y: 84,
+            z: true,
         })
     };
     foo_sfl_boot(app_cfg_src1)
