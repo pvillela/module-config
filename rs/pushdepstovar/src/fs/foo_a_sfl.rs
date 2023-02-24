@@ -13,12 +13,23 @@ pub struct FooASflDeps {
     pub bar_a_bf: BoxPinFn<u64, String>,
 }
 
+pub struct FooAIn {
+    pub sleep_millis: u64,
+}
+
+#[allow(unused)]
+pub struct FooAOut {
+    pub res: String,
+}
+
 pub static FOO_A_SFL_CFG_DEPS: OnceCell<CfgDeps<FooASflCfgInfo, FooASflDeps>> = OnceCell::new();
 
-pub async fn foo_a_sfl(sleep_millis: u64) -> String {
+pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
+    let FooAIn { sleep_millis } = input;
     sleep(Duration::from_millis(sleep_millis)).await;
     let (cfg, FooASflDeps { bar_a_bf }) = CfgDeps::get(&FOO_A_SFL_CFG_DEPS);
     let a = cfg.a.clone() + "-foo";
     let b = cfg.b + 3;
-    format!("fooSfl(): a={}, b={}, bar=({})", a, b, bar_a_bf(0).await)
+    let res = format!("fooSfl(): a={}, b={}, bar=({})", a, b, bar_a_bf(0).await);
+    FooAOut { res }
 }

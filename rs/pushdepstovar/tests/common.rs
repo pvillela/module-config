@@ -1,5 +1,5 @@
 use pushdepstovar::fs::{
-    bar_a_bf, foo_a_sfl, BarABfCfgInfo, FooASflCfgInfo, FooASflDeps, BAR_A_BF_CFG_DEPS,
+    bar_a_bf, foo_a_sfl, BarABfCfgInfo, FooAIn, FooASflCfgInfo, FooASflDeps, BAR_A_BF_CFG_DEPS,
     FOO_A_SFL_CFG_DEPS,
 };
 use pushdepstovar::fwk::{box_pin_async_fn, CfgDeps};
@@ -24,8 +24,8 @@ pub async fn common_test(
         (),
     );
 
-    let handle = tokio::spawn(async move { foo_a_sfl(0).await });
-    let res = handle.await.ok();
+    let handle = tokio::spawn(async move { foo_a_sfl(FooAIn { sleep_millis: 0 }).await });
+    let res = handle.await.ok().map(|x| x.res);
     println!("{:?}", res);
     res
 }

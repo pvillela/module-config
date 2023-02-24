@@ -1,6 +1,7 @@
 use futures::future::join_all;
 use pushdepstovar::config::refresh_app_configuration;
 use pushdepstovar::fs::foo_a_sfl;
+use pushdepstovar::fs::FooAIn;
 use pushdepstovar::startup::init_a_no_cache;
 use std::time::Duration;
 use std::time::SystemTime;
@@ -26,11 +27,15 @@ async fn main() {
     });
 
     let handles1 = (0..N / 2)
-        .map(|_| tokio::spawn(async move { foo_a_sfl(200).await.len() }))
+        .map(|_| {
+            tokio::spawn(async move { foo_a_sfl(FooAIn { sleep_millis: 200 }).await.res.len() })
+        })
         .collect::<Vec<_>>();
 
     let handles2: Vec<_> = (0..N / 2)
-        .map(|_| tokio::spawn(async move { foo_a_sfl(300).await.len() }))
+        .map(|_| {
+            tokio::spawn(async move { foo_a_sfl(FooAIn { sleep_millis: 300 }).await.res.len() })
+        })
         .collect();
 
     let _ = handle_r
