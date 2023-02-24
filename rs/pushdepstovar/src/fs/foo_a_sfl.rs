@@ -1,7 +1,5 @@
-use crate::fwk::CfgDeps;
-use core::pin::Pin;
+use crate::fwk::{BoxPinFn, CfgDeps};
 use once_cell::sync::OnceCell;
-use std::future::Future;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -12,8 +10,7 @@ pub struct FooASflCfgInfo {
 }
 
 pub struct FooASflDeps {
-    pub bar_a_bf:
-        Box<dyn Fn(u64) -> Pin<Box<dyn Future<Output = String> + Send + Sync>> + Send + Sync>,
+    pub bar_a_bf: BoxPinFn<u64, String>,
 }
 
 pub static FOO_A_SFL_CFG_DEPS: OnceCell<CfgDeps<FooASflCfgInfo, FooASflDeps>> = OnceCell::new();
