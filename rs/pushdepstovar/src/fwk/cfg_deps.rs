@@ -1,7 +1,9 @@
+use arc_swap::ArcSwap;
 use core::panic;
 use once_cell::sync::OnceCell;
 use std::ops::Deref;
 use std::sync::Arc;
+use std::time::{Duration, SystemTime};
 
 use super::type_name;
 
@@ -11,8 +13,14 @@ pub struct CfgDeps<T: 'static, U: 'static> {
 }
 
 pub enum RefreshMode {
-    Cached,
-    Refreshable,
+    NoRefresh,
+    Refreshable(Duration),
+}
+
+#[derive(Clone)]
+struct Cache<T> {
+    last_refresh: SystemTime,
+    value: T,
 }
 
 impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
@@ -63,14 +71,24 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
         F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
     {
-        let cache: Option<Arc<T>> = match refresh_mode {
-            RefreshMode::Cached => Some(Arc::new(g(f().deref()))),
-            RefreshMode::Refreshable => None,
-        };
+        let cache_cell = ArcSwap::new(Arc::new(Cache {
+            last_refresh: SystemTime::now(),
+            value: Arc::new(g(f().deref())),
+        }));
 
-        let h = move || match cache.clone() {
-            Some(v) => v,
-            None => Arc::new(g(f().deref())),
+        let h = move || {
+            if let RefreshMode::Refreshable(cache_ttl) = refresh_mode {
+                if let Ok(elapsed) = cache_cell.load().last_refresh.elapsed() {
+                    if elapsed > cache_ttl {
+                        cache_cell.store(Arc::new(Cache {
+                            last_refresh: SystemTime::now(),
+                            value: Arc::new(g(f().deref())),
+                        }));
+                    }
+                }
+            }
+
+            cache_cell.load().value.clone()
         };
 
         let deps_str = type_name(&deps);

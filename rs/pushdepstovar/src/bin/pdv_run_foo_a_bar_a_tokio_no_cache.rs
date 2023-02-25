@@ -2,7 +2,7 @@ use futures::future::join_all;
 use pushdepstovar::config::refresh_app_configuration;
 use pushdepstovar::fs::foo_a_sfl;
 use pushdepstovar::fs::FooAIn;
-use pushdepstovar::startup::init_a_no_cache;
+use pushdepstovar::startup::init_a_refreshable;
 use std::time::Duration;
 use std::time::SystemTime;
 use tokio;
@@ -10,7 +10,7 @@ use tokio::time::sleep;
 
 #[tokio::main]
 async fn main() {
-    init_a_no_cache();
+    init_a_refreshable();
 
     const N: usize = 10_000;
 
