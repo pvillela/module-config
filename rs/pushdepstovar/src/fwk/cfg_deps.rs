@@ -7,6 +7,41 @@ use std::time::{Duration, SystemTime};
 
 use super::type_name;
 
+pub trait CfgSrc<T: 'static>: Clone {
+    fn get(&self) -> Arc<T>;
+}
+
+#[derive(Clone)]
+pub struct CfgSrc0<T: 'static> {
+    pub info: T,
+}
+
+impl<T: Clone> CfgSrc<T> for CfgSrc0<T> {
+    fn get(&self) -> Arc<T> {
+        self.info
+    }
+}
+
+#[derive(Clone)]
+pub struct CfgSrc1<T: 'static> {
+    src: fn() -> Arc<T>,
+}
+
+impl<T: Clone> CfgSrc<T> for CfgSrc1<T> {
+    fn get(&self) -> Arc<T> {
+        self.src()
+    }
+}
+
+pub struct CfgSrc2<S: 'static, T: 'static> {
+    origin: fn() -> Arc<S>,
+    adapter: fn(&S) -> T,
+}
+
+impl<S, T> CfgSrc<T> for CfgSrc2<S, T> {
+    fn get(&self) -> Arc<T> {}
+}
+
 pub struct CfgDeps<T: 'static, U: 'static> {
     src: Box<dyn 'static + Fn() -> Arc<T> + Send + Sync>,
     deps: U,
