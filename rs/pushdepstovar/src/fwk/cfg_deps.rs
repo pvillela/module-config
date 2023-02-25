@@ -1,14 +1,14 @@
-use arc_swap::ArcSwap;
+use super::type_name;
 use core::panic;
 use once_cell::sync::OnceCell;
+use std::cell::RefCell;
 use std::ops::Deref;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 
-use super::type_name;
-
-pub struct CfgDeps<T: 'static, U: 'static> {
-    src: Box<dyn 'static + Fn() -> Arc<T> + Send + Sync>,
+#[derive(Clone)]
+pub struct CfgDeps<T: 'static, U: 'static + Clone, F: Fn() -> Arc<T> + Clone> {
+    src: F, //Box<dyn 'static + Fn() -> Arc<T> + Send + Sync>,
     deps: U,
 }
 
@@ -23,7 +23,7 @@ struct Cache<T> {
     value: T,
 }
 
-impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
+impl<T: 'static + Clone + Send + Sync, U: 'static, F: Fn() -> Arc<T> + Clone> CfgDeps<T, U, F> {
     fn new(src: impl 'static + Fn() -> Arc<T> + Send + Sync, deps: U) -> Self {
         CfgDeps {
             src: Box::new(src),
@@ -35,7 +35,7 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
         self.src.as_ref()()
     }
 
-    pub fn get(mod_cfg_src: &OnceCell<CfgDeps<T, U>>) -> (Arc<T>, &U) {
+    pub fn get(mod_cfg_src: &OnceCell<CfgDeps<T, U, F>>) -> (Arc<T>, &U) {
         let cfg_deps = mod_cfg_src
             .get()
             .expect("module config source static not initialized");
@@ -48,7 +48,7 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
     /// structure.
     /// Calls against a mod_cfg_deps after the first call result in a panic.
     pub fn set(
-        mod_cfg_deps: &OnceCell<CfgDeps<T, U>>,
+        mod_cfg_deps: &OnceCell<CfgDeps<T, U, F>>,
         cfg_src_fn: impl 'static + Fn() -> Arc<T> + Send + Sync,
         deps: U,
     ) {
@@ -61,26 +61,27 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
     /// sets it and the deps data structure to the static module CfgDeps.
     /// Calls against a mod_cfg_deps after the first call do not modify the mod_cfg_deps but
     /// log a message.
-    pub fn set_with_cfg_adapter<S, F, G>(
-        mod_cfg_deps: &OnceCell<CfgDeps<T, U>>,
+    pub fn set_with_cfg_adapter<S, G>(
+        mod_cfg_deps: &OnceCell<CfgDeps<T, U, F>>,
         f: F,
         g: G,
         refresh_mode: RefreshMode,
         deps: U,
     ) where
-        F: 'static + Fn() -> Arc<S> + Send + Sync,
+        // F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
     {
-        let cache_cell = ArcSwap::new(Arc::new(Cache {
+        let cache = RefCell::new(Cache {
             last_refresh: SystemTime::now(),
             value: Arc::new(g(f().deref())),
-        }));
+        });
 
         let h = move || {
+            let cache = cache.clone();
             if let RefreshMode::Refreshable(cache_ttl) = refresh_mode {
-                if let Ok(elapsed) = cache_cell.load().last_refresh.elapsed() {
+                if let Ok(elapsed) = cache.borrow().last_refresh.elapsed() {
                     if elapsed > cache_ttl {
-                        cache_cell.store(Arc::new(Cache {
+                        cache.replace(Arc::new(Cache {
                             last_refresh: SystemTime::now(),
                             value: Arc::new(g(f().deref())),
                         }));
@@ -88,7 +89,7 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
                 }
             }
 
-            cache_cell.load().value.clone()
+            cache.borrow().value.clone()
         };
 
         let deps_str = type_name(&deps);
