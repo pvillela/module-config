@@ -7,8 +7,8 @@ use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 
 #[derive(Clone)]
-pub struct CfgDeps<T: 'static, U: 'static + Clone, F: Fn() -> Arc<T> + Clone> {
-    src: F, //Box<dyn 'static + Fn() -> Arc<T> + Send + Sync>,
+pub struct CfgDeps<T: 'static, U: 'static + Clone> {
+    src: Box<dyn 'static + Fn() -> Arc<T> + Send + Sync>,
     deps: U,
 }
 
@@ -23,7 +23,7 @@ struct Cache<T> {
     value: T,
 }
 
-impl<T: 'static + Clone + Send + Sync, U: 'static, F: Fn() -> Arc<T> + Clone> CfgDeps<T, U, F> {
+impl<T: 'static + Clone + Send + Sync, U: 'static + Clone> CfgDeps<T, U> {
     fn new(src: impl 'static + Fn() -> Arc<T> + Send + Sync, deps: U) -> Self {
         CfgDeps {
             src: Box::new(src),
@@ -35,7 +35,7 @@ impl<T: 'static + Clone + Send + Sync, U: 'static, F: Fn() -> Arc<T> + Clone> Cf
         self.src.as_ref()()
     }
 
-    pub fn get(mod_cfg_src: &OnceCell<CfgDeps<T, U, F>>) -> (Arc<T>, &U) {
+    pub fn get(mod_cfg_src: &OnceCell<CfgDeps<T, U>>) -> (Arc<T>, &U) {
         let cfg_deps = mod_cfg_src
             .get()
             .expect("module config source static not initialized");
@@ -48,7 +48,7 @@ impl<T: 'static + Clone + Send + Sync, U: 'static, F: Fn() -> Arc<T> + Clone> Cf
     /// structure.
     /// Calls against a mod_cfg_deps after the first call result in a panic.
     pub fn set(
-        mod_cfg_deps: &OnceCell<CfgDeps<T, U, F>>,
+        mod_cfg_deps: &OnceCell<CfgDeps<T, U>>,
         cfg_src_fn: impl 'static + Fn() -> Arc<T> + Send + Sync,
         deps: U,
     ) {
@@ -61,14 +61,14 @@ impl<T: 'static + Clone + Send + Sync, U: 'static, F: Fn() -> Arc<T> + Clone> Cf
     /// sets it and the deps data structure to the static module CfgDeps.
     /// Calls against a mod_cfg_deps after the first call do not modify the mod_cfg_deps but
     /// log a message.
-    pub fn set_with_cfg_adapter<S, G>(
-        mod_cfg_deps: &OnceCell<CfgDeps<T, U, F>>,
+    pub fn set_with_cfg_adapter<S, F, G>(
+        mod_cfg_deps: &OnceCell<CfgDeps<T, U>>,
         f: F,
         g: G,
         refresh_mode: RefreshMode,
         deps: U,
     ) where
-        // F: 'static + Fn() -> Arc<S> + Send + Sync,
+        F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
     {
         let cache = RefCell::new(Cache {
