@@ -36,7 +36,7 @@ pub fn foo_sfl_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
     );
 }
 
-pub fn foo_sfl_init_cached(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
+pub fn foo_sfl_init_no_refresh(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
     // A stereotype should initialize its dependencies.
     bar_bf_init_cached(app_cfg_src);
     foo_sfl_adapt_cfg_src(app_cfg_src, RefreshMode::NoRefresh, FooSflDeps { bar_bf });

@@ -1,12 +1,12 @@
-use pushdepstovar::startup::init_a_refreshable;
-use pushdepstovar::tokio_run_common::run;
+use pushdepstovar_o::startup::init_a_refreshable;
+use pushdepstovar_o::tokio_run_common::run;
 use tokio;
 
 #[tokio::main]
 async fn main() {
     init_a_refreshable();
 
-    println!("===== pdv_run_foo_a_bar_a_tokio_no_cache =====");
+    println!("===== pdvo_run_foo_a_bar_a_tokio_no_cache =====");
 
     println!("*** run(0) -- zero sleep time, zero repeats");
     run(0, 0).await;
