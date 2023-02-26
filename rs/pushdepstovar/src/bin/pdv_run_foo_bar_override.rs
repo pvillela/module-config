@@ -2,7 +2,7 @@ use pushdepstovar::config::refresh_app_configuration;
 use pushdepstovar::fs::{
     bar_bf, foo_sfl, BarBfCfgInfo, FooSflCfgInfo, FooSflDeps, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS,
 };
-use pushdepstovar::fwk::CfgDeps;
+use pushdepstovar::fwk::{CfgDeps, RefreshMode};
 use std::sync::Arc;
 use std::thread;
 
@@ -15,6 +15,7 @@ fn main() {
                 b: 11,
             })
         },
+        RefreshMode::NoRefresh,
         FooSflDeps { bar_bf },
     );
 
@@ -26,6 +27,7 @@ fn main() {
                 v: "bar_override".to_owned(),
             })
         },
+        RefreshMode::NoRefresh,
         (),
     );
 

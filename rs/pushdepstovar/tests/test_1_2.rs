@@ -10,13 +10,19 @@ mod t1 {
     #[tokio::test]
     async fn test1() {
         let res = common_test(
-            FooASflCfgInfo {
-                a: "foo_a_test1".to_owned(),
-                b: 1,
+            || {
+                FooASflCfgInfo {
+                    a: "foo_a_test1".to_owned(),
+                    b: 1,
+                }
+                .into()
             },
-            BarABfCfgInfo {
-                u: 11,
-                v: "bar_a_test1".to_owned(),
+            || {
+                BarABfCfgInfo {
+                    u: 11,
+                    v: "bar_a_test1".to_owned(),
+                }
+                .into()
             },
         )
         .await;
@@ -36,13 +42,19 @@ mod t2 {
     #[tokio::test]
     async fn test2() {
         let res = common_test(
-            FooASflCfgInfo {
-                a: "foo_a_test2".to_owned(),
-                b: 2,
+            || {
+                FooASflCfgInfo {
+                    a: "foo_a_test2".to_owned(),
+                    b: 2,
+                }
+                .into()
             },
-            BarABfCfgInfo {
-                u: 22,
-                v: "bar_a_test2".to_owned(),
+            || {
+                BarABfCfgInfo {
+                    u: 22,
+                    v: "bar_a_test2".to_owned(),
+                }
+                .into()
             },
         )
         .await;

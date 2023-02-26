@@ -30,7 +30,7 @@ pub fn refresh_app_configuration() {
     }));
 }
 
-pub fn get_app_configuration() -> Arc<AppCfgInfo> {
+pub fn get_app_config_info() -> Arc<AppCfgInfo> {
     // println!("get_app_configuration has been called");
     APP_CONFIGURATION.load().clone()
 }

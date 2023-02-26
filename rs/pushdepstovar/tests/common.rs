@@ -2,17 +2,18 @@ use pushdepstovar::fs::{
     bar_a_bf, foo_a_sfl, BarABfCfgInfo, FooAIn, FooASflCfgInfo, FooASflDeps, BAR_A_BF_CFG_DEPS,
     FOO_A_SFL_CFG_DEPS,
 };
-use pushdepstovar::fwk::{box_pin_async_fn, CfgDeps};
+use pushdepstovar::fwk::{box_pin_async_fn, CfgDeps, RefreshMode};
 use std::sync::Arc;
 use tokio;
 
 pub async fn common_test(
-    foo_sfl_cfg_info: FooASflCfgInfo,
-    bar_bf_cfg_info: BarABfCfgInfo,
+    foo_sfl_cfg_src: fn() -> Arc<FooASflCfgInfo>,
+    bar_bf_cfg_src: fn() -> Arc<BarABfCfgInfo>,
 ) -> Option<String> {
     CfgDeps::set(
         &FOO_A_SFL_CFG_DEPS,
-        move || Arc::new(foo_sfl_cfg_info.clone()),
+        foo_sfl_cfg_src,
+        RefreshMode::NoRefresh,
         FooASflDeps {
             bar_a_bf: box_pin_async_fn(bar_a_bf),
         },
@@ -20,7 +21,8 @@ pub async fn common_test(
 
     CfgDeps::set(
         &BAR_A_BF_CFG_DEPS,
-        move || Arc::new(bar_bf_cfg_info.clone()),
+        bar_bf_cfg_src,
+        RefreshMode::NoRefresh,
         (),
     );
 

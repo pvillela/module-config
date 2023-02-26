@@ -10,6 +10,7 @@ pub struct FooASflCfgInfo {
     pub b: i32,
 }
 
+#[derive(Clone)]
 pub struct FooASflDeps {
     pub bar_a_bf: BoxPinFn<u64, String>,
 }
