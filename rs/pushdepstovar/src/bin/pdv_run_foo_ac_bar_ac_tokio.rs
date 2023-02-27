@@ -1,38 +1,41 @@
-use crate::config::refresh_app_configuration;
-use crate::fs::foo_a_sfl;
-use crate::fs::FooAIn;
 use futures::future::join_all;
-use std::time::Duration;
+use pushdepstovar::fs::foo_ac_sfl;
+use pushdepstovar::fs::FooAcIn;
 use std::time::SystemTime;
 use tokio;
-use tokio::time::sleep;
 
-pub async fn run(sleep_factor: u64, repeats: usize) {
+#[tokio::main]
+async fn main() {
+    println!("===== pdv_pdv_run_foo_ac_bar_ac_tokio =====");
+
+    println!("*** run(0) -- zero sleep time, zero repeats");
+    run(0, 0).await;
+    println!("*** run(10) -- total 300 ms sleep time, zero repeats");
+    run(10, 0).await;
+
+    println!("*** run(0) -- zero sleep time, 99 repeats");
+    run(0, 99).await;
+    println!("*** run(10) -- total 300 ms sleep time, 99 repeats");
+    run(10, 99).await;
+}
+
+async fn run(sleep_factor: u64, repeats: usize) {
     const N: usize = 10_000;
 
     let start_time = SystemTime::now();
     println!("Started at {:?}", start_time);
 
-    let handle_r = tokio::spawn(async move {
-        sleep(Duration::from_millis(25u64 * sleep_factor)).await;
-        refresh_app_configuration();
-        println!(
-            "App configuration refreshed at elapsed time {:?}.",
-            start_time.elapsed()
-        );
-    });
-
     let handles1 = (0..N / 2)
         .map(|_| {
             tokio::spawn(async move {
-                let res = foo_a_sfl(FooAIn {
+                let res = foo_ac_sfl(FooAcIn {
                     sleep_millis: 20u64 * sleep_factor,
                 })
                 .await
                 .res
                 .len();
                 for _ in 0..repeats {
-                    foo_a_sfl(FooAIn { sleep_millis: 0 }).await;
+                    foo_ac_sfl(FooAcIn { sleep_millis: 0 }).await;
                 }
                 res
             })
@@ -42,24 +45,19 @@ pub async fn run(sleep_factor: u64, repeats: usize) {
     let handles2: Vec<_> = (0..N / 2)
         .map(|_| {
             tokio::spawn(async move {
-                let res = foo_a_sfl(FooAIn {
+                let res = foo_ac_sfl(FooAcIn {
                     sleep_millis: 30u64 * sleep_factor,
                 })
                 .await
                 .res
                 .len();
                 for _ in 0..repeats {
-                    foo_a_sfl(FooAIn { sleep_millis: 0 }).await;
+                    foo_ac_sfl(FooAcIn { sleep_millis: 0 }).await;
                 }
                 res
             })
         })
         .collect();
-
-    let _ = handle_r
-        .await
-        .ok()
-        .expect("app configuration refresh task failed");
 
     let res1: usize = join_all(handles1)
         .await
@@ -79,7 +77,7 @@ pub async fn run(sleep_factor: u64, repeats: usize) {
     );
 
     println!(
-        "Ended at {:?}, with averages {:?} (expected averages = (65, 73) for refreshable, non-zero sleep cases)",
+        "Ended at {:?}, with averages {:?} (expected averages = (91, 91))",
         start_time.elapsed(),
         averages
     );
