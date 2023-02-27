@@ -1,6 +1,6 @@
 use once_cell::sync::OnceCell;
 use std::sync::Arc;
-use std::time::{Duration, SystemTime};
+use std::time::{Duration, Instant};
 
 use super::type_name;
 
@@ -8,7 +8,7 @@ use super::type_name;
 pub struct CfgSrc<T: 'static> {
     cache_data: Arc<T>,
     refresh_mode: RefreshMode,
-    last_updated: SystemTime,
+    last_updated: Instant,
     src: fn() -> Arc<T>,
 }
 
@@ -17,17 +17,16 @@ impl<T> CfgSrc<T> {
         CfgSrc {
             cache_data: src(),
             refresh_mode,
-            last_updated: SystemTime::now(),
+            last_updated: Instant::now(),
             src,
         }
     }
 
     fn get(&mut self) -> Arc<T> {
         if let RefreshMode::Refreshable(cache_ttl) = self.refresh_mode {
-            if let Ok(elapsed) = self.last_updated.elapsed() {
-                if elapsed > cache_ttl {
-                    self.cache_data = (self.src)();
-                }
+            let elapsed = self.last_updated.elapsed();
+            if elapsed > cache_ttl {
+                self.cache_data = (self.src)();
             }
         }
         self.cache_data.clone()

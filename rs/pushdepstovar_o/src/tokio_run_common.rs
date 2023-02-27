@@ -3,14 +3,14 @@ use crate::fs::foo_a_sfl;
 use crate::fs::FooAIn;
 use futures::future::join_all;
 use std::time::Duration;
-use std::time::SystemTime;
+use std::time::Instant;
 use tokio;
 use tokio::time::sleep;
 
 pub async fn run(sleep_factor: u64, repeats: usize) {
     const N: usize = 10_000;
 
-    let start_time = SystemTime::now();
+    let start_time = Instant::now();
     println!("Started at {:?}", start_time);
 
     let handle_r = tokio::spawn(async move {

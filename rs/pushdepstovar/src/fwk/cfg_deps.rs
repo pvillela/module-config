@@ -3,7 +3,7 @@ use core::panic;
 use once_cell::sync::OnceCell;
 use std::ops::Deref;
 use std::sync::Arc;
-use std::time::{Duration, SystemTime};
+use std::time::{Duration, Instant};
 
 use super::type_name;
 
@@ -19,7 +19,7 @@ pub enum RefreshMode {
 
 #[derive(Clone)]
 struct Cache<T> {
-    last_refresh: SystemTime,
+    last_refresh: Instant,
     value: T,
 }
 
@@ -72,19 +72,18 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
         G: 'static + Fn(&S) -> T + Send + Sync,
     {
         let cache_cell = ArcSwap::new(Arc::new(Cache {
-            last_refresh: SystemTime::now(),
+            last_refresh: Instant::now(),
             value: Arc::new(g(f().deref())),
         }));
 
         let h = move || {
             if let RefreshMode::Refreshable(cache_ttl) = refresh_mode {
-                if let Ok(elapsed) = cache_cell.load().last_refresh.elapsed() {
-                    if elapsed > cache_ttl {
-                        cache_cell.store(Arc::new(Cache {
-                            last_refresh: SystemTime::now(),
-                            value: Arc::new(g(f().deref())),
-                        }));
-                    }
+                let elapsed = cache_cell.load().last_refresh.elapsed();
+                if elapsed > cache_ttl {
+                    cache_cell.store(Arc::new(Cache {
+                        last_refresh: Instant::now(),
+                        value: Arc::new(g(f().deref())),
+                    }));
                 }
             }
 

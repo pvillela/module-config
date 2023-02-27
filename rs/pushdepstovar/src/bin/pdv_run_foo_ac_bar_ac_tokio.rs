@@ -1,7 +1,7 @@
 use futures::future::join_all;
 use pushdepstovar::fs::foo_ac_sfl;
 use pushdepstovar::fs::FooAcIn;
-use std::time::SystemTime;
+use std::time::Instant;
 use tokio;
 
 #[tokio::main]
@@ -22,7 +22,7 @@ async fn main() {
 async fn run(sleep_factor: u64, repeats: usize) {
     const N: usize = 10_000;
 
-    let start_time = SystemTime::now();
+    let start_time = Instant::now();
     println!("Started at {:?}", start_time);
 
     let handles1 = (0..N / 2)
