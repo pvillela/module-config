@@ -10,13 +10,13 @@ The key considerations when designing/selecting a configuration framework are:
 - Unit testing ease -- the configuration approach and framework should facilitate and not get in the way of unit testing.
 - Ease of use -- the configuration approach should be easy to adopt and use in the application code.
 
-There are three main configuration approaches:
+There are three main kinds of configuration approach:
 
 - *pull*
 - *push-to-variable*
 - *push-to-function*
 
-### _Pull_ approach
+### _Pull_ approaches
 
 #### *Naive pull*
 
@@ -25,20 +25,48 @@ There are three main configuration approaches:
 - This approach inevitably causes dependencies to be hard-wired and also introduces a dependency of all configurable modules and functions on the global application configuration source.
 - Is often implemented in a simplistic way that exacerbates the above-mentioned dependencies, makes it harder to structure and control configuration information, and makes it hard to unit test modules.
 
-#### *Pull-with-push-override*
+#### *Pull config, with push override*
 
-- The naive pull approach can be refined to yield a configuration approach that is easy to use and facilitates module unit testing. Ease of unit testing is comparable to that of the *push-to-file* approach.
-- This involves constructing a file-level configuration object, used by functions defined in the file, that pulls in global application configuration but also allows configuration information to be injected for unit testing.
-- When unit testing with this approach, configuration information must be pushed to each dependency. 
+- The naive pull approach can be refined to yield a configuration approach that is easy to use and facilitates unit testing of modules with respect to configuration. Ease of unit testing is comparable to that of the *push-to-variable* approach.
+- This involves constructing one or more module-level configuration variables, used by functions defined in the module, that pull in global application configuration but also allow configuration information to be injected for unit testing.
+- When unit testing with this approach, configuration information must be pushed for each dependency. 
 
-### *Push-to-variable* approach
+#### *Pull config and dependencies, with push override*
 
-- Each configurable module has a top-level variable that can be set with configuration information and which is accessed by functions in the file. For example a module can have an exported function `setConfig(configData)` that is called by application initialization logic to set the aforementioned top-level variable.
+- The above approach can be extended to include the pulling of dependencies by having the module-level variables contain both the configuration source and the references to dependencies.
+- This is a hybrid of the above approach with the *Push config and dependencies to variable* approach below.
+- This works around the hard-wiring of dependencies and provides flexibility for unit testing of modules separately from their dependencies.
+- When unit testing with this approach, both configuration information and dependencies are pushed to the module-level objects.
+- On balance, this is the most practical of the approaches, as it combines ease of use with full unit testing control.
+
+##### *Workflow considerations*
+
+To promote a natural design workflow that starts with service flow modules and later defines modules for the other stereotypes, the following steps should be followed:
+
+- Start by defining each service flow.
+- For each service flow, define its dependencies as functional interfaces. 
+- The service flow's module-level configuration object is initially implemented as the result of ***todo*** function(s).
+- Once the service flow's dependencies are defined in their respective modules, import the dependencies and replace the corresponding *todo* functions with the imports.
+- At any time, the service flow can be unit tested by using the ability to push overriding configuration source and dependencies. 
+- Subflows as well as Business functions that compose other business functions can follow a similar process to the above.
+
+### *Push to variable* approaches
+
+#### *Push config to variable* 
+
+- Each configurable module has top-level variables that can be set with configuration information and which are accessed by functions in the file. For example a module can have an exported function `setConfig(configData)` that is called by application initialization logic to set the aforementioned top-level variable.
 - This approach inevitably causes dependencies to be hard-wired.
-- The *push-to-file* approach requires a few more files, and a bit more work, but it avoids a direct dependence on a global application configuration source. It naturally enables unit testing by allowing configuration information to be pushed to files. 
+- The *Push config to variable* approach requires a few more files, and a bit more work, but it avoids a direct dependence on a global application configuration source. It naturally enables unit testing of modules with respect to configuration by allowing configuration information to be pushed to the modules. 
 - When unit testing with this approach, configuration information must be pushed to each dependency. 
 
-- Using this approach for modules with top-level variables that depend on configuration information leads to circular dependencies and the use of uninitialized variables. This is because, during initialization, the module/package to be configured is loaded so that its exported configuration function can be called by the initialization logic but, as the module/package to be configured is loaded, its top-level variables are initialized and that (by assumption) requires the configuration information that has not yet been injected into the module/package. This problem can be solved by moving top-level variables that depend on configuration information to a separate module/package and having those variables reference the top-level configuration variable in the original module/package.
+
+*Note: In some languages, including TypeScript, using this approach for modules with other top-level variables that depend on configuration information can lead to circular dependencies and the use of uninitialized variables. In the case of TypeScript, this is because, during initialization, the module/package to be configured is loaded so that its exported configuration function can be called by the initialization logic but, as the module/package to be configured is loaded, its top-level variables are initialized and that (by assumption) require the configuration information that has not yet been injected into the module/package. This problem can be solved by moving other top-level variables that depend on configuration information to a separate module/package and having those variables reference the top-level configuration variable in the original module/package.*
+
+#### *Push config and dependencies to variable*
+
+- The above approach can be extended to include the pushing of dependencies by having the module-level variables contain both the configuration source and the references to dependencies.
+- This works around the hard-wiring of dependencies and provides flexibility for unit testing of modules separately from their dependencies.
+- When unit testing a module with this approach, both configuration information and dependencies are pushed to the module-level variables.
 
 ### **_Push-to-function_** approach
 

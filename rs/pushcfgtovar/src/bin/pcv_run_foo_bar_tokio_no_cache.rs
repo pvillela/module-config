@@ -1,7 +1,7 @@
 use futures::future::join_all;
-use pushtovar::config::refresh_app_configuration;
-use pushtovar::fs::foo_sfl;
-use pushtovar::startup::init_no_cache;
+use pushcfgtovar::config::refresh_app_configuration;
+use pushcfgtovar::fs::foo_sfl;
+use pushcfgtovar::startup::init_no_cache;
 use std::time::Duration;
 use std::time::SystemTime;
 use tokio;

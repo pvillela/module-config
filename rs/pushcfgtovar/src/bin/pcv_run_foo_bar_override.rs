@@ -1,6 +1,6 @@
-use pushtovar::config::refresh_app_configuration;
-use pushtovar::fs::{foo_sfl, BarBfCfgInfo, FooSflCfgInfo, BAR_BF_CFG_SRC, FOO_SFL_CFG_SRC};
-use pushtovar::fwk::update_cfg_src_with_fn;
+use pushcfgtovar::config::refresh_app_configuration;
+use pushcfgtovar::fs::{foo_sfl, BarBfCfgInfo, FooSflCfgInfo, BAR_BF_CFG_SRC, FOO_SFL_CFG_SRC};
+use pushcfgtovar::fwk::update_cfg_src_with_fn;
 use std::sync::Arc;
 use std::thread;
 

@@ -779,11 +779,21 @@ dependencies = [
 ]
 
 [[package]]
-name = "pullwithpushoverride"
+name = "pullcfgwithoverride"
 version = "0.1.0"
 dependencies = [
  "arc-swap",
  "once_cell",
+]
+
+[[package]]
+name = "pushcfgtovar"
+version = "0.1.0"
+dependencies = [
+ "arc-swap",
+ "futures",
+ "once_cell",
+ "tokio",
 ]
 
 [[package]]
@@ -818,16 +828,6 @@ version = "0.1.0"
 dependencies = [
  "arc-swap",
  "once_cell",
-]
-
-[[package]]
-name = "pushtovar"
-version = "0.1.0"
-dependencies = [
- "arc-swap",
- "futures",
- "once_cell",
- "tokio",
 ]
 
 [[package]]

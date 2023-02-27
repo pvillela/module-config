@@ -1,17 +1,17 @@
-use pushtovar::config::refresh_app_configuration;
-use pushtovar::fs::foo_sfl;
-use pushtovar::startup::init_with_cache;
+use pushcfgtovar::config::refresh_app_configuration;
+use pushcfgtovar::fs::foo_sfl;
+use pushcfgtovar::startup::init_no_cache;
 use std::thread;
 
 fn main() {
-    init_with_cache();
+    init_no_cache();
 
     let handle = thread::spawn(move || foo_sfl());
     let res = handle.join().unwrap();
     println!("{}", res);
 
     refresh_app_configuration();
-    println!("App configuration refreshed -- there should be no difference in output.");
+    println!("App configuration refreshed -- output should be different.");
 
     let handle = thread::spawn(move || foo_sfl());
     let res = handle.join().unwrap();
