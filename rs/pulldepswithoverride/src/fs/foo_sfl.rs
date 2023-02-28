@@ -12,6 +12,7 @@ pub struct FooSflCfgInfo {
     pub b: i32,
 }
 
+#[derive(Clone)]
 pub struct FooSflDeps {
     pub bar_bf: fn() -> String,
 }

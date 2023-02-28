@@ -2,8 +2,7 @@ use pulldepswithoverride::fs::{
     bar_a_bf, foo_a_sfl, BarABfCfgInfo, FooAIn, FooASflCfgInfo, FooASflDeps, BAR_A_BF_CFG_DEPS,
     FOO_A_SFL_CFG_DEPS,
 };
-use pulldepswithoverride::fwk::{box_pin_async_fn, CfgDeps};
-use std::sync::Arc;
+use pulldepswithoverride::fwk::{box_pin_async_fn, CfgDeps, RefreshMode};
 use tokio;
 
 pub async fn common_test(
@@ -12,7 +11,8 @@ pub async fn common_test(
 ) -> Option<String> {
     CfgDeps::set(
         &FOO_A_SFL_CFG_DEPS,
-        move || Arc::new(foo_sfl_cfg_info.clone()),
+        move || foo_sfl_cfg_info.clone().into(),
+        RefreshMode::NoRefresh,
         FooASflDeps {
             bar_a_bf: box_pin_async_fn(bar_a_bf),
         },
@@ -20,7 +20,8 @@ pub async fn common_test(
 
     CfgDeps::set(
         &BAR_A_BF_CFG_DEPS,
-        move || Arc::new(bar_bf_cfg_info.clone()),
+        move || bar_bf_cfg_info.clone().into(),
+        RefreshMode::NoRefresh,
         (),
     );
 

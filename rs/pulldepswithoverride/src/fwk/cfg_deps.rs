@@ -1,11 +1,13 @@
 use arc_swap::ArcSwap;
 use once_cell::sync::Lazy;
+use std::ops::Deref;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-pub struct CfgDeps<T: 'static, U: 'static> {
-    src: Box<dyn 'static + Fn() -> Arc<T> + Send + Sync>,
-    cache: ArcSwap<Cache<T>>,
+pub struct CfgDeps<T: 'static, U: 'static + Clone> {
+    src: Arc<dyn 'static + Fn() -> Arc<T> + Send + Sync>,
+    refresh_mode: RefreshMode,
+    cache: ArcSwap<Option<Cache<T>>>,
     deps: U,
 }
 
@@ -15,69 +17,55 @@ pub enum RefreshMode {
     Refreshable(Duration),
 }
 
-#[derive(Clone)]
-struct InnerCache<T> {
+#[derive(Debug, Clone)]
+struct Cache<T> {
     last_refresh: Instant,
     value: Arc<T>,
 }
 
-#[derive(Clone)]
-struct Cache<T> {
-    refresh_mode: RefreshMode,
-    inner: Option<InnerCache<T>>,
-}
-
-impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
+impl<T: 'static + std::fmt::Debug + Clone + Send + Sync, U: 'static + Clone> CfgDeps<T, U> {
     pub fn new(
         src: impl 'static + Fn() -> Arc<T> + Send + Sync,
         refresh_mode: RefreshMode,
         deps: U,
     ) -> Arc<Self> {
         CfgDeps {
-            src: Box::new(src),
-            cache: ArcSwap::new(
-                Cache {
-                    refresh_mode,
-                    inner: None,
-                }
-                .into(),
-            ),
+            src: Arc::new(src),
+            refresh_mode,
+            cache: ArcSwap::new(None.into()),
             deps,
         }
         .into()
     }
 
-    pub fn cfg(&self) -> Arc<T> {
-        let cache = self.cache.load();
-        match cache.refresh_mode {
-            RefreshMode::NoRefresh => (self.src)(),
-            RefreshMode::Refreshable(cache_ttl) => {
-                let refresh = move || -> Arc<T> {
-                    let cfg_value = (self.src)();
-                    let new_inner = InnerCache {
-                        last_refresh: Instant::now(),
-                        value: cfg_value,
-                    };
-                    let new_cache = Cache {
-                        refresh_mode: cache.refresh_mode,
-                        inner: Some(new_inner),
-                    };
-                    self.cache.store(new_cache.into());
-                    cfg_value
-                };
+    fn refresh(&self) -> Arc<T> {
+        let cfg_value = (self.src)();
+        let new_cache = Cache {
+            last_refresh: Instant::now(),
+            value: cfg_value.clone(),
+        };
+        self.cache.store(Some(new_cache).into());
+        cfg_value
+    }
 
-                match cache.inner {
-                    Some(inner) => {
-                        let elapsed = inner.last_refresh.elapsed();
-                        if elapsed > cache_ttl {
-                            refresh()
-                        } else {
-                            inner.value
-                        }
+    pub fn cfg(&self) -> Arc<T> {
+        let cache_as = &self.cache;
+        let cache = &*cache_as.load().clone();
+        match &cache {
+            Some(cache) => {
+                let use_cached = match self.refresh_mode {
+                    RefreshMode::NoRefresh => true,
+                    RefreshMode::Refreshable(cache_ttl) => {
+                        cache.last_refresh.elapsed() <= cache_ttl
                     }
-                    None => refresh(),
+                };
+                if use_cached {
+                    cache.value.clone()
+                } else {
+                    self.refresh()
                 }
             }
+            None => self.refresh(),
         }
     }
 
@@ -95,10 +83,10 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
         Self::new(src, refresh_mode, deps)
     }
 
-    pub fn get(mod_cfg_deps: &Lazy<ArcSwap<CfgDeps<T, U>>>) -> (Arc<T>, &U) {
-        let cfg_deps = mod_cfg_deps.load();
-        let cfg = (cfg_deps.src)();
-        let deps = &cfg_deps.deps;
+    pub fn get(mod_cfg_deps: &Lazy<ArcSwap<CfgDeps<T, U>>>) -> (Arc<T>, U) {
+        let cfg_deps = mod_cfg_deps.deref().load();
+        let cfg = cfg_deps.cfg();
+        let deps = cfg_deps.deps.clone();
         (cfg, deps)
     }
 
@@ -117,8 +105,17 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
         mod_cfg_deps: &Lazy<ArcSwap<CfgDeps<T, U>>>,
         refresh_mode: RefreshMode,
     ) {
-        let cfg_deps = mod_cfg_deps.load();
-        Self::set(mod_cfg_deps, cfg_deps.src, refresh_mode, cfg_deps.deps)
+        let cfg_deps = mod_cfg_deps.deref().load();
+        let cache_arc = cfg_deps.cache.load().clone();
+        mod_cfg_deps.store(
+            CfgDeps {
+                src: cfg_deps.src.clone(),
+                refresh_mode,
+                cache: ArcSwap::new(cache_arc),
+                deps: cfg_deps.deps.clone(),
+            }
+            .into(),
+        );
     }
 
     /// Composes an application info source f with an adapter g for a particular module, then

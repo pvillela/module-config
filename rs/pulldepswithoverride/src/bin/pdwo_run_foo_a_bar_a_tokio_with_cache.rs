@@ -1,10 +1,14 @@
-use pulldepswithoverride::startup::init_a_no_refresh;
-use pulldepswithoverride::tokio_run_common::run;
+use pulldepswithoverride::{
+    fs::{BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS},
+    fwk::{CfgDeps, RefreshMode},
+    tokio_run_common::run,
+};
 use tokio;
 
 #[tokio::main]
 async fn main() {
-    init_a_no_refresh();
+    CfgDeps::update_refresh_mode(&FOO_SFL_CFG_DEPS, RefreshMode::NoRefresh);
+    CfgDeps::update_refresh_mode(&BAR_BF_CFG_DEPS, RefreshMode::NoRefresh);
 
     println!("===== pdv_run_foo_a_bar_a_tokio_no_cache =====");
 

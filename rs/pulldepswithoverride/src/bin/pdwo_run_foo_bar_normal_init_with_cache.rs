@@ -1,10 +1,11 @@
 use pulldepswithoverride::config::refresh_app_configuration;
-use pulldepswithoverride::fs::foo_sfl;
-use pulldepswithoverride::startup::init_no_refresh;
+use pulldepswithoverride::fs::{foo_sfl, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS};
+use pulldepswithoverride::fwk::{CfgDeps, RefreshMode};
 use std::thread;
 
 fn main() {
-    init_no_refresh();
+    CfgDeps::update_refresh_mode(&FOO_SFL_CFG_DEPS, RefreshMode::NoRefresh);
+    CfgDeps::update_refresh_mode(&BAR_BF_CFG_DEPS, RefreshMode::NoRefresh);
 
     let handle = thread::spawn(move || foo_sfl());
     let res = handle.join().unwrap();
