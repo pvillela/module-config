@@ -1,10 +1,9 @@
-use std::time::Duration;
-
+use pdwo_arch::fwk::{CfgDeps, RefreshMode};
 use pulldepswithoverride::{
     fs::{BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS},
-    fwk::{CfgDeps, RefreshMode},
     tokio_run_common::run,
 };
+use std::time::Duration;
 use tokio;
 
 #[tokio::main]

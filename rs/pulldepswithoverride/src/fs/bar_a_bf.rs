@@ -1,9 +1,7 @@
-use crate::{
-    config::{get_app_configuration, AppCfgInfo},
-    fwk::{CfgDeps, RefreshMode},
-};
+use crate::config::{get_app_configuration, AppCfgInfo};
 use arc_swap::ArcSwap;
 use once_cell::sync::Lazy;
+use pdwo_arch::fwk::{CfgDeps, RefreshMode};
 use std::time::Duration;
 use tokio::time::sleep;
 

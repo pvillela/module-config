@@ -1,8 +1,8 @@
+use pdwo_arch::fwk::{CfgDeps, RefreshMode};
 use pulldepswithoverride::config::refresh_app_configuration;
 use pulldepswithoverride::fs::{
     bar_bf, foo_sfl, BarBfCfgInfo, FooSflCfgInfo, FooSflDeps, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS,
 };
-use pulldepswithoverride::fwk::{CfgDeps, RefreshMode};
 use std::sync::Arc;
 use std::thread;
 

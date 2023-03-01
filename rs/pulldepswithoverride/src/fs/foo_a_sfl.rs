@@ -1,10 +1,8 @@
 use super::bar_a_bf;
-use crate::{
-    config::{get_app_configuration, AppCfgInfo},
-    fwk::{box_pin_async_fn, BoxPinFn, CfgDeps, RefreshMode},
-};
+use crate::config::{get_app_configuration, AppCfgInfo};
 use arc_swap::ArcSwap;
 use once_cell::sync::Lazy;
+use pdwo_arch::fwk::{box_pin_async_fn, BoxPinFn, CfgDeps, RefreshMode};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use tokio::time::sleep;
