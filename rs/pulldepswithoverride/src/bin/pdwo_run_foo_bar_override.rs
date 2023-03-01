@@ -1,9 +1,7 @@
+use common::config::refresh_app_configuration;
 use common::fwk::{CfgDeps, RefreshMode};
-use pulldepswithoverride::{
-    config::refresh_app_configuration,
-    fs::{
-        bar_bf, foo_sfl, BarBfCfgInfo, FooSflCfgInfo, FooSflDeps, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS,
-    },
+use pulldepswithoverride::fs::{
+    bar_bf, foo_sfl, BarBfCfgInfo, FooSflCfgInfo, FooSflDeps, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS,
 };
 use std::sync::Arc;
 use std::thread;

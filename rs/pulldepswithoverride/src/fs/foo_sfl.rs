@@ -1,6 +1,6 @@
 use super::bar_bf;
-use crate::config::{get_app_configuration, AppCfgInfo};
 use arc_swap::ArcSwap;
+use common::config::{get_app_configuration, AppCfgInfo};
 use common::fwk::{CfgDeps, RefreshMode};
 use once_cell::sync::Lazy;
 
