@@ -7,8 +7,6 @@ pub use bar_ac_bf::*;
 mod bar_bf;
 pub use bar_bf::*;
 
-pub mod boot;
-
 mod foo_a_sfl;
 pub use foo_a_sfl::*;
 

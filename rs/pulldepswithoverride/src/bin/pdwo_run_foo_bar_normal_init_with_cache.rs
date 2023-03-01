@@ -1,6 +1,8 @@
-use pulldepswithoverride::config::refresh_app_configuration;
-use pulldepswithoverride::fs::{foo_sfl, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS};
-use pulldepswithoverride::fwk::{CfgDeps, RefreshMode};
+use pulldepswithoverride::{
+    config::refresh_app_configuration,
+    fs::{foo_sfl, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS},
+    fwk::{CfgDeps, RefreshMode},
+};
 use std::thread;
 
 fn main() {

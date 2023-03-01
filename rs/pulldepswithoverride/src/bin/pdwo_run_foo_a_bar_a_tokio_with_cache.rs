@@ -3,7 +3,6 @@ use pulldepswithoverride::{
     fwk::{CfgDeps, RefreshMode},
     tokio_run_common::run,
 };
-use tokio;
 
 #[tokio::main]
 async fn main() {

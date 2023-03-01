@@ -1,10 +1,8 @@
 use actix_web::{web, App, HttpServer};
-use pulldepswithoverride::{fs::foo_a_sfl, fwk::handler_of, startup::init_a_refreshable};
+use pulldepswithoverride::{fs::foo_a_sfl, web::handler_of};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    init_a_refreshable();
-
     HttpServer::new(move || {
         let arc_f = handler_of(foo_a_sfl);
         let f = move |i| arc_f(i);

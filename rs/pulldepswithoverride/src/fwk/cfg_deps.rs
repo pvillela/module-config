@@ -4,7 +4,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-pub struct CfgDeps<T: 'static, U: 'static + Clone> {
+pub struct CfgDeps<T, U> {
     src: Arc<dyn 'static + Fn() -> Arc<T> + Send + Sync>,
     refresh_mode: RefreshMode,
     cache: ArcSwap<Option<Cache<T>>>,
@@ -23,7 +23,7 @@ struct Cache<T> {
     value: Arc<T>,
 }
 
-impl<T: 'static + std::fmt::Debug + Clone + Send + Sync, U: 'static + Clone> CfgDeps<T, U> {
+impl<T, U: Clone> CfgDeps<T, U> {
     pub fn new(
         src: impl 'static + Fn() -> Arc<T> + Send + Sync,
         refresh_mode: RefreshMode,

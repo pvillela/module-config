@@ -1,8 +1,6 @@
 use super::bar_a_bf;
-use crate::{
-    config::{get_app_configuration, AppCfgInfo},
-    fwk::{box_pin_async_fn, BoxPinFn, CfgDeps, RefreshMode},
-};
+use crate::config::{get_app_configuration, AppCfgInfo};
+use crate::fwk::{box_pin_async_fn, BoxPinFn, CfgDeps, RefreshMode};
 use arc_swap::ArcSwap;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
