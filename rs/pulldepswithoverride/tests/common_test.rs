@@ -10,7 +10,7 @@ pub async fn common_test(
     foo_sfl_cfg_info: FooSflCfgInfo,
     bar_bf_cfg_info: BarBfCfgInfo,
 ) -> Option<String> {
-    CfgDeps::set(
+    CfgDeps::set_static(
         &FOO_A_SFL_CFG_DEPS,
         move || foo_sfl_cfg_info.clone().into(),
         RefreshMode::NoRefresh,
@@ -19,7 +19,7 @@ pub async fn common_test(
         },
     );
 
-    CfgDeps::set(
+    CfgDeps::set_static(
         &BAR_A_BF_CFG_DEPS,
         move || bar_bf_cfg_info.clone().into(),
         RefreshMode::NoRefresh,

@@ -12,7 +12,7 @@ pub struct FooSflDeps {
 }
 
 pub fn foo_sfl() -> String {
-    let (cfg, FooSflDeps { bar_bf }) = CfgDeps::get(&FOO_SFL_CFG_DEPS);
+    let (cfg, FooSflDeps { bar_bf }) = CfgDeps::get_from_static(&FOO_SFL_CFG_DEPS);
     let a = cfg.a.clone() + "-foo";
     let b = cfg.b + 3;
     format!("fooSfl(): a={}, b={}, bar=({})", a, b, bar_bf())

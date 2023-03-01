@@ -20,7 +20,7 @@ pub struct FooASflDeps {
 pub async fn foo_a_sfl(input: FooIn) -> FooOut {
     let FooIn { sleep_millis } = input;
     sleep(Duration::from_millis(sleep_millis)).await;
-    let (cfg, FooASflDeps { bar_a_bf }) = CfgDeps::get(&FOO_A_SFL_CFG_DEPS);
+    let (cfg, FooASflDeps { bar_a_bf }) = CfgDeps::get_from_static(&FOO_A_SFL_CFG_DEPS);
     let a = cfg.a.clone() + "-foo";
     let b = cfg.b + 3;
     let res = format!("fooSfl(): a={}, b={}, bar=({})", a, b, bar_a_bf(0).await);

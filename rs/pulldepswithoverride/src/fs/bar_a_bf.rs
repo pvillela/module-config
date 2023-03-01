@@ -9,7 +9,7 @@ type BarBfCfgInfo = common::fs_data::BarBfCfgInfo;
 
 pub async fn bar_a_bf(sleep_millis: u64) -> String {
     sleep(Duration::from_millis(sleep_millis)).await;
-    let (cfg, _) = CfgDeps::get(&BAR_A_BF_CFG_DEPS);
+    let (cfg, _) = CfgDeps::get_from_static(&BAR_A_BF_CFG_DEPS);
     let u = cfg.u + 1;
     let v = cfg.v.clone() + "-bar";
     format!("barBf(): u={}, v={}", u, v)

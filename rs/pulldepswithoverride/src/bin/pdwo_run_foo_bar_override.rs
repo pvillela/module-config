@@ -6,7 +6,7 @@ use std::sync::Arc;
 use std::thread;
 
 fn main() {
-    CfgDeps::set(
+    CfgDeps::set_static(
         &FOO_SFL_CFG_DEPS,
         || {
             Arc::new(FooSflCfgInfo {
@@ -18,7 +18,7 @@ fn main() {
         FooSflDeps { bar_bf },
     );
 
-    CfgDeps::set(
+    CfgDeps::set_static(
         &BAR_BF_CFG_DEPS,
         || {
             Arc::new(BarBfCfgInfo {

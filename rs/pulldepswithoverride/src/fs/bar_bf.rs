@@ -6,7 +6,7 @@ use once_cell::sync::Lazy;
 type BarBfCfgInfo = common::fs_data::BarBfCfgInfo;
 
 pub fn bar_bf() -> String {
-    let (cfg, _) = CfgDeps::get(&BAR_BF_CFG_DEPS);
+    let (cfg, _) = CfgDeps::get_from_static(&BAR_BF_CFG_DEPS);
     let u = cfg.u + 1;
     let v = cfg.v.clone() + "-bar";
     format!("barBf(): u={}, v={}", u, v)

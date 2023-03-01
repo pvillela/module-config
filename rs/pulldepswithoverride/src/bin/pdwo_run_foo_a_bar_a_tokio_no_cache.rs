@@ -8,12 +8,12 @@ use tokio;
 
 #[tokio::main]
 async fn main() {
-    CfgDeps::update_refresh_mode(
+    CfgDeps::update_static_refresh_mode(
         &FOO_SFL_CFG_DEPS,
         RefreshMode::Refreshable(Duration::from_millis(0)),
     );
 
-    CfgDeps::update_refresh_mode(
+    CfgDeps::update_static_refresh_mode(
         &BAR_BF_CFG_DEPS,
         RefreshMode::Refreshable(Duration::from_millis(0)),
     );

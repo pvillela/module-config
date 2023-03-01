@@ -83,17 +83,21 @@ impl<T, U: Clone> CfgDeps<T, U> {
         Self::new(src, refresh_mode, deps)
     }
 
-    pub fn get(mod_cfg_deps: &Lazy<ArcSwap<CfgDeps<T, U>>>) -> (Arc<T>, U) {
-        let cfg_deps = mod_cfg_deps.deref().load();
-        let cfg = cfg_deps.cfg();
-        let deps = cfg_deps.deps.clone();
+    pub fn get(&self) -> (Arc<T>, U) {
+        let cfg = self.cfg();
+        let deps = self.deps.clone();
         (cfg, deps)
+    }
+
+    pub fn get_from_static(mod_cfg_deps: &ArcSwap<CfgDeps<T, U>>) -> (Arc<T>, U) {
+        let cfg_deps = mod_cfg_deps.deref().load();
+        cfg_deps.get()
     }
 
     /// Sets a static module CfgDeps with a configuration info source, refresh mode, and a dependencies data
     /// structure.
-    pub fn set(
-        mod_cfg_deps: &Lazy<ArcSwap<CfgDeps<T, U>>>,
+    pub fn set_static(
+        mod_cfg_deps: &ArcSwap<CfgDeps<T, U>>,
         cfg_src_fn: impl 'static + Fn() -> Arc<T> + Send + Sync,
         refresh_mode: RefreshMode,
         deps: U,
@@ -101,7 +105,20 @@ impl<T, U: Clone> CfgDeps<T, U> {
         mod_cfg_deps.store(CfgDeps::new(cfg_src_fn, refresh_mode, deps));
     }
 
-    pub fn update_refresh_mode(
+    // pub fn update_refresh_mode(&self, refresh_mode: RefreshMode) {
+    //     let cache_arc = self.cache.load().clone();
+    //     mod_cfg_deps.store(
+    //         CfgDeps {
+    //             src: cfg_deps.src.clone(),
+    //             refresh_mode,
+    //             cache: ArcSwap::new(cache_arc),
+    //             deps: cfg_deps.deps.clone(),
+    //         }
+    //         .into(),
+    //     );
+    // }
+
+    pub fn update_static_refresh_mode(
         mod_cfg_deps: &Lazy<ArcSwap<CfgDeps<T, U>>>,
         refresh_mode: RefreshMode,
     ) {
@@ -121,7 +138,7 @@ impl<T, U: Clone> CfgDeps<T, U> {
     /// Composes an application info source f with an adapter g for a particular module, then
     /// sets it and the refresh mode and deps data structure to the static module CfgDeps.
     pub fn set_with_cfg_adapter<S, F, G>(
-        mod_cfg_deps: &Lazy<ArcSwap<CfgDeps<T, U>>>,
+        mod_cfg_deps: &ArcSwap<CfgDeps<T, U>>,
         f: F,
         g: G,
         refresh_mode: RefreshMode,
