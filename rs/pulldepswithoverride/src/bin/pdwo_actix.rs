@@ -1,5 +1,6 @@
 use actix_web::{web, App, HttpServer};
-use pulldepswithoverride::{fs::foo_a_sfl, web::handler_of};
+use common::web::handler_of;
+use pulldepswithoverride::fs::foo_a_sfl;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

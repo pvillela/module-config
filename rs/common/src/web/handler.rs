@@ -1,28 +1,6 @@
-use std::sync::Arc;
-
-use crate::fs::{foo_a_sfl, FooAIn, FooAOut};
-use actix_web::{
-    body::BoxBody, http::header::ContentType, web, HttpRequest, HttpResponse, Responder,
-};
+use actix_web::{body::BoxBody, http::header::ContentType, web, HttpResponse, Responder};
 use futures::Future;
-
-impl Responder for FooAOut {
-    type Body = BoxBody;
-
-    fn respond_to(self, _req: &HttpRequest) -> HttpResponse<Self::Body> {
-        common_respond_to(self)
-    }
-}
-
-// pub async fn foo_handler(info: web::Json<FooAIn>) -> FooAOut {
-//     let input = info.into_inner();
-//     foo_a_sfl(input).await
-// }
-
-pub async fn foo_handler(info: web::Json<FooAIn>) -> FooAOut {
-    let input = info.into_inner();
-    foo_a_sfl(input).await
-}
+use std::sync::Arc;
 
 pub fn common_respond_to<T: serde::Serialize>(t: T) -> HttpResponse<BoxBody> {
     let body = serde_json::to_string(&t).unwrap();
@@ -35,7 +13,6 @@ pub fn common_respond_to<T: serde::Serialize>(t: T) -> HttpResponse<BoxBody> {
 
 pub fn handler_of<S: 'static + serde::Deserialize<'static>, T: Responder + Send + Sync, Fut>(
     f: impl Fn(S) -> Fut + 'static + Send + Sync,
-    // f: fn(S) -> Fut,
 ) -> Arc<dyn Fn(web::Json<S>) -> Fut + Send + Sync + 'static>
 where
     Fut: 'static + Future<Output = T> + Send + Sync,
