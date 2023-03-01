@@ -1,6 +1,5 @@
 use futures::future::join_all;
-use pulldepswithoverride::fs::foo_ac_sfl;
-use pulldepswithoverride::fs::FooAcIn;
+use pulldepswithoverride::fs::{foo_ac_sfl, FooAcIn};
 use std::time::Instant;
 use tokio;
 

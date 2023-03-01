@@ -1,7 +1,7 @@
+use pdwo_arch::fwk::{CfgDeps, RefreshMode};
 use pulldepswithoverride::{
     config::refresh_app_configuration,
     fs::{foo_sfl, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS},
-    fwk::{CfgDeps, RefreshMode},
 };
 use std::thread;
 use std::time::Duration;

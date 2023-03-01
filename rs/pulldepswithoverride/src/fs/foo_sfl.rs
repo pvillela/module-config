@@ -1,8 +1,8 @@
 use super::bar_bf;
 use crate::config::{get_app_configuration, AppCfgInfo};
-use crate::fwk::{CfgDeps, RefreshMode};
 use arc_swap::ArcSwap;
 use once_cell::sync::Lazy;
+use pdwo_arch::fwk::{CfgDeps, RefreshMode};
 
 #[derive(Debug, Clone)]
 pub struct FooSflCfgInfo {
