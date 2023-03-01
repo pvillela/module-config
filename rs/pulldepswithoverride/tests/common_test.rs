@@ -1,4 +1,4 @@
-use pdwo_arch::fwk::{box_pin_async_fn, CfgDeps, RefreshMode};
+use common::fwk::{box_pin_async_fn, CfgDeps, RefreshMode};
 use pulldepswithoverride::fs::{
     bar_a_bf, foo_a_sfl, BarABfCfgInfo, FooAIn, FooASflCfgInfo, FooASflDeps, BAR_A_BF_CFG_DEPS,
     FOO_A_SFL_CFG_DEPS,

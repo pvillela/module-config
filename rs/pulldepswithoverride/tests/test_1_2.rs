@@ -1,6 +1,6 @@
-mod common;
+mod common_test;
 
-use common::common_test;
+use common_test::common_test;
 use pulldepswithoverride::fs::{BarABfCfgInfo, FooASflCfgInfo};
 use tokio;
 
