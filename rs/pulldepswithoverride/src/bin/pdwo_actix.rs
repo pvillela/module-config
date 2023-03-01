@@ -1,5 +1,5 @@
 use actix_web::{web, App, HttpServer};
-use pulldepswithoverride::{fs::foo_a_sfl, fwk::handler_of, startup::init_a_refreshable};
+use pulldepswithoverride::{fs::foo_a_sfl, startup::init_a_refreshable, web::handler_of};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

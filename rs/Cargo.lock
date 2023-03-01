@@ -740,6 +740,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d01a5bd0424d00070b0098dd17ebca6f961a959dead1dbcbbbc1d1cd8d3deeba"
 
 [[package]]
+name = "pdwo_arch"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "arc-swap",
+ "futures",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "percent-encoding"
 version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -794,6 +807,7 @@ dependencies = [
  "arc-swap",
  "futures",
  "once_cell",
+ "pdwo_arch",
  "serde",
  "serde_json",
  "tokio",
