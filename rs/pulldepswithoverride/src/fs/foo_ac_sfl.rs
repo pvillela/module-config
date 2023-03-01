@@ -1,4 +1,3 @@
-use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -10,16 +9,9 @@ pub struct FooAcSflCfgInfo {
     pub b: i32,
 }
 
-#[derive(Deserialize)]
-pub struct FooAcIn {
-    pub sleep_millis: u64,
-}
+type FooAcIn = common::fs_data::FooAIn;
 
-#[allow(unused)]
-#[derive(Serialize)]
-pub struct FooAcOut {
-    pub res: String,
-}
+type FooAcOut = common::fs_data::FooAOut;
 
 pub static FOO_AC_SFL_CFG_INFO: FooAcSflCfgInfo = FooAcSflCfgInfo {
     a: "constant_config_info",

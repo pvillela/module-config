@@ -3,11 +3,7 @@ use common::config::{get_app_configuration, AppCfgInfo};
 use common::fwk::{CfgDeps, RefreshMode};
 use once_cell::sync::Lazy;
 
-#[derive(Debug, Clone)]
-pub struct BarBfCfgInfo {
-    pub u: i32,
-    pub v: String,
-}
+type BarBfCfgInfo = common::fs_data::BarBfCfgInfo;
 
 pub fn bar_bf() -> String {
     let (cfg, _) = CfgDeps::get(&BAR_BF_CFG_DEPS);

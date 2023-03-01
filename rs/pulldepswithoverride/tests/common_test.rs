@@ -1,13 +1,14 @@
+use common::fs_data::BarBfCfgInfo;
+use common::fs_data::{FooAIn, FooSflCfgInfo};
 use common::fwk::{box_pin_async_fn, CfgDeps, RefreshMode};
 use pulldepswithoverride::fs::{
-    bar_a_bf, foo_a_sfl, BarABfCfgInfo, FooAIn, FooASflCfgInfo, FooASflDeps, BAR_A_BF_CFG_DEPS,
-    FOO_A_SFL_CFG_DEPS,
+    bar_a_bf, foo_a_sfl, FooASflDeps, BAR_A_BF_CFG_DEPS, FOO_A_SFL_CFG_DEPS,
 };
 use tokio;
 
 pub async fn common_test(
-    foo_sfl_cfg_info: FooASflCfgInfo,
-    bar_bf_cfg_info: BarABfCfgInfo,
+    foo_sfl_cfg_info: FooSflCfgInfo,
+    bar_bf_cfg_info: BarBfCfgInfo,
 ) -> Option<String> {
     CfgDeps::set(
         &FOO_A_SFL_CFG_DEPS,

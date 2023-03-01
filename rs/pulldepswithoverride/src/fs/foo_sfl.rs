@@ -4,11 +4,7 @@ use common::config::{get_app_configuration, AppCfgInfo};
 use common::fwk::{CfgDeps, RefreshMode};
 use once_cell::sync::Lazy;
 
-#[derive(Debug, Clone)]
-pub struct FooSflCfgInfo {
-    pub a: String,
-    pub b: i32,
-}
+type FooSflCfgInfo = common::fs_data::FooSflCfgInfo;
 
 #[derive(Clone)]
 pub struct FooSflDeps {

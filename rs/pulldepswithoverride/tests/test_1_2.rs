@@ -1,7 +1,8 @@
 mod common_test;
 
+use common::fs_data::BarBfCfgInfo;
+use common::fs_data::FooSflCfgInfo;
 use common_test::common_test;
-use pulldepswithoverride::fs::{BarABfCfgInfo, FooASflCfgInfo};
 use tokio;
 
 mod t1 {
@@ -10,11 +11,11 @@ mod t1 {
     #[tokio::test]
     async fn test1() {
         let res = common_test(
-            FooASflCfgInfo {
+            FooSflCfgInfo {
                 a: "foo_a_test1".to_owned(),
                 b: 1,
             },
-            BarABfCfgInfo {
+            BarBfCfgInfo {
                 u: 11,
                 v: "bar_a_test1".to_owned(),
             },
@@ -36,11 +37,11 @@ mod t2 {
     #[tokio::test]
     async fn test2() {
         let res = common_test(
-            FooASflCfgInfo {
+            FooSflCfgInfo {
                 a: "foo_a_test2".to_owned(),
                 b: 2,
             },
-            BarABfCfgInfo {
+            BarBfCfgInfo {
                 u: 22,
                 v: "bar_a_test2".to_owned(),
             },

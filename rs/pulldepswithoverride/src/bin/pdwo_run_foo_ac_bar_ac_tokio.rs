@@ -1,7 +1,9 @@
 use futures::future::join_all;
-use pulldepswithoverride::fs::{foo_ac_sfl, FooAcIn};
+use pulldepswithoverride::fs::foo_ac_sfl;
 use std::time::Instant;
 use tokio;
+
+type FooAcIn = common::fs_data::FooAIn;
 
 #[tokio::main]
 async fn main() {

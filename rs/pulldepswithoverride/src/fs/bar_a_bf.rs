@@ -5,11 +5,7 @@ use once_cell::sync::Lazy;
 use std::time::Duration;
 use tokio::time::sleep;
 
-#[derive(Debug, Clone)]
-pub struct BarABfCfgInfo {
-    pub u: i32,
-    pub v: String,
-}
+type BarBfCfgInfo = common::fs_data::BarBfCfgInfo;
 
 pub async fn bar_a_bf(sleep_millis: u64) -> String {
     sleep(Duration::from_millis(sleep_millis)).await;
@@ -19,7 +15,7 @@ pub async fn bar_a_bf(sleep_millis: u64) -> String {
     format!("barBf(): u={}, v={}", u, v)
 }
 
-pub static BAR_A_BF_CFG_DEPS: Lazy<ArcSwap<CfgDeps<BarABfCfgInfo, ()>>> = Lazy::new(move || {
+pub static BAR_A_BF_CFG_DEPS: Lazy<ArcSwap<CfgDeps<BarBfCfgInfo, ()>>> = Lazy::new(move || {
     ArcSwap::new(CfgDeps::new_with_cfg_adapter(
         get_app_configuration,
         bar_a_bf_cfg_adapter,
@@ -28,8 +24,8 @@ pub static BAR_A_BF_CFG_DEPS: Lazy<ArcSwap<CfgDeps<BarABfCfgInfo, ()>>> = Lazy::
     ))
 });
 
-fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarABfCfgInfo {
-    BarABfCfgInfo {
+fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
+    BarBfCfgInfo {
         u: app_cfg.y,
         v: app_cfg.x.clone(),
     }
