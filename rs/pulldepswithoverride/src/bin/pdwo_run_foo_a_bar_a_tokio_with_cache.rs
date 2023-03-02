@@ -1,4 +1,4 @@
-use common::fwk::{CfgDepsInnerMut, RefreshMode};
+use common::fwk::{InnerMut, RefreshMode};
 use pulldepswithoverride::{
     fs::{BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS},
     tokio_run_common::run,
@@ -7,8 +7,8 @@ use tokio;
 
 #[tokio::main]
 async fn main() {
-    CfgDepsInnerMut::update_refresh_mode(&FOO_SFL_CFG_DEPS, RefreshMode::NoRefresh);
-    CfgDepsInnerMut::update_refresh_mode(&BAR_BF_CFG_DEPS, RefreshMode::NoRefresh);
+    InnerMut::update_refresh_mode(&FOO_SFL_CFG_DEPS, RefreshMode::NoRefresh);
+    InnerMut::update_refresh_mode(&BAR_BF_CFG_DEPS, RefreshMode::NoRefresh);
 
     println!("===== pdv_run_foo_a_bar_a_tokio_no_cache =====");
 
