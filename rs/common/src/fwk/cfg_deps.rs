@@ -8,7 +8,7 @@ pub struct CfgDepsInnerMut<T, U>(ArcSwap<CfgDepsStd<T, U>>);
 struct CfgDepsStd<T, U> {
     src: Arc<dyn 'static + Fn() -> Arc<T> + Send + Sync>,
     refresh_mode: RefreshMode,
-    cache: Option<Cache<T>>,
+    cache: Cache<T>,
     deps: U,
 }
 
@@ -31,6 +31,9 @@ struct Cache<T> {
 }
 
 pub trait CfgDeps<T: Clone, U: Clone> {
+    /// Returns a pair containing an Arc of the configuration data and the dependencies data structure.
+    /// Although the reference to self is immutable, the receiver may have interior mutability and
+    /// update a configuration data cache as a result of this call.
     fn get(&self) -> (Arc<T>, U);
 
     /// Sets a static module CfgDeps with a configuration info source, refresh mode, and a dependencies data
@@ -52,61 +55,61 @@ pub trait CfgDeps<T: Clone, U: Clone> {
         G: 'static + Fn(&S) -> T + Send + Sync;
 }
 
+pub trait CfgDepsMut<T: Clone, U: Clone>: CfgDeps<T, U> {
+    /// Returns a pair containing an Arc of the configuration data and the dependencies data structure.
+    /// This will return the cached configuration data, without any change to cache state.
+    fn get(&self) -> (Arc<T>, U);
+
+    /// Returns a triple containing an Arc of the configuration data, the dependencies data structure,
+    /// and an indicator of whether it is true that the object was mutated.
+    /// This will return the current configuration data, according to the object's cache refresh policy,
+    /// with a possible change to cache state as a side-effect.
+    fn get_current(&mut self) -> (Arc<T>, U, bool);
+}
+
 impl<T: Clone, U: Clone> CfgDepsStd<T, U> {
     pub fn new(
         src: impl 'static + Fn() -> Arc<T> + Send + Sync,
         refresh_mode: RefreshMode,
         deps: U,
     ) -> Self {
+        let cfg = src();
         CfgDepsStd {
             src: Arc::new(src),
             refresh_mode,
-            cache: None,
+            cache: Cache {
+                last_refresh: Instant::now(),
+                value: cfg,
+            },
             deps,
         }
     }
 
     /// Function to produce a copy of self with a refreshed the cache.
-    pub fn refreshed(&self) -> (Arc<T>, Self) {
-        // let curr_inner = self.0.load();
+    pub fn refresh(&mut self) {
         let cfg_value = (self.src)();
         let cache = Cache {
             last_refresh: Instant::now(),
             value: cfg_value.clone(),
         };
-        (
-            cfg_value,
-            CfgDepsStd {
-                src: self.src.clone(),
-                refresh_mode: self.refresh_mode.clone(),
-                cache: Some(cache),
-                deps: self.deps.clone(),
-            },
-        )
+        self.cache = cache;
     }
 
-    fn cfg(&self) -> (Arc<T>, Option<Self>) {
-        let cache = self.cache.clone();
-        match cache {
-            Some(cache) => {
-                let use_cached = match &self.refresh_mode {
-                    RefreshMode::NoRefresh => true,
-                    RefreshMode::Refreshable(cache_ttl) => {
-                        cache.last_refresh.elapsed() <= *cache_ttl
-                    }
-                };
-                if use_cached {
-                    (cache.value.clone(), None)
-                } else {
-                    let (cfg_value, new_state) = self.refreshed();
-                    (cfg_value, Some(new_state))
-                }
-            }
-            None => {
-                let (cfg_value, new_state) = self.refreshed();
-                (cfg_value, Some(new_state))
+    fn cache_expired(&self) -> bool {
+        if let RefreshMode::Refreshable(cache_ttl) = self.refresh_mode {
+            if self.cache.last_refresh.elapsed() > cache_ttl {
+                return true;
             }
         }
+        false
+    }
+
+    fn cfg(&mut self) -> (Arc<T>, bool) {
+        if !self.cache_expired() {
+            return (self.cache.value.clone(), false);
+        }
+        self.refresh();
+        (self.cache.value.clone(), true)
     }
 
     pub fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode, deps: U) -> Self
@@ -118,30 +121,24 @@ impl<T: Clone, U: Clone> CfgDepsStd<T, U> {
         Self::new(src, refresh_mode, deps)
     }
 
-    pub fn get(&self) -> (Arc<T>, U, Option<CfgDepsStd<T, U>>) {
-        let (cfg, new_state) = self.cfg();
+    pub fn get(&self) -> Arc<T> {
+        self.cache.value.clone()
+    }
+
+    pub fn get_current(&mut self) -> (Arc<T>, U, bool) {
+        let (cfg, mutated) = self.cfg();
         let deps = self.deps.clone();
-        (cfg, deps, new_state)
+        (cfg, deps, mutated)
     }
 }
 
 impl<T: Clone, U: Clone> CfgDepsInnerMut<T, U> {
-    fn set_inner_items(
-        &self,
-        src: Arc<dyn 'static + Fn() -> Arc<T> + Send + Sync>,
-        refresh_mode: RefreshMode,
-        cache: Option<Cache<T>>,
-        deps: U,
-    ) {
-        self.0.store(
-            CfgDepsStd {
-                src,
-                refresh_mode,
-                cache,
-                deps,
-            }
-            .into(),
-        );
+    fn get_inner(&self) -> Guard<Arc<CfgDepsStd<T, U>>> {
+        self.0.load()
+    }
+
+    fn set_inner(&self, inner: CfgDepsStd<T, U>) {
+        self.0.store(Arc::new(inner));
     }
 
     pub fn new(
@@ -149,59 +146,7 @@ impl<T: Clone, U: Clone> CfgDepsInnerMut<T, U> {
         refresh_mode: RefreshMode,
         deps: U,
     ) -> Self {
-        CfgDepsInnerMut(
-            CfgDepsStd {
-                src: Arc::new(src),
-                refresh_mode,
-                cache: None,
-                deps,
-            }
-            .into(),
-        )
-    }
-
-    fn get_inner(&self) -> Guard<Arc<CfgDepsStd<T, U>>> {
-        self.0.load()
-    }
-
-    /// Helper function to refresh the cache and return the cached value. I takes the parameter
-    /// curr_inner which can be obtained from self but is passed in to avoid having to call
-    /// load again on self.0.
-    fn refresh(&self, inner: &Guard<Arc<CfgDepsStd<T, U>>>) -> Arc<T> {
-        // let curr_inner = self.0.load();
-        let cfg_value = (inner.src)();
-        let new_cache = Cache {
-            last_refresh: Instant::now(),
-            value: cfg_value.clone(),
-        };
-        let new_inner = CfgDepsStd {
-            src: inner.src.clone(),
-            refresh_mode: inner.refresh_mode.clone(),
-            cache: Some(new_cache),
-            deps: inner.deps.clone(),
-        };
-        self.0.store(new_inner.into());
-        cfg_value
-    }
-
-    fn cfg(&self, inner: &Guard<Arc<CfgDepsStd<T, U>>>) -> Arc<T> {
-        let cache = &inner.cache;
-        match cache {
-            Some(cache) => {
-                let use_cached = match inner.refresh_mode {
-                    RefreshMode::NoRefresh => true,
-                    RefreshMode::Refreshable(cache_ttl) => {
-                        cache.last_refresh.elapsed() <= cache_ttl
-                    }
-                };
-                if use_cached {
-                    cache.value.clone()
-                } else {
-                    self.refresh(inner)
-                }
-            }
-            None => self.refresh(inner),
-        }
+        CfgDepsInnerMut(CfgDepsStd::new(src, refresh_mode, deps).into())
     }
 
     pub fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode, deps: U) -> Self
@@ -209,18 +154,20 @@ impl<T: Clone, U: Clone> CfgDepsInnerMut<T, U> {
         F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
     {
-        let src = move || Arc::new(g(&f()));
-        Self::new(src, refresh_mode, deps)
+        CfgDepsInnerMut(CfgDepsStd::new_with_cfg_adapter(f, g, refresh_mode, deps).into())
     }
 
     pub fn get(&self) -> (Arc<T>, U) {
-        let inner = self.get_inner();
-        let cfg = self.cfg(&inner);
-        let deps = inner.deps.clone();
+        let inner = &*self.get_inner().clone();
+        let mut inner = inner.clone();
+        let (cfg, deps, mutated) = inner.get_current();
+        if mutated {
+            self.set_inner(inner.clone());
+        }
         (cfg, deps)
     }
 
-    /// Sets a static module CfgDeps with a configuration info source, refresh mode, and a dependencies data
+    /// Updates the receiver with a configuration info source, refresh mode, and a dependencies data
     /// structure.
     pub fn update_all(
         &self,
@@ -228,28 +175,28 @@ impl<T: Clone, U: Clone> CfgDepsInnerMut<T, U> {
         refresh_mode: RefreshMode,
         deps: U,
     ) {
-        self.set_inner_items(Arc::new(cfg_src_fn), refresh_mode, None, deps);
+        let inner = CfgDepsStd::new(cfg_src_fn, refresh_mode, deps);
+        self.set_inner(inner);
     }
 
     pub fn update_refresh_mode(&self, refresh_mode: RefreshMode) {
         let inner = self.get_inner();
-        self.set_inner_items(
-            inner.src.clone(),
+        let new_inner = CfgDepsStd {
+            src: inner.src.clone(),
             refresh_mode,
-            inner.cache.clone(),
-            inner.deps.clone(),
-        );
+            cache: inner.cache.clone(),
+            deps: inner.deps.clone(),
+        };
     }
 
     /// Composes an application info source f with an adapter g for a particular module, then
-    /// sets it and the refresh mode and deps data structure to the static module CfgDeps.
+    /// sets it and the refresh mode and deps data structure to the receiver.
     pub fn update_with_cfg_adapter<S, F, G>(&self, f: F, g: G, refresh_mode: RefreshMode, deps: U)
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
     {
-        let inner = self.get_inner();
-        let src = move || Arc::new(g(&f()));
-        self.set_inner_items(Arc::new(src), refresh_mode, inner.cache.clone(), deps);
+        let inner = CfgDepsStd::new_with_cfg_adapter(f, g, refresh_mode, deps);
+        self.set_inner(inner);
     }
 }
