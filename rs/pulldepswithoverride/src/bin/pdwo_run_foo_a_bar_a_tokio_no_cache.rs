@@ -1,4 +1,4 @@
-use common::fwk::{CfgDeps, RefreshMode};
+use common::fwk::{CfgDepsInnerMut, RefreshMode};
 use pulldepswithoverride::{
     fs::{BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS},
     tokio_run_common::run,
@@ -8,12 +8,12 @@ use tokio;
 
 #[tokio::main]
 async fn main() {
-    CfgDeps::update_static_refresh_mode(
+    CfgDepsInnerMut::update_refresh_mode(
         &FOO_SFL_CFG_DEPS,
         RefreshMode::Refreshable(Duration::from_millis(0)),
     );
 
-    CfgDeps::update_static_refresh_mode(
+    CfgDepsInnerMut::update_refresh_mode(
         &BAR_BF_CFG_DEPS,
         RefreshMode::Refreshable(Duration::from_millis(0)),
     );
