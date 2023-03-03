@@ -1,9 +1,6 @@
-use std::ops::Deref;
-
 use super::bar_bf;
-use arc_swap::ArcSwap;
 use common::config::{get_app_configuration, AppCfgInfo};
-use common::fwk::{CfgDepsInnerMut, CfgDepsMut, CfgDepsStd, InnerMut, RefreshMode};
+use common::fwk::{CfgDepsInnerMut, RefreshMode};
 use once_cell::sync::Lazy;
 
 type FooSflCfgInfo = common::fs_data::FooSflCfgInfo;
@@ -22,12 +19,12 @@ pub fn foo_sfl() -> String {
 
 pub static FOO_SFL_CFG_DEPS: Lazy<CfgDepsInnerMut<FooSflCfgInfo, FooSflDeps>> =
     Lazy::new(move || {
-        ArcSwap::new(CfgDepsInnerMut::new_with_cfg_adapter(
+        CfgDepsInnerMut::new_with_cfg_adapter(
             get_app_configuration,
             foo_sfl_cfg_adapter,
             RefreshMode::NoRefresh,
             FooSflDeps { bar_bf },
-        ))
+        )
     });
 
 fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {

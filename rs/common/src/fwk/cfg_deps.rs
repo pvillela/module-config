@@ -89,6 +89,12 @@ pub trait CfgDepsMut<T: Clone, U: Clone> {
 }
 
 impl<T: Clone, U: Clone> CfgDepsStd<T, U> {
+    pub fn get(&mut self) -> (Arc<T>, U, bool) {
+        let (cfg, mutated) = self.cfg();
+        let deps = self.deps.clone();
+        (cfg, deps, mutated)
+    }
+
     pub fn new(
         src: impl 'static + Fn() -> Arc<T> + Send + Sync,
         refresh_mode: RefreshMode,
@@ -177,7 +183,7 @@ impl<T: Clone, U: Clone> CfgDepsMut<T, U> for CfgDepsStd<T, U> {
 }
 
 impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone> InnerMut<T, U, I> {
-    pub fn get_inner(&self) -> Guard<Arc<I>> {
+    fn get_inner(&self) -> Guard<Arc<I>> {
         self.0.load()
     }
 
@@ -257,6 +263,37 @@ impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone> InnerMut<T, U, I> {
         let mut inner = inner.clone();
         inner.update_with_cfg_adapter(f, g, refresh_mode, deps);
         self.set_inner(inner);
+    }
+}
+
+impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone> CfgDeps<T, U> for InnerMut<T, U, I> {
+    fn get(&self) -> (Arc<T>, U) {
+        Self::get(self)
+    }
+
+    /// Updates the receiver with a configuration info source, refresh mode, and a dependencies data
+    /// structure.
+    fn update_all(
+        &self,
+        src: impl 'static + Fn() -> Arc<T> + Send + Sync,
+        refresh_mode: RefreshMode,
+        deps: U,
+    ) {
+        Self::update_all(self, src, refresh_mode, deps)
+    }
+
+    fn update_refresh_mode(&self, refresh_mode: RefreshMode) {
+        Self::update_refresh_mode(&self, refresh_mode)
+    }
+
+    /// Composes an application info source f with an adapter g for a particular module, then
+    /// sets it and the refresh mode and deps data structure to the receiver.
+    fn update_with_cfg_adapter<S, F, G>(&self, f: F, g: G, refresh_mode: RefreshMode, deps: U)
+    where
+        F: 'static + Fn() -> Arc<S> + Send + Sync,
+        G: 'static + Fn(&S) -> T + Send + Sync,
+    {
+        Self::update_with_cfg_adapter(&self, f, g, refresh_mode, deps)
     }
 }
 
