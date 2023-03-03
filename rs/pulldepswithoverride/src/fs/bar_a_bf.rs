@@ -18,7 +18,8 @@ pub static BAR_A_BF_CFG_DEPS: Lazy<CfgDepsInnerMut<BarBfCfgInfo, ()>> = Lazy::ne
     CfgDepsInnerMut::new_with_cfg_adapter(
         get_app_configuration,
         bar_a_bf_cfg_adapter,
-        RefreshMode::NoRefresh,
+        RefreshMode::Refreshable(Duration::from_millis(60)),
+        // RefreshMode::NoRefresh,
         (),
     )
 });

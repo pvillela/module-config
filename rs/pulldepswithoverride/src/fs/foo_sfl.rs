@@ -5,7 +5,7 @@ use once_cell::sync::Lazy;
 
 type FooSflCfgInfo = common::fs_data::FooSflCfgInfo;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FooSflDeps {
     pub bar_bf: fn() -> String,
 }
@@ -23,6 +23,7 @@ pub static FOO_SFL_CFG_DEPS: Lazy<CfgDepsInnerMut<FooSflCfgInfo, FooSflDeps>> =
             get_app_configuration,
             foo_sfl_cfg_adapter,
             RefreshMode::NoRefresh,
+            // RefreshMode::Refreshable(Duration::from_millis(999)),
             FooSflDeps { bar_bf },
         )
     });

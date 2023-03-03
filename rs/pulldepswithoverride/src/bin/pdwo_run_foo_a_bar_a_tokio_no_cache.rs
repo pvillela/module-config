@@ -1,6 +1,6 @@
 use common::fwk::RefreshMode;
 use pulldepswithoverride::{
-    fs::{BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS},
+    fs::{BAR_A_BF_CFG_DEPS, FOO_A_SFL_CFG_DEPS},
     tokio_run_common::run,
 };
 use std::time::Duration;
@@ -8,8 +8,8 @@ use tokio;
 
 #[tokio::main]
 async fn main() {
-    FOO_SFL_CFG_DEPS.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(0)));
-    BAR_BF_CFG_DEPS.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(0)));
+    FOO_A_SFL_CFG_DEPS.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(0)));
+    BAR_A_BF_CFG_DEPS.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(0)));
 
     println!("===== pdv_run_foo_a_bar_a_tokio_no_cache =====");
 

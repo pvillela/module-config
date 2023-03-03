@@ -15,11 +15,21 @@ pub async fn run(sleep_factor: u64, repeats: usize) {
 
     let handle_r = tokio::spawn(async move {
         sleep(Duration::from_millis(25u64 * sleep_factor)).await;
+        for _ in 0..20 {
+            sleep(Duration::from_millis(1 * sleep_factor)).await;
+            refresh_app_configuration();
+            println!(
+                "App configuration refreshed at elapsed time {:?}.",
+                start_time.elapsed()
+            );
+            // foo_a_sfl(FooAIn { sleep_millis: 0 }).await;
+        }
         refresh_app_configuration();
         println!(
             "App configuration refreshed at elapsed time {:?}.",
             start_time.elapsed()
         );
+        // foo_a_sfl(FooAIn { sleep_millis: 0 }).await;
     });
 
     let handles1 = (0..N / 2)

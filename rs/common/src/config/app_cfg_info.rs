@@ -1,6 +1,9 @@
 use arc_swap::ArcSwap;
 use once_cell::sync::Lazy;
-use std::sync::Arc;
+use std::sync::{
+    atomic::{AtomicU32, Ordering},
+    Arc,
+};
 
 #[derive(Debug, Clone)]
 pub struct AppCfgInfo {
@@ -21,10 +24,13 @@ fn initial_app_configuration() -> AppCfgInfo {
     }
 }
 
+static REFRESH_COUNT: AtomicU32 = AtomicU32::new(0);
+
 // Simulates refresh of APP_CONFIGURATION
 pub fn refresh_app_configuration() {
+    let count = REFRESH_COUNT.fetch_add(1, Ordering::Relaxed);
     APP_CONFIGURATION.store(Arc::new(AppCfgInfo {
-        x: "refreshed".to_owned(),
+        x: format!("refreshed-{}", count),
         y: 1042,
         z: true,
     }));

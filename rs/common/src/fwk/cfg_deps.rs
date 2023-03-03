@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-pub struct InnerMut<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone>(
+pub struct InnerMut<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone + core::fmt::Debug>(
     ArcSwap<I>,
     PhantomData<T>,
     PhantomData<U>,
@@ -17,13 +17,23 @@ pub struct CfgDepsStd<T, U> {
     deps: U,
 }
 
+impl<T: core::fmt::Debug, U: core::fmt::Debug> core::fmt::Debug for CfgDepsStd<T, U> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let txt = format!(
+            "<refresh_mode: {:?}, cache: {:?}, deps: {:?}>",
+            self.refresh_mode, self.cache, self.deps,
+        );
+        f.write_str(&txt)
+    }
+}
+
 impl<T, U> Into<ArcSwap<CfgDepsStd<T, U>>> for CfgDepsStd<T, U> {
     fn into(self) -> ArcSwap<CfgDepsStd<T, U>> {
         ArcSwap::new(Arc::new(self))
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum RefreshMode {
     NoRefresh,
     Refreshable(Duration),
@@ -123,12 +133,16 @@ impl<T: Clone, U: Clone> CfgDepsStd<T, U> {
     }
 
     fn cache_expired(&self) -> bool {
-        if let RefreshMode::Refreshable(cache_ttl) = self.refresh_mode {
-            if self.cache.last_refresh.elapsed() > cache_ttl {
-                return true;
+        match self.refresh_mode {
+            RefreshMode::NoRefresh => false,
+            RefreshMode::Refreshable(cache_ttl) => {
+                if self.cache.last_refresh.elapsed() > cache_ttl {
+                    true
+                } else {
+                    false
+                }
             }
         }
-        false
     }
 
     fn cfg(&mut self) -> (Arc<T>, bool) {
@@ -182,12 +196,15 @@ impl<T: Clone, U: Clone> CfgDepsMut<T, U> for CfgDepsStd<T, U> {
     }
 }
 
-impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone> InnerMut<T, U, I> {
+impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone + core::fmt::Debug> InnerMut<T, U, I> {
     fn get_inner(&self) -> Guard<Arc<I>> {
-        self.0.load()
+        let inner = self.0.load();
+        println!(">>> get_inner: {:?}", inner);
+        inner
     }
 
     fn set_inner(&self, inner: I) {
+        println!("<<< set_inner: {:?}", inner);
         self.0.store(Arc::new(inner));
     }
 
@@ -266,7 +283,9 @@ impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone> InnerMut<T, U, I> {
     }
 }
 
-impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone> CfgDeps<T, U> for InnerMut<T, U, I> {
+impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone + core::fmt::Debug> CfgDeps<T, U>
+    for InnerMut<T, U, I>
+{
     fn get(&self) -> (Arc<T>, U) {
         Self::get(self)
     }
@@ -299,7 +318,7 @@ impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone> CfgDeps<T, U> for InnerMut
 
 pub type CfgDepsInnerMut<S, T> = InnerMut<S, T, CfgDepsStd<S, T>>;
 
-impl<T: Clone, U: Clone> CfgDepsInnerMut<T, U> {
+impl<T: Clone + core::fmt::Debug, U: Clone + core::fmt::Debug> CfgDepsInnerMut<T, U> {
     pub fn new(
         src: impl 'static + Fn() -> Arc<T> + Send + Sync,
         refresh_mode: RefreshMode,

@@ -16,6 +16,12 @@ pub struct FooASflDeps {
     pub bar_a_bf: BoxPinFn<u64, String>,
 }
 
+impl std::fmt::Debug for FooASflDeps {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("<FooASflDeps>")
+    }
+}
+
 pub async fn foo_a_sfl(input: FooIn) -> FooOut {
     let FooIn { sleep_millis } = input;
     sleep(Duration::from_millis(sleep_millis)).await;
@@ -32,7 +38,8 @@ pub static FOO_A_SFL_CFG_DEPS: Lazy<CfgDepsInnerMut<FooSflCfgInfo, FooASflDeps>>
         CfgDepsInnerMut::new_with_cfg_adapter(
             get_app_configuration,
             foo_a_sfl_cfg_adapter,
-            RefreshMode::NoRefresh,
+            // RefreshMode::NoRefresh,
+            RefreshMode::Refreshable(Duration::from_millis(60)),
             FooASflDeps {
                 bar_a_bf: box_pin_async_fn(bar_a_bf),
             },
@@ -40,6 +47,7 @@ pub static FOO_A_SFL_CFG_DEPS: Lazy<CfgDepsInnerMut<FooSflCfgInfo, FooASflDeps>>
     });
 
 fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
+    println!("@ foo_a_sfl_cfg_adapter called");
     FooSflCfgInfo {
         a: app_cfg.x.clone(),
         b: app_cfg.y,
