@@ -8,7 +8,7 @@ pub struct FooAIn {
 }
 
 #[allow(unused)]
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct FooAOut {
     pub res: String,
 }

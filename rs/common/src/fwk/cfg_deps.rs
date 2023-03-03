@@ -199,12 +199,12 @@ impl<T: Clone, U: Clone> CfgDepsMut<T, U> for CfgDepsStd<T, U> {
 impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone + core::fmt::Debug> InnerMut<T, U, I> {
     fn get_inner(&self) -> Guard<Arc<I>> {
         let inner = self.0.load();
-        println!(">>> get_inner: {:?}", inner);
+        // println!(">>> get_inner: {:?}", inner);
         inner
     }
 
     fn set_inner(&self, inner: I) {
-        println!("<<< set_inner: {:?}", inner);
+        // println!("<<< set_inner: {:?}", inner);
         self.0.store(Arc::new(inner));
     }
 

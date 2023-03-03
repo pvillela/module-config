@@ -20,6 +20,6 @@ async fn main() {
 
     // println!("*** run(0) -- zero sleep time, 99 repeats");
     // run(0, 99).await;
-    // println!("*** run(10) -- total 300 ms sleep time, 99 repeats");
-    // run(10, 99).await;
+    println!("*** run(10) -- total 300 ms sleep time, 99 repeats");
+    run(10, 99).await;
 }
