@@ -1,16 +1,16 @@
 use common::config::refresh_app_configuration;
-use common::fwk::{InnerMut, RefreshMode};
+use common::fwk::{CfgDepsInnerMut, RefreshMode};
 use pulldepswithoverride::fs::{foo_sfl, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS};
 use std::thread;
 use std::time::Duration;
 
 fn main() {
-    InnerMut::update_refresh_mode(
+    CfgDepsInnerMut::update_refresh_mode(
         &FOO_SFL_CFG_DEPS,
         RefreshMode::Refreshable(Duration::from_millis(0)),
     );
 
-    InnerMut::update_refresh_mode(
+    CfgDepsInnerMut::update_refresh_mode(
         &BAR_BF_CFG_DEPS,
         RefreshMode::Refreshable(Duration::from_millis(0)),
     );

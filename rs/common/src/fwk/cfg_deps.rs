@@ -1,8 +1,13 @@
 use arc_swap::{ArcSwap, Guard};
+use std::marker::PhantomData;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-pub struct InnerMut<I>(ArcSwap<I>);
+pub struct InnerMut<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone>(
+    ArcSwap<I>,
+    PhantomData<T>,
+    PhantomData<U>,
+);
 
 #[derive(Clone)]
 pub struct CfgDepsStd<T, U> {
@@ -171,8 +176,8 @@ impl<T: Clone, U: Clone> CfgDepsMut<T, U> for CfgDepsStd<T, U> {
     }
 }
 
-impl<I> InnerMut<I> {
-    fn get_inner(&self) -> Guard<Arc<I>> {
+impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone> InnerMut<T, U, I> {
+    pub fn get_inner(&self) -> Guard<Arc<I>> {
         self.0.load()
     }
 
@@ -180,7 +185,11 @@ impl<I> InnerMut<I> {
         self.0.store(Arc::new(inner));
     }
 
-    pub fn new_f<T: Clone, U: Clone, F>(
+    fn new_priv(inner: I) -> Self {
+        InnerMut(ArcSwap::new(inner.into()), PhantomData, PhantomData)
+    }
+
+    pub fn new_f<F>(
         src: F,
         refresh_mode: RefreshMode,
         deps: U,
@@ -189,10 +198,10 @@ impl<I> InnerMut<I> {
     where
         F: 'static + Fn() -> Arc<T> + Send + Sync,
     {
-        InnerMut(ArcSwap::new(factory(src, refresh_mode, deps).into()))
+        Self::new_priv(factory(src, refresh_mode, deps))
     }
 
-    pub fn new_with_cfg_adapter_f<T: Clone, U: Clone, S, F, G>(
+    pub fn new_with_cfg_adapter_f<S, F, G>(
         f: F,
         g: G,
         refresh_mode: RefreshMode,
@@ -203,12 +212,10 @@ impl<I> InnerMut<I> {
         F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
     {
-        InnerMut(ArcSwap::new(factory(f, g, refresh_mode, deps).into()))
+        Self::new_priv(factory(f, g, refresh_mode, deps))
     }
-}
 
-impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone> CfgDeps<T, U> for InnerMut<I> {
-    fn get(&self) -> (Arc<T>, U) {
+    pub fn get(&self) -> (Arc<T>, U) {
         let inner = &*self.get_inner().clone();
         let mut inner = inner.clone();
         let (cfg, deps, mutated) = inner.get();
@@ -220,7 +227,7 @@ impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone> CfgDeps<T, U> for InnerMut
 
     /// Updates the receiver with a configuration info source, refresh mode, and a dependencies data
     /// structure.
-    fn update_all(
+    pub fn update_all(
         &self,
         src: impl 'static + Fn() -> Arc<T> + Send + Sync,
         refresh_mode: RefreshMode,
@@ -232,7 +239,7 @@ impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone> CfgDeps<T, U> for InnerMut
         self.set_inner(inner);
     }
 
-    fn update_refresh_mode(&self, refresh_mode: RefreshMode) {
+    pub fn update_refresh_mode(&self, refresh_mode: RefreshMode) {
         let inner = &*self.get_inner().clone();
         let mut inner = inner.clone();
         inner.update_refresh_mode(refresh_mode);
@@ -241,7 +248,7 @@ impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone> CfgDeps<T, U> for InnerMut
 
     /// Composes an application info source f with an adapter g for a particular module, then
     /// sets it and the refresh mode and deps data structure to the receiver.
-    fn update_with_cfg_adapter<S, F, G>(&self, f: F, g: G, refresh_mode: RefreshMode, deps: U)
+    pub fn update_with_cfg_adapter<S, F, G>(&self, f: F, g: G, refresh_mode: RefreshMode, deps: U)
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
@@ -253,9 +260,9 @@ impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone> CfgDeps<T, U> for InnerMut
     }
 }
 
-pub type CfgSrcInnerMut<S, T> = InnerMut<CfgDepsStd<S, T>>;
+pub type CfgDepsInnerMut<S, T> = InnerMut<S, T, CfgDepsStd<S, T>>;
 
-impl<T: Clone, U: Clone> CfgSrcInnerMut<T, U> {
+impl<T: Clone, U: Clone> CfgDepsInnerMut<T, U> {
     pub fn new(
         src: impl 'static + Fn() -> Arc<T> + Send + Sync,
         refresh_mode: RefreshMode,
