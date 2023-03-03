@@ -8,7 +8,7 @@ use tokio;
 use tokio::time::sleep;
 
 pub async fn run(sleep_factor: u64, repeats: usize) {
-    const N: usize = 10_000;
+    const N: usize = 2;
 
     let start_time = Instant::now();
     println!("Started at {:?}", start_time);
@@ -34,6 +34,7 @@ pub async fn run(sleep_factor: u64, repeats: usize) {
                 for _ in 0..repeats {
                     foo_a_sfl(FooAIn { sleep_millis: 0 }).await;
                 }
+                println!("foo_a executed at {:?} elapsed", start_time.elapsed());
                 res
             })
         })
@@ -51,6 +52,7 @@ pub async fn run(sleep_factor: u64, repeats: usize) {
                 for _ in 0..repeats {
                     foo_a_sfl(FooAIn { sleep_millis: 0 }).await;
                 }
+                println!("foo_a executed at {:?} elapsed", start_time.elapsed());
                 res
             })
         })

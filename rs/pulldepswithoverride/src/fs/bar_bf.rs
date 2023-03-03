@@ -1,4 +1,3 @@
-use arc_swap::ArcSwap;
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fwk::{CfgDepsInnerMut, RefreshMode};
 use once_cell::sync::Lazy;
@@ -6,21 +5,20 @@ use once_cell::sync::Lazy;
 type BarBfCfgInfo = common::fs_data::BarBfCfgInfo;
 
 pub fn bar_bf() -> String {
-    let (cfg, _) = CfgDepsInnerMut::get_from_static(&BAR_BF_CFG_DEPS);
+    let (cfg, _) = BAR_BF_CFG_DEPS.get();
     let u = cfg.u + 1;
     let v = cfg.v.clone() + "-bar";
     format!("barBf(): u={}, v={}", u, v)
 }
 
-pub static BAR_BF_CFG_DEPS: Lazy<ArcSwap<CfgDepsInnerMut<BarBfCfgInfo, ()>>> =
-    Lazy::new(move || {
-        ArcSwap::new(CfgDepsInnerMut::new_with_cfg_adapter(
-            get_app_configuration,
-            bar_bf_cfg_adapter,
-            RefreshMode::NoRefresh,
-            (),
-        ))
-    });
+pub static BAR_BF_CFG_DEPS: Lazy<CfgDepsInnerMut<BarBfCfgInfo, ()>> = Lazy::new(move || {
+    CfgDepsInnerMut::new_with_cfg_adapter(
+        get_app_configuration,
+        bar_bf_cfg_adapter,
+        RefreshMode::NoRefresh,
+        (),
+    )
+});
 
 fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
     BarBfCfgInfo {

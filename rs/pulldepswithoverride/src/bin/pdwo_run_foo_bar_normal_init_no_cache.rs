@@ -1,19 +1,12 @@
 use common::config::refresh_app_configuration;
-use common::fwk::{CfgDepsInnerMut, RefreshMode};
+use common::fwk::RefreshMode;
 use pulldepswithoverride::fs::{foo_sfl, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS};
 use std::thread;
 use std::time::Duration;
 
 fn main() {
-    CfgDepsInnerMut::update_refresh_mode(
-        &FOO_SFL_CFG_DEPS,
-        RefreshMode::Refreshable(Duration::from_millis(0)),
-    );
-
-    CfgDepsInnerMut::update_refresh_mode(
-        &BAR_BF_CFG_DEPS,
-        RefreshMode::Refreshable(Duration::from_millis(0)),
-    );
+    FOO_SFL_CFG_DEPS.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(0)));
+    BAR_BF_CFG_DEPS.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(0)));
 
     let handle = thread::spawn(move || foo_sfl());
     let res = handle.join().unwrap();

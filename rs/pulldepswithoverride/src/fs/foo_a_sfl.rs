@@ -1,5 +1,4 @@
 use super::bar_a_bf;
-use arc_swap::ArcSwap;
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fwk::{box_pin_async_fn, BoxPinFn, CfgDepsInnerMut, RefreshMode};
 use once_cell::sync::Lazy;
@@ -20,23 +19,24 @@ pub struct FooASflDeps {
 pub async fn foo_a_sfl(input: FooIn) -> FooOut {
     let FooIn { sleep_millis } = input;
     sleep(Duration::from_millis(sleep_millis)).await;
-    let (cfg, FooASflDeps { bar_a_bf }) = CfgDepsInnerMut::get_from_static(&FOO_A_SFL_CFG_DEPS);
+    let (cfg, FooASflDeps { bar_a_bf }) = FOO_A_SFL_CFG_DEPS.get();
     let a = cfg.a.clone() + "-foo";
     let b = cfg.b + 3;
     let res = format!("fooSfl(): a={}, b={}, bar=({})", a, b, bar_a_bf(0).await);
+    println!("res: {}", res);
     FooOut { res }
 }
 
-pub static FOO_A_SFL_CFG_DEPS: Lazy<ArcSwap<CfgDepsInnerMut<FooSflCfgInfo, FooASflDeps>>> =
+pub static FOO_A_SFL_CFG_DEPS: Lazy<CfgDepsInnerMut<FooSflCfgInfo, FooASflDeps>> =
     Lazy::new(move || {
-        ArcSwap::new(CfgDepsInnerMut::new_with_cfg_adapter(
+        CfgDepsInnerMut::new_with_cfg_adapter(
             get_app_configuration,
             foo_a_sfl_cfg_adapter,
             RefreshMode::NoRefresh,
             FooASflDeps {
                 bar_a_bf: box_pin_async_fn(bar_a_bf),
             },
-        ))
+        )
     });
 
 fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
