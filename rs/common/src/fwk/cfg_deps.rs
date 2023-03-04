@@ -203,6 +203,12 @@ impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone + core::fmt::Debug> InnerMu
         inner
     }
 
+    fn get_inner_clone(&self) -> I {
+        let inner = &*self.get_inner().clone();
+        let inner = inner.clone();
+        inner
+    }
+
     fn set_inner(&self, inner: I) {
         // println!("<<< set_inner: {:?}", inner);
         self.0.store(Arc::new(inner));
@@ -239,8 +245,7 @@ impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone + core::fmt::Debug> InnerMu
     }
 
     pub fn get(&self) -> (Arc<T>, U) {
-        let inner = &*self.get_inner().clone();
-        let mut inner = inner.clone();
+        let mut inner = self.get_inner_clone();
         let (cfg, deps, mutated) = inner.get();
         if mutated {
             self.set_inner(inner.clone());
@@ -256,15 +261,13 @@ impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone + core::fmt::Debug> InnerMu
         refresh_mode: RefreshMode,
         deps: U,
     ) {
-        let inner = &*self.get_inner().clone();
-        let mut inner = inner.clone();
+        let mut inner = self.get_inner_clone();
         inner.update_all(src, refresh_mode, deps);
         self.set_inner(inner);
     }
 
     pub fn update_refresh_mode(&self, refresh_mode: RefreshMode) {
-        let inner = &*self.get_inner().clone();
-        let mut inner = inner.clone();
+        let mut inner = self.get_inner_clone();
         inner.update_refresh_mode(refresh_mode);
         self.set_inner(inner);
     }
@@ -276,8 +279,7 @@ impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone + core::fmt::Debug> InnerMu
         F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
     {
-        let inner = &*self.get_inner().clone();
-        let mut inner = inner.clone();
+        let mut inner = self.get_inner_clone();
         inner.update_with_cfg_adapter(f, g, refresh_mode, deps);
         self.set_inner(inner);
     }
