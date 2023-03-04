@@ -204,8 +204,9 @@ impl<T: Clone, U: Clone, I: CfgDepsMut<T, U> + Clone + core::fmt::Debug> InnerMu
     }
 
     fn get_inner_clone(&self) -> I {
-        let inner = &*self.get_inner().clone();
-        let inner = inner.clone();
+        let inner = self.get_inner();
+        let inner = inner.as_ref();
+        let inner = (*inner).clone();
         inner
     }
 
