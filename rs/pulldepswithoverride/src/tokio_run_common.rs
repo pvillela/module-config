@@ -1,22 +1,49 @@
 use crate::fs::foo_a_sfl;
-use common::config::refresh_app_configuration;
+use common::config::{initialize_app_configuration, refresh_app_configuration};
 use common::fs_data::FooAIn;
 use futures::future::join_all;
-use std::time::Duration;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use tokio;
 use tokio::time::sleep;
 
-pub async fn run(sleep_factor: u64, repeats: usize) {
-    const N: usize = 3;
+pub struct RunIn {
+    pub unit_time_millis: u64,
+    pub app_cfg_first_refresh_units: u64,
+    pub app_cfg_refresh_delta_units: u64,
+    pub app_cfg_refresh_count: u64,
+    pub batch_initial_sleep_units: u64,
+    pub batch_gap_sleep_units: u64,
+    pub concurrency: usize,
+    pub repeats: usize,
+}
+
+pub async fn run(input: RunIn) {
+    let RunIn {
+        unit_time_millis,
+        app_cfg_first_refresh_units,
+        app_cfg_refresh_delta_units,
+        app_cfg_refresh_count,
+        batch_initial_sleep_units,
+        batch_gap_sleep_units,
+        concurrency,
+        repeats,
+    } = input;
 
     let start_time = Instant::now();
     println!("Started at {:?}", start_time);
 
+    initialize_app_configuration();
+
     let handle_r = tokio::spawn(async move {
-        sleep(Duration::from_millis(22u64 * sleep_factor)).await;
-        for _ in 0..30 {
-            sleep(Duration::from_millis(1 * sleep_factor)).await;
+        sleep(Duration::from_millis(
+            app_cfg_first_refresh_units * unit_time_millis,
+        ))
+        .await;
+        for _ in 0..app_cfg_refresh_count {
+            sleep(Duration::from_millis(
+                app_cfg_refresh_delta_units * unit_time_millis,
+            ))
+            .await;
             refresh_app_configuration();
             println!(
                 "App configuration refreshed at elapsed time {:?}.",
@@ -26,71 +53,42 @@ pub async fn run(sleep_factor: u64, repeats: usize) {
         refresh_app_configuration();
     });
 
-    let handles1 = (0..N / 3)
-        .map(|_| {
-            tokio::spawn(async move {
-                let res = foo_a_sfl(FooAIn {
-                    sleep_millis: 20u64 * sleep_factor,
-                })
-                .await
-                .res
-                .len();
-                for _ in 0..repeats {
-                    foo_a_sfl(FooAIn { sleep_millis: 0 }).await;
-                }
+    let run_concurrent = |i: usize| {
+        tokio::spawn(async move {
+            let out = foo_a_sfl(FooAIn { sleep_millis: 0 }).await;
+            let res = out.res.len();
+            if i == 0 {
                 println!(
-                    "foo_a executed at {:?} elapsed, res={:?}",
+                    "foo_a executed at {:?} elapsed, res={}, out={:?}",
                     start_time.elapsed(),
-                    foo_a_sfl(FooAIn { sleep_millis: 0 }).await
+                    res,
+                    out
                 );
-                res
-            })
+            }
+            for _ in 0..repeats - 1 {
+                foo_a_sfl(FooAIn { sleep_millis: 0 }).await;
+            }
+            res
         })
-        .collect::<Vec<_>>();
+    };
 
-    let handles2: Vec<_> = (0..N / 3)
-        .map(|_| {
-            tokio::spawn(async move {
-                let res = foo_a_sfl(FooAIn {
-                    sleep_millis: 25u64 * sleep_factor,
-                })
-                .await
-                .res
-                .len();
-                for _ in 0..repeats {
-                    foo_a_sfl(FooAIn { sleep_millis: 0 }).await;
-                }
-                println!(
-                    "foo_a executed at {:?} elapsed, res={:?}",
-                    start_time.elapsed(),
-                    foo_a_sfl(FooAIn { sleep_millis: 0 }).await
-                );
-                res
-            })
-        })
-        .collect();
+    sleep(Duration::from_millis(
+        batch_initial_sleep_units * unit_time_millis,
+    ))
+    .await;
+    let handles1 = (0..concurrency).map(run_concurrent).collect::<Vec<_>>();
 
-    let handles3: Vec<_> = (0..N / 3)
-        .map(|_| {
-            tokio::spawn(async move {
-                let res = foo_a_sfl(FooAIn {
-                    sleep_millis: 30u64 * sleep_factor,
-                })
-                .await
-                .res
-                .len();
-                for _ in 0..repeats {
-                    foo_a_sfl(FooAIn { sleep_millis: 0 }).await;
-                }
-                println!(
-                    "foo_a executed at {:?} elapsed, res={:?}",
-                    start_time.elapsed(),
-                    foo_a_sfl(FooAIn { sleep_millis: 0 }).await
-                );
-                res
-            })
-        })
-        .collect();
+    sleep(Duration::from_millis(
+        (batch_initial_sleep_units + batch_gap_sleep_units) * unit_time_millis,
+    ))
+    .await;
+    let handles2 = (0..concurrency).map(run_concurrent).collect::<Vec<_>>();
+
+    sleep(Duration::from_millis(
+        (batch_initial_sleep_units + 2 * batch_gap_sleep_units) * unit_time_millis,
+    ))
+    .await;
+    let handles3 = (0..concurrency).map(run_concurrent).collect::<Vec<_>>();
 
     let _ = handle_r
         .await
@@ -112,18 +110,23 @@ pub async fn run(sleep_factor: u64, repeats: usize) {
     let res3: usize = join_all(handles3)
         .await
         .iter()
-        .map(|x| x.as_ref().ok().expect("Failure in second batch of tasks."))
+        .map(|x| x.as_ref().ok().expect("Failure in third batch of tasks."))
         .sum();
 
     let averages = (
-        (res1 as f64) / (N as f64) * 3.0,
-        (res2 as f64) / (N as f64) * 3.0,
-        (res3 as f64) / (N as f64) * 3.0,
+        (res1 as f64) / (concurrency as f64),
+        (res2 as f64) / (concurrency as f64),
+        (res3 as f64) / (concurrency as f64),
     );
 
     println!(
-        "Ended at {:?}, with averages {:?} (expected averages = (65, 73) for refreshable, non-zero sleep cases)",
+        "Ended at {:?}, with execution counts counts={:?}, averages={:?}",
         start_time.elapsed(),
+        (
+            concurrency * repeats,
+            concurrency * repeats,
+            concurrency * repeats
+        ),
         averages
     );
 }

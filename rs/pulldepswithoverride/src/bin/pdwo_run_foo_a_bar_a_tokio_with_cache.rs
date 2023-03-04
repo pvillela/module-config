@@ -1,26 +1,28 @@
-use std::time::Duration;
-
 use common::fwk::RefreshMode;
 use pulldepswithoverride::{
     fs::{BAR_A_BF_CFG_DEPS, FOO_A_SFL_CFG_DEPS},
-    tokio_run_common::run,
+    tokio_run_common::{run, RunIn},
 };
+use std::time::Duration;
 use tokio;
 
 #[tokio::main]
 async fn main() {
-    FOO_A_SFL_CFG_DEPS.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(60)));
-    BAR_A_BF_CFG_DEPS.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(60)));
+    println!("===== pdv_run_foo_a_bar_a_tokio_with_cache =====");
 
-    println!("===== pdv_run_foo_a_bar_a_tokio_no_cache =====");
+    FOO_A_SFL_CFG_DEPS.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(100)));
+    BAR_A_BF_CFG_DEPS.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(100)));
 
-    // println!("*** run(0) -- zero sleep time, zero repeats");
-    // run(0, 0).await;
-    println!("*** run(10) -- total 300 ms sleep time, zero repeats");
-    run(10, 0).await;
-
-    // println!("*** run(0) -- zero sleep time, 99 repeats");
-    // run(0, 99).await;
-    println!("*** run(10) -- total 300 ms sleep time, 99 repeats");
-    run(10, 99).await;
+    println!("\n*** run -- total 80 ms sleep time, 10_000 concurrency, 100 repeats");
+    run(RunIn {
+        unit_time_millis: 10,
+        app_cfg_first_refresh_units: 1,
+        app_cfg_refresh_delta_units: 1,
+        app_cfg_refresh_count: 10,
+        batch_initial_sleep_units: 0,
+        batch_gap_sleep_units: 4,
+        concurrency: 10_000,
+        repeats: 100,
+    })
+    .await;
 }

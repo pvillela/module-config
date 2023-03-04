@@ -15,7 +15,9 @@ pub struct AppCfgInfo {
 static APP_CONFIGURATION: Lazy<ArcSwap<AppCfgInfo>> =
     Lazy::new(|| ArcSwap::from_pointee(initial_app_configuration()));
 
-// Simulates initial APP_CONFIGURATION
+static REFRESH_COUNT: AtomicU32 = AtomicU32::new(0);
+
+// Produce simulated initial APP_CONFIGURATION
 fn initial_app_configuration() -> AppCfgInfo {
     AppCfgInfo {
         x: "initial".to_owned(),
@@ -24,7 +26,11 @@ fn initial_app_configuration() -> AppCfgInfo {
     }
 }
 
-static REFRESH_COUNT: AtomicU32 = AtomicU32::new(0);
+// Simulates initialization of APP_CONFIGURATION
+pub fn initialize_app_configuration() {
+    REFRESH_COUNT.store(0, Ordering::Relaxed);
+    APP_CONFIGURATION.store(Arc::new(initial_app_configuration()));
+}
 
 // Simulates refresh of APP_CONFIGURATION
 pub fn refresh_app_configuration() {
