@@ -1,6 +1,6 @@
 use super::bar_a_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
-use common::fwk::{box_pin_async_fn, BoxPinFn, CfgDepsInnerMutArc, RefreshMode};
+use common::fwk::{box_pin_async_fn, BoxPinFn, CfgDepsInnerMut, RefreshMode};
 use once_cell::sync::Lazy;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -32,9 +32,9 @@ pub async fn foo_a_sfl(input: FooIn) -> FooOut {
     FooOut { res }
 }
 
-pub static FOO_A_SFL_CFG_DEPS: Lazy<CfgDepsInnerMutArc<FooSflCfgInfo, FooASflDeps>> =
+pub static FOO_A_SFL_CFG_DEPS: Lazy<CfgDepsInnerMut<FooSflCfgInfo, FooASflDeps>> =
     Lazy::new(move || {
-        CfgDepsInnerMutArc::new_with_cfg_adapter(
+        CfgDepsInnerMut::new_with_cfg_adapter(
             get_app_configuration,
             foo_a_sfl_cfg_adapter,
             RefreshMode::NoRefresh,

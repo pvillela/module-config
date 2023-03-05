@@ -1,5 +1,5 @@
 use common::config::{get_app_configuration, AppCfgInfo};
-use common::fwk::{CfgDepsInnerMutArc, RefreshMode};
+use common::fwk::{CfgDepsInnerMut, RefreshMode};
 use once_cell::sync::Lazy;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -14,8 +14,8 @@ pub async fn bar_a_bf(sleep_millis: u64) -> String {
     format!("barBf(): u={}, v={}", u, v)
 }
 
-pub static BAR_A_BF_CFG_DEPS: Lazy<CfgDepsInnerMutArc<BarBfCfgInfo, ()>> = Lazy::new(move || {
-    CfgDepsInnerMutArc::new_with_cfg_adapter(
+pub static BAR_A_BF_CFG_DEPS: Lazy<CfgDepsInnerMut<BarBfCfgInfo, ()>> = Lazy::new(move || {
+    CfgDepsInnerMut::new_with_cfg_adapter(
         get_app_configuration,
         bar_a_bf_cfg_adapter,
         RefreshMode::NoRefresh,

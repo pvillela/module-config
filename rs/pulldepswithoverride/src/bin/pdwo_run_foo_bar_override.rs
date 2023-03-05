@@ -1,30 +1,25 @@
 use common::config::refresh_app_configuration;
 use common::fs_data::{BarBfCfgInfo, FooSflCfgInfo};
-use common::fwk::{CfgDepsInnerMutArc, RefreshMode};
+use common::fwk::{CfgDepsInnerMut, RefreshMode};
 use pulldepswithoverride::fs::{bar_bf, foo_sfl, FooSflDeps, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS};
-use std::sync::Arc;
 use std::thread;
 
 fn main() {
-    CfgDepsInnerMutArc::update_all(
+    CfgDepsInnerMut::update_all(
         &FOO_SFL_CFG_DEPS,
-        || {
-            Arc::new(FooSflCfgInfo {
-                a: "foo_override".to_owned(),
-                b: 11,
-            })
+        || FooSflCfgInfo {
+            a: "foo_override".to_owned(),
+            b: 11,
         },
         RefreshMode::NoRefresh,
         FooSflDeps { bar_bf },
     );
 
-    CfgDepsInnerMutArc::update_all(
+    CfgDepsInnerMut::update_all(
         &BAR_BF_CFG_DEPS,
-        || {
-            Arc::new(BarBfCfgInfo {
-                u: 33,
-                v: "bar_override".to_owned(),
-            })
+        || BarBfCfgInfo {
+            u: 33,
+            v: "bar_override".to_owned(),
         },
         RefreshMode::NoRefresh,
         (),
