@@ -1,6 +1,6 @@
 use super::bar_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
-use common::fwk::{CfgDepsInnerMut, RefreshMode};
+use common::fwk::{CfgDepsInnerMutArc, RefreshMode};
 use once_cell::sync::Lazy;
 
 type FooSflCfgInfo = common::fs_data::FooSflCfgInfo;
@@ -17,9 +17,9 @@ pub fn foo_sfl() -> String {
     format!("fooSfl(): a={}, b={}, bar=({})", a, b, bar_bf())
 }
 
-pub static FOO_SFL_CFG_DEPS: Lazy<CfgDepsInnerMut<FooSflCfgInfo, FooSflDeps>> =
+pub static FOO_SFL_CFG_DEPS: Lazy<CfgDepsInnerMutArc<FooSflCfgInfo, FooSflDeps>> =
     Lazy::new(move || {
-        CfgDepsInnerMut::new_with_cfg_adapter(
+        CfgDepsInnerMutArc::new_with_cfg_adapter(
             get_app_configuration,
             foo_sfl_cfg_adapter,
             RefreshMode::NoRefresh,
