@@ -1,9 +1,9 @@
-use arc_swap::{ArcSwap, Guard};
+use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-pub struct InnerMut<T, U, I>(ArcSwap<I>, PhantomData<T>, PhantomData<U>)
+pub struct InnerMut<T, U, I>(RefCell<I>, PhantomData<T>, PhantomData<U>)
 where
     T: Clone,
     U: Clone,
@@ -94,12 +94,6 @@ where
             self.refresh_mode, self.cache, self.deps,
         );
         f.write_str(&txt)
-    }
-}
-
-impl<T, U> Into<ArcSwap<CfgDepsStd<T, U>>> for CfgDepsStd<T, U> {
-    fn into(self) -> ArcSwap<CfgDepsStd<T, U>> {
-        ArcSwap::new(Arc::new(self))
     }
 }
 
@@ -216,26 +210,25 @@ where
     U: Clone,
     I: CfgDepsMut<T, U> + Clone + core::fmt::Debug,
 {
-    fn get_inner(&self) -> Guard<Arc<I>> {
-        let inner = self.0.load();
+    fn get_inner(&self) -> RefCell<I> {
+        let inner = self.0.clone();
         // println!(">>> get_inner: {:?}", inner);
         inner
     }
 
     fn get_inner_clone(&self) -> I {
         let inner = self.get_inner();
-        let inner = inner.as_ref();
-        let inner = (*inner).clone();
+        let inner = inner.into_inner();
         inner
     }
 
     fn set_inner(&self, inner: I) {
         // println!("<<< set_inner: {:?}", inner);
-        self.0.store(Arc::new(inner));
+        self.0.replace(inner);
     }
 
     fn new_priv(inner: I) -> Self {
-        InnerMut(ArcSwap::new(inner.into()), PhantomData, PhantomData)
+        InnerMut(RefCell::new(inner.into()), PhantomData, PhantomData)
     }
 
     pub fn new_f<F>(
