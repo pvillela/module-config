@@ -1,5 +1,6 @@
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fwk::{CfgDepsInnerMut, RefreshMode};
+use std::rc::Rc;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -24,9 +25,10 @@ pub static BAR_A_BF_CFG_DEPS: CfgDepsInnerMut<BarBfCfgInfo, ()> =
     );
 }
 
-fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
+fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> Rc<BarBfCfgInfo> {
     BarBfCfgInfo {
         u: app_cfg.y,
         v: app_cfg.x.clone(),
     }
+    .into()
 }

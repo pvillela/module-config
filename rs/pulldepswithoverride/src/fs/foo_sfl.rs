@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use super::bar_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fwk::{CfgDepsInnerMut, RefreshMode};
@@ -27,9 +29,10 @@ pub static FOO_SFL_CFG_DEPS: CfgDepsInnerMut<FooSflCfgInfo, FooSflDeps> =
         );
 }
 
-fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
+fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> Rc<FooSflCfgInfo> {
     FooSflCfgInfo {
         a: app_cfg.x.clone(),
         b: app_cfg.y,
     }
+    .into()
 }

@@ -1,6 +1,7 @@
 use super::bar_a_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fwk::{box_pin_async_fn, BoxPinFn, CfgDepsInnerMut, RefreshMode};
+use std::rc::Rc;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -24,10 +25,18 @@ impl std::fmt::Debug for FooASflDeps {
 pub async fn foo_a_sfl(input: FooIn) -> FooOut {
     let FooIn { sleep_millis } = input;
     sleep(Duration::from_millis(sleep_millis)).await;
-    let (cfg, FooASflDeps { bar_a_bf }) = FOO_A_SFL_CFG_DEPS.with(CfgDepsInnerMut::get);
-    let a = cfg.a.clone() + "-foo";
-    let b = cfg.b + 3;
-    let res = format!("fooSfl(): a={}, b={}, bar=({})", a, b, bar_a_bf(0).await);
+    let (a, b, d) = {
+        let (cfg, d) = FOO_A_SFL_CFG_DEPS.with(CfgDepsInnerMut::get);
+        let a = cfg.a.clone() + "-foo";
+        let b = cfg.b + 3;
+        (a, b, d)
+    };
+    let res = format!(
+        "fooSfl(): a={}, b={}, bar=({})",
+        a,
+        b,
+        (d.bar_a_bf)(0).await
+    );
     FooOut { res }
 }
 
@@ -44,9 +53,10 @@ pub static FOO_A_SFL_CFG_DEPS: CfgDepsInnerMut<FooSflCfgInfo, FooASflDeps> =
     )
 }
 
-fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
+fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> Rc<FooSflCfgInfo> {
     FooSflCfgInfo {
         a: app_cfg.x.clone(),
         b: app_cfg.y,
     }
+    .into()
 }

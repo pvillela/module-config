@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::marker::PhantomData;
+use std::rc::Rc;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -334,7 +335,7 @@ where
     }
 }
 
-pub type CfgDepsInnerMut<T, U> = InnerMut<T, U, CfgDepsStd<T, U>>;
+pub type CfgDepsInnerMut<T, U> = InnerMut<Rc<T>, U, CfgDepsStd<Rc<T>, U>>;
 
 impl<T, U> CfgDepsInnerMut<T, U>
 where
@@ -342,7 +343,7 @@ where
     U: Clone + core::fmt::Debug,
 {
     pub fn new(
-        src: impl 'static + Fn() -> T + Send + Sync,
+        src: impl 'static + Fn() -> Rc<T> + Send + Sync,
         refresh_mode: RefreshMode,
         deps: U,
     ) -> Self {
@@ -352,7 +353,7 @@ where
     pub fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode, deps: U) -> Self
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
-        G: 'static + Fn(&S) -> T + Send + Sync,
+        G: 'static + Fn(&S) -> Rc<T> + Send + Sync,
     {
         Self::new_with_cfg_adapter_f(f, g, refresh_mode, deps, CfgDepsStd::new_with_cfg_adapter)
     }

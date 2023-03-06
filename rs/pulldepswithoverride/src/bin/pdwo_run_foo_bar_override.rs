@@ -2,14 +2,17 @@ use common::config::refresh_app_configuration;
 use common::fs_data::{BarBfCfgInfo, FooSflCfgInfo};
 use common::fwk::RefreshMode;
 use pulldepswithoverride::fs::{bar_bf, foo_sfl, FooSflDeps, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS};
+use std::rc::Rc;
 use std::thread;
 
 fn main() {
     FOO_SFL_CFG_DEPS.with(|c| {
         c.update_all(
-            || FooSflCfgInfo {
-                a: "foo_override".to_owned(),
-                b: 11,
+            || {
+                Rc::new(FooSflCfgInfo {
+                    a: "foo_override".to_owned(),
+                    b: 11,
+                })
             },
             RefreshMode::NoRefresh,
             FooSflDeps { bar_bf },
@@ -18,9 +21,11 @@ fn main() {
 
     BAR_BF_CFG_DEPS.with(|c| {
         c.update_all(
-            || BarBfCfgInfo {
-                u: 33,
-                v: "bar_override".to_owned(),
+            || {
+                Rc::new(BarBfCfgInfo {
+                    u: 33,
+                    v: "bar_override".to_owned(),
+                })
             },
             RefreshMode::NoRefresh,
             (),
