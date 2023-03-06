@@ -16,7 +16,6 @@ pub struct CfgDepsStd<T, U> {
     refresh_mode: RefreshMode,
     cache: Cache<T>,
     deps: U,
-    _t: PhantomData<T>,
 }
 
 #[derive(Clone, Debug)]
@@ -57,11 +56,17 @@ pub trait CfgDeps<T: Clone, U: Clone> {
 }
 
 pub trait CfgDepsMut<T: Clone, U: Clone> {
-    /// Returns a triple containing an Arc of the configuration data, the dependencies data structure,
+    /// Returns a pair containing the configuration data and the dependencies data structure.
+    /// The configuration data returned is whatever is in the cache, even if stale.
+    fn get_cached(&self) -> (T, U);
+
+    fn cache_expired(&self) -> bool;
+
+    /// Returns a triple containing the configuration data, the dependencies data structure,
     /// and an indicator of whether it is true that the object was mutated.
     /// This will return the current configuration data, according to the object's cache refresh policy,
     /// with a possible change to cache state as a side-effect.
-    fn get(&mut self) -> (T, U, bool);
+    fn get_mut(&mut self) -> (T, U, bool);
 
     fn replace(&mut self, other: Self);
 
@@ -103,12 +108,6 @@ where
     T: Clone,
     U: Clone,
 {
-    pub fn get(&mut self) -> (T, U, bool) {
-        let (cfg, mutated) = self.cfg();
-        let deps = self.deps.clone();
-        (cfg, deps, mutated)
-    }
-
     pub fn new(
         src: impl 'static + Fn() -> T + Send + Sync,
         refresh_mode: RefreshMode,
@@ -123,11 +122,10 @@ where
                 value: cfg,
             },
             deps,
-            _t: PhantomData,
         }
     }
 
-    /// Function to produce a copy of self with a refreshed the cache.
+    /// Function to update self with a refreshed the cache.
     pub fn refresh(&mut self) {
         let cfg_value = (self.src)();
         let cache = Cache {
@@ -135,27 +133,6 @@ where
             value: cfg_value.clone(),
         };
         self.cache = cache;
-    }
-
-    fn cache_expired(&self) -> bool {
-        match self.refresh_mode {
-            RefreshMode::NoRefresh => false,
-            RefreshMode::Refreshable(cache_ttl) => {
-                if self.cache.last_refresh.elapsed() > cache_ttl {
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-    }
-
-    fn cfg(&mut self) -> (T, bool) {
-        if !self.cache_expired() {
-            return (self.cache.value.clone(), false);
-        }
-        self.refresh();
-        (self.cache.value.clone(), true)
     }
 
     pub fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode, deps: U) -> Self
@@ -173,8 +150,33 @@ where
     T: Clone,
     U: Clone,
 {
-    fn get(&mut self) -> (T, U, bool) {
-        let (cfg, mutated) = self.cfg();
+    fn get_cached(&self) -> (T, U) {
+        let cfg = self.cache.value.clone();
+        let deps = self.deps.clone();
+        (cfg, deps)
+    }
+
+    fn cache_expired(&self) -> bool {
+        match self.refresh_mode {
+            RefreshMode::NoRefresh => false,
+            RefreshMode::Refreshable(cache_ttl) => {
+                if self.cache.last_refresh.elapsed() > cache_ttl {
+                    true
+                } else {
+                    false
+                }
+            }
+        }
+    }
+
+    fn get_mut(&mut self) -> (T, U, bool) {
+        let mutated = if self.cache_expired() {
+            self.refresh();
+            true
+        } else {
+            false
+        };
+        let cfg = self.cache.value.clone();
         let deps = self.deps.clone();
         (cfg, deps, mutated)
     }
@@ -211,15 +213,15 @@ where
     U: Clone,
     I: CfgDepsMut<T, U> + Clone + core::fmt::Debug,
 {
-    fn get_inner(&self) -> RefCell<I> {
-        let inner = self.0.clone();
+    fn get_inner(&self) -> &RefCell<I> {
+        let inner = &self.0;
         // println!(">>> get_inner: {:?}", inner);
         inner
     }
 
     fn get_inner_clone(&self) -> I {
         let inner = self.get_inner();
-        let inner = inner.into_inner();
+        let inner = inner.borrow().clone();
         inner
     }
 
@@ -259,11 +261,15 @@ where
     }
 
     pub fn get(&self) -> (T, U) {
-        let mut inner = self.get_inner_clone();
-        let (cfg, deps, mutated) = inner.get();
-        if mutated {
-            self.set_inner(inner.clone());
-        }
+        let inner = self.get_inner().borrow();
+        let (cfg, deps) = if inner.cache_expired() {
+            let mut inner = inner.clone();
+            let (cfg, deps, _) = inner.get_mut();
+            self.set_inner(inner);
+            (cfg, deps)
+        } else {
+            inner.get_cached()
+        };
         (cfg, deps)
     }
 
