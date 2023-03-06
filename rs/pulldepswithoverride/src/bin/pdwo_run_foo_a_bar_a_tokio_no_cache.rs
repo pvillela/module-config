@@ -10,7 +10,8 @@ use tokio;
 async fn main() {
     println!("===== pdv_run_foo_a_bar_a_tokio_no_cache =====");
 
-    FOO_A_SFL_CFG_DEPS.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(0)));
+    FOO_A_SFL_CFG_DEPS
+        .with(|c| c.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(0))));
     BAR_A_BF_CFG_DEPS.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(0)));
 
     println!("\n*** run -- total 0 ms sleep time, 10_000 concurrency, 100 repeats");

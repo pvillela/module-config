@@ -1,4 +1,4 @@
-use common::fwk::RefreshMode;
+use common::fwk::{CfgDepsInnerMut, RefreshMode};
 use pulldepswithoverride::{
     fs::{BAR_A_BF_CFG_DEPS, FOO_A_SFL_CFG_DEPS},
     tokio_run_common::{run, RunIn},
@@ -10,7 +10,8 @@ use tokio;
 async fn main() {
     println!("===== pdv_run_foo_a_bar_a_tokio_with_cache =====");
 
-    FOO_A_SFL_CFG_DEPS.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(100)));
+    FOO_A_SFL_CFG_DEPS
+        .with(|c| c.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(100))));
     BAR_A_BF_CFG_DEPS.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(100)));
 
     println!("\n*** run -- total 80 ms sleep time, 10_000 concurrency, 100 repeats");

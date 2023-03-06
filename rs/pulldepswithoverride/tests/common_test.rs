@@ -10,14 +10,15 @@ pub async fn common_test(
     foo_sfl_cfg_info: FooSflCfgInfo,
     bar_bf_cfg_info: BarBfCfgInfo,
 ) -> Option<String> {
-    CfgDepsInnerMut::update_all(
-        &FOO_A_SFL_CFG_DEPS,
-        move || foo_sfl_cfg_info.clone().into(),
-        RefreshMode::NoRefresh,
-        FooASflDeps {
-            bar_a_bf: box_pin_async_fn(bar_a_bf),
-        },
-    );
+    FOO_A_SFL_CFG_DEPS.with(|c| {
+        c.update_all(
+            move || foo_sfl_cfg_info.clone().into(),
+            RefreshMode::NoRefresh,
+            FooASflDeps {
+                bar_a_bf: box_pin_async_fn(bar_a_bf),
+            },
+        )
+    });
 
     CfgDepsInnerMut::update_all(
         &BAR_A_BF_CFG_DEPS,
