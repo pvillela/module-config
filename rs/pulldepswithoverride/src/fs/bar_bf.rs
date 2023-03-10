@@ -1,5 +1,5 @@
 use common::config::{get_app_configuration, AppCfgInfo};
-use common::fwk::{CfgDepsInnerMut, RefreshMode};
+use common::fwk::{CfgDepsDefault, RefreshMode};
 
 type BarBfCfgInfo = common::fs_data::BarBfCfgInfo;
 
@@ -11,8 +11,8 @@ pub fn bar_bf() -> String {
 }
 
 thread_local! {
-pub static BAR_BF_CFG_DEPS: CfgDepsInnerMut<BarBfCfgInfo, ()> = {
-    CfgDepsInnerMut::new_with_cfg_adapter(
+pub static BAR_BF_CFG_DEPS: CfgDepsDefault<BarBfCfgInfo, ()> = {
+    CfgDepsDefault::new_with_cfg_adapter(
         get_app_configuration,
         bar_bf_cfg_adapter,
         RefreshMode::NoRefresh,

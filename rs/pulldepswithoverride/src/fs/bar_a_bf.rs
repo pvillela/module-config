@@ -1,5 +1,5 @@
 use common::config::{get_app_configuration, AppCfgInfo};
-use common::fwk::{CfgDepsInnerMut, RefreshMode};
+use common::fwk::{CfgDepsDefault, RefreshMode};
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -14,8 +14,8 @@ pub async fn bar_a_bf(sleep_millis: u64) -> String {
 }
 
 thread_local! {
-pub static BAR_A_BF_CFG_DEPS: CfgDepsInnerMut<BarBfCfgInfo, ()> =
-    CfgDepsInnerMut::new_with_cfg_adapter(
+pub static BAR_A_BF_CFG_DEPS: CfgDepsDefault<BarBfCfgInfo, ()> =
+    CfgDepsDefault::new_with_cfg_adapter(
         get_app_configuration,
         bar_a_bf_cfg_adapter,
         RefreshMode::NoRefresh,

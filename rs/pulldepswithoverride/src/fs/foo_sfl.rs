@@ -1,6 +1,6 @@
 use super::bar_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
-use common::fwk::{CfgDepsInnerMut, RefreshMode};
+use common::fwk::{CfgDepsDefault, RefreshMode};
 
 type FooSflCfgInfo = common::fs_data::FooSflCfgInfo;
 
@@ -17,8 +17,8 @@ pub fn foo_sfl() -> String {
 }
 
 thread_local! {
-pub static FOO_SFL_CFG_DEPS: CfgDepsInnerMut<FooSflCfgInfo, FooSflDeps> =
-        CfgDepsInnerMut::new_with_cfg_adapter(
+pub static FOO_SFL_CFG_DEPS: CfgDepsDefault<FooSflCfgInfo, FooSflDeps> =
+        CfgDepsDefault::new_with_cfg_adapter(
             get_app_configuration,
             foo_sfl_cfg_adapter,
             RefreshMode::NoRefresh,

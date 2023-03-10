@@ -1,6 +1,6 @@
 use super::bar_a_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
-use common::fwk::{box_pin_async_fn, BoxPinFn, CfgDepsInnerMut, RefreshMode};
+use common::fwk::{box_pin_async_fn, BoxPinFn, CfgDepsDefault, RefreshMode};
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -25,7 +25,7 @@ pub async fn foo_a_sfl(input: FooIn) -> FooOut {
     let FooIn { sleep_millis } = input;
     sleep(Duration::from_millis(sleep_millis)).await;
     let (a, b, d) = {
-        let (cfg, d) = FOO_A_SFL_CFG_DEPS.with(CfgDepsInnerMut::get);
+        let (cfg, d) = FOO_A_SFL_CFG_DEPS.with(CfgDepsDefault::get);
         let a = cfg.a.clone() + "-foo";
         let b = cfg.b + 3;
         (a, b, d)
@@ -40,8 +40,8 @@ pub async fn foo_a_sfl(input: FooIn) -> FooOut {
 }
 
 thread_local! {
-pub static FOO_A_SFL_CFG_DEPS: CfgDepsInnerMut<FooSflCfgInfo, FooASflDeps> =
-    CfgDepsInnerMut::new_with_cfg_adapter(
+pub static FOO_A_SFL_CFG_DEPS: CfgDepsDefault<FooSflCfgInfo, FooASflDeps> =
+    CfgDepsDefault::new_with_cfg_adapter(
         get_app_configuration,
         foo_a_sfl_cfg_adapter,
         RefreshMode::NoRefresh,

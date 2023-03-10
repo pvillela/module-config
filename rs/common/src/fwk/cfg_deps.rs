@@ -33,7 +33,7 @@ struct Cache<V> {
     value: V,
 }
 
-pub trait CfgDeps<T, TX: Clone, U: Clone> {
+pub trait CfgDepsImmut<T, TX: Clone, U: Clone> {
     /// Returns a pair containing an Arc of the configuration data and the dependencies data structure.
     /// Although the reference to self is immutable, the receiver may have interior mutability and
     /// update a configuration data cache as a result of this call.
@@ -313,7 +313,7 @@ where
     }
 }
 
-impl<T, TX, U, I> CfgDeps<T, TX, U> for InnerMut<T, TX, U, I>
+impl<T, TX, U, I> CfgDepsImmut<T, TX, U> for InnerMut<T, TX, U, I>
 where
     TX: From<T> + Clone + core::fmt::Debug,
     U: Clone,
@@ -349,11 +349,22 @@ where
     }
 }
 
-pub type CfgDepsInnerMut<T, U> = InnerMut<T, Rc<T>, U, CfgDepsRaw<T, Rc<T>, U>>;
+// Type aliases for CfgDeps.
 
-impl<T, U> CfgDepsInnerMut<T, U>
+pub type CfgDeps<T, TX, U> = InnerMut<T, TX, U, CfgDepsRaw<T, TX, U>>;
+
+pub type CfgDepsRc<T, U> = CfgDeps<T, Rc<T>, U>;
+
+pub type CfgDepsArc<T, U> = CfgDeps<T, Arc<T>, U>;
+
+pub type CfgDepsId<T, U> = CfgDeps<T, T, U>;
+
+pub type CfgDepsDefault<T, U> = CfgDepsRc<T, U>;
+
+impl<T, TX, U> CfgDeps<T, TX, U>
 where
-    T: Clone + core::fmt::Debug,
+    T: Clone,
+    TX: From<T> + Clone + core::fmt::Debug,
     U: Clone + core::fmt::Debug,
 {
     pub fn new(
