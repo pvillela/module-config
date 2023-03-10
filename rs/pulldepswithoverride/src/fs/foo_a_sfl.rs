@@ -1,7 +1,6 @@
 use super::bar_a_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fwk::{box_pin_async_fn, BoxPinFn, CfgDepsInnerMut, RefreshMode};
-use std::rc::Rc;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -53,10 +52,9 @@ pub static FOO_A_SFL_CFG_DEPS: CfgDepsInnerMut<FooSflCfgInfo, FooASflDeps> =
     )
 }
 
-fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> Rc<FooSflCfgInfo> {
+fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
     FooSflCfgInfo {
         a: app_cfg.x.clone(),
         b: app_cfg.y,
     }
-    .into()
 }

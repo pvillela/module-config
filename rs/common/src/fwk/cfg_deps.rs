@@ -4,17 +4,20 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-pub struct InnerMut<T, U, I>(RefCell<I>, PhantomData<T>, PhantomData<U>)
+pub struct InnerMut<T, TX, U, I>(RefCell<I>, PhantomData<T>, PhantomData<TX>, PhantomData<U>)
 where
-    T: Clone,
+    TX: From<T> + Clone + core::fmt::Debug,
     U: Clone,
-    I: CfgDepsMut<T, U> + Clone + core::fmt::Debug;
+    I: CfgDepsMut<T, TX, U> + Clone + core::fmt::Debug;
 
 #[derive(Clone)]
-pub struct CfgDepsStd<T, U> {
+pub struct CfgDepsRaw<T, TX, U>
+where
+    TX: From<T> + Clone + core::fmt::Debug,
+{
     src: Arc<dyn 'static + Fn() -> T + Send + Sync>,
     refresh_mode: RefreshMode,
-    cache: Cache<T>,
+    cache: Cache<TX>,
     deps: U,
 }
 
@@ -30,11 +33,11 @@ struct Cache<V> {
     value: V,
 }
 
-pub trait CfgDeps<T: Clone, U: Clone> {
+pub trait CfgDeps<T, TX: Clone, U: Clone> {
     /// Returns a pair containing an Arc of the configuration data and the dependencies data structure.
     /// Although the reference to self is immutable, the receiver may have interior mutability and
     /// update a configuration data cache as a result of this call.
-    fn get(&self) -> (T, U);
+    fn get(&self) -> (TX, U);
 
     /// Sets a static module CfgDeps with a configuration info source, refresh mode, and a dependencies data
     /// structure.
@@ -55,10 +58,10 @@ pub trait CfgDeps<T: Clone, U: Clone> {
         G: 'static + Fn(&S) -> T + Send + Sync;
 }
 
-pub trait CfgDepsMut<T: Clone, U: Clone> {
+pub trait CfgDepsMut<T, TX: Clone, U: Clone> {
     /// Returns a pair containing the configuration data and the dependencies data structure.
     /// The configuration data returned is whatever is in the cache, even if stale.
-    fn get_cached(&self) -> (T, U);
+    fn get_cached(&self) -> (TX, U);
 
     fn cache_expired(&self) -> bool;
 
@@ -66,7 +69,7 @@ pub trait CfgDepsMut<T: Clone, U: Clone> {
     /// and an indicator of whether it is true that the object was mutated.
     /// This will return the current configuration data, according to the object's cache refresh policy,
     /// with a possible change to cache state as a side-effect.
-    fn get_mut(&mut self) -> (T, U, bool);
+    fn get_mut(&mut self) -> (TX, U, bool);
 
     fn replace(&mut self, other: Self);
 
@@ -89,9 +92,9 @@ pub trait CfgDepsMut<T: Clone, U: Clone> {
         G: 'static + Fn(&S) -> T + Send + Sync;
 }
 
-impl<T, U> core::fmt::Debug for CfgDepsStd<T, U>
+impl<T, TX, U> core::fmt::Debug for CfgDepsRaw<T, TX, U>
 where
-    T: core::fmt::Debug,
+    TX: From<T> + Clone + core::fmt::Debug,
     U: core::fmt::Debug,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -103,9 +106,9 @@ where
     }
 }
 
-impl<T, U> CfgDepsStd<T, U>
+impl<T, TX, U> CfgDepsRaw<T, TX, U>
 where
-    T: Clone,
+    TX: From<T> + Clone + core::fmt::Debug,
     U: Clone,
 {
     pub fn new(
@@ -114,12 +117,12 @@ where
         deps: U,
     ) -> Self {
         let cfg = src();
-        CfgDepsStd {
+        CfgDepsRaw {
             src: Arc::new(src),
             refresh_mode,
             cache: Cache {
                 last_refresh: Instant::now(),
-                value: cfg,
+                value: cfg.into(),
             },
             deps,
         }
@@ -127,7 +130,7 @@ where
 
     /// Function to update self with a refreshed the cache.
     pub fn refresh(&mut self) {
-        let cfg_value = (self.src)();
+        let cfg_value: TX = (self.src)().into();
         let cache = Cache {
             last_refresh: Instant::now(),
             value: cfg_value.clone(),
@@ -145,12 +148,12 @@ where
     }
 }
 
-impl<T, U> CfgDepsMut<T, U> for CfgDepsStd<T, U>
+impl<T, TX, U> CfgDepsMut<T, TX, U> for CfgDepsRaw<T, TX, U>
 where
-    T: Clone,
+    TX: From<T> + Clone + core::fmt::Debug,
     U: Clone,
 {
-    fn get_cached(&self) -> (T, U) {
+    fn get_cached(&self) -> (TX, U) {
         let cfg = self.cache.value.clone();
         let deps = self.deps.clone();
         (cfg, deps)
@@ -169,7 +172,7 @@ where
         }
     }
 
-    fn get_mut(&mut self) -> (T, U, bool) {
+    fn get_mut(&mut self) -> (TX, U, bool) {
         let mutated = if self.cache_expired() {
             self.refresh();
             true
@@ -207,11 +210,11 @@ where
     }
 }
 
-impl<T, U, I> InnerMut<T, U, I>
+impl<T, TX, U, I> InnerMut<T, TX, U, I>
 where
-    T: Clone,
+    TX: From<T> + Clone + core::fmt::Debug,
     U: Clone,
-    I: CfgDepsMut<T, U> + Clone + core::fmt::Debug,
+    I: CfgDepsMut<T, TX, U> + Clone + core::fmt::Debug,
 {
     fn get_inner(&self) -> &RefCell<I> {
         let inner = &self.0;
@@ -231,7 +234,12 @@ where
     }
 
     fn new_priv(inner: I) -> Self {
-        InnerMut(RefCell::new(inner.into()), PhantomData, PhantomData)
+        InnerMut(
+            RefCell::new(inner.into()),
+            PhantomData,
+            PhantomData,
+            PhantomData,
+        )
     }
 
     pub fn new_f<F>(
@@ -260,7 +268,7 @@ where
         Self::new_priv(factory(f, g, refresh_mode, deps))
     }
 
-    pub fn get(&self) -> (T, U) {
+    pub fn get(&self) -> (TX, U) {
         let inner = self.get_inner().borrow();
         let (cfg, deps) = if inner.cache_expired() {
             let mut inner = inner.clone();
@@ -305,13 +313,13 @@ where
     }
 }
 
-impl<T, U, I> CfgDeps<T, U> for InnerMut<T, U, I>
+impl<T, TX, U, I> CfgDeps<T, TX, U> for InnerMut<T, TX, U, I>
 where
-    T: Clone,
+    TX: From<T> + Clone + core::fmt::Debug,
     U: Clone,
-    I: CfgDepsMut<T, U> + Clone + core::fmt::Debug,
+    I: CfgDepsMut<T, TX, U> + Clone + core::fmt::Debug,
 {
-    fn get(&self) -> (T, U) {
+    fn get(&self) -> (TX, U) {
         Self::get(self)
     }
 
@@ -341,7 +349,7 @@ where
     }
 }
 
-pub type CfgDepsInnerMut<T, U> = InnerMut<Rc<T>, U, CfgDepsStd<Rc<T>, U>>;
+pub type CfgDepsInnerMut<T, U> = InnerMut<T, Rc<T>, U, CfgDepsRaw<T, Rc<T>, U>>;
 
 impl<T, U> CfgDepsInnerMut<T, U>
 where
@@ -349,18 +357,18 @@ where
     U: Clone + core::fmt::Debug,
 {
     pub fn new(
-        src: impl 'static + Fn() -> Rc<T> + Send + Sync,
+        src: impl 'static + Fn() -> T + Send + Sync,
         refresh_mode: RefreshMode,
         deps: U,
     ) -> Self {
-        Self::new_f(src, refresh_mode, deps, CfgDepsStd::new)
+        Self::new_f(src, refresh_mode, deps, CfgDepsRaw::new)
     }
 
     pub fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode, deps: U) -> Self
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
-        G: 'static + Fn(&S) -> Rc<T> + Send + Sync,
+        G: 'static + Fn(&S) -> T + Send + Sync,
     {
-        Self::new_with_cfg_adapter_f(f, g, refresh_mode, deps, CfgDepsStd::new_with_cfg_adapter)
+        Self::new_with_cfg_adapter_f(f, g, refresh_mode, deps, CfgDepsRaw::new_with_cfg_adapter)
     }
 }
