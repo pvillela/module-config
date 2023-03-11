@@ -1,18 +1,9 @@
 use std::sync::Arc;
 
-use crate::fs::{foo_a_sfl, FooAIn, FooAOut};
-use actix_web::{
-    body::BoxBody, http::header::ContentType, web, HttpRequest, HttpResponse, Responder,
-};
+use crate::fs::foo_a_sfl;
+use actix_web::{body::BoxBody, http::header::ContentType, web, HttpResponse, Responder};
+use common::fs_data::{FooAIn, FooAOut};
 use futures::Future;
-
-impl Responder for FooAOut {
-    type Body = BoxBody;
-
-    fn respond_to(self, _req: &HttpRequest) -> HttpResponse<Self::Body> {
-        common_respond_to(self)
-    }
-}
 
 // pub async fn foo_handler(info: web::Json<FooAIn>) -> FooAOut {
 //     let input = info.into_inner();

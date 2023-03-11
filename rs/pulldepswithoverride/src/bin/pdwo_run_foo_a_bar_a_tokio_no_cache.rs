@@ -6,7 +6,7 @@ use tokio;
 
 #[tokio::main]
 async fn main() {
-    println!("===== pdv_run_foo_a_bar_a_tokio_no_cache =====");
+    println!("===== pdwo_run_foo_a_bar_a_tokio_no_cache =====");
 
     FOO_A_SFL_CFG_DEPS
         .with(|c| c.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(0))));

@@ -1,9 +1,9 @@
 use common::{
+    fs_data::{FooAIn, FooAOut},
     fs_util::foo_core,
     fwk::{BoxPinFn, CfgDepsArc},
 };
 use once_cell::sync::OnceCell;
-use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -16,17 +16,6 @@ pub struct FooASflCfgInfo {
 #[derive(Clone)]
 pub struct FooASflDeps {
     pub bar_a_bf: BoxPinFn<u64, String>,
-}
-
-#[derive(Deserialize)]
-pub struct FooAIn {
-    pub sleep_millis: u64,
-}
-
-#[allow(unused)]
-#[derive(Serialize)]
-pub struct FooAOut {
-    pub res: String,
 }
 
 pub static FOO_A_SFL_CFG_DEPS: OnceCell<CfgDepsArc<FooASflCfgInfo, FooASflDeps>> = OnceCell::new();
