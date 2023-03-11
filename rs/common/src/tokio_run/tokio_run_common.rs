@@ -1,6 +1,6 @@
-use common::config::{initialize_app_configuration, refresh_app_configuration};
-use common::fs_data::{FooAIn, FooAOut};
-use common::fwk::BoxPinFn;
+use crate::config::{initialize_app_configuration, refresh_app_configuration};
+use crate::fs_data::{FooAIn, FooAOut};
+use crate::fwk::BoxPinFn;
 use futures::future::join_all;
 use std::time::{Duration, Instant};
 use tokio;

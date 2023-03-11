@@ -1,8 +1,6 @@
 use common::fwk::{box_pin_async_fn, RefreshMode};
-use pulldepswithoverride::{
-    fs::{foo_a_sfl, BAR_A_BF_CFG_DEPS, FOO_A_SFL_CFG_DEPS},
-    tokio_run_common::{run, RunIn},
-};
+use common::tokio_run::{run, RunIn};
+use pulldepswithoverride::fs::{foo_a_sfl, BAR_A_BF_CFG_DEPS, FOO_A_SFL_CFG_DEPS};
 use std::time::Duration;
 use tokio;
 
