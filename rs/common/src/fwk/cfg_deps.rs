@@ -38,7 +38,8 @@ impl<I: Clone> InnerMut<I> for ArcSwap<I> {
     }
 
     fn with<V>(&self, f: impl Fn(&I) -> V) -> V {
-        f(self.load().as_ref())
+        let x = self.load();
+        f(&x)
     }
 }
 
@@ -63,8 +64,8 @@ impl<I: Clone> InnerMut<I> for RefCell<I> {
     }
 
     fn with<V>(&self, f: impl Fn(&I) -> V) -> V {
-        let x = &self.borrow();
-        f(x)
+        let x = self.borrow();
+        f(&x)
     }
 }
 
