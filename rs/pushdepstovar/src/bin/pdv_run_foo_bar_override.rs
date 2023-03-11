@@ -1,31 +1,28 @@
-use pushdepstovar::config::refresh_app_configuration;
+use common::config::refresh_app_configuration;
+use common::fwk::{CfgDepsArc, RefreshMode};
 use pushdepstovar::fs::{
     bar_bf, foo_sfl, BarBfCfgInfo, FooSflCfgInfo, FooSflDeps, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS,
 };
-use pushdepstovar::fwk::CfgDeps;
-use std::sync::Arc;
 use std::thread;
 
 fn main() {
-    CfgDeps::set(
+    CfgDepsArc::set(
         &FOO_SFL_CFG_DEPS,
-        || {
-            Arc::new(FooSflCfgInfo {
-                a: "foo_override".to_owned(),
-                b: 11,
-            })
+        || FooSflCfgInfo {
+            a: "foo_override".to_owned(),
+            b: 11,
         },
+        RefreshMode::NoRefresh,
         FooSflDeps { bar_bf },
     );
 
-    CfgDeps::set(
+    CfgDepsArc::set(
         &BAR_BF_CFG_DEPS,
-        || {
-            Arc::new(BarBfCfgInfo {
-                u: 33,
-                v: "bar_override".to_owned(),
-            })
+        || BarBfCfgInfo {
+            u: 33,
+            v: "bar_override".to_owned(),
         },
+        RefreshMode::NoRefresh,
         (),
     );
 

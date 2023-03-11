@@ -1,4 +1,4 @@
-use crate::fwk::{BoxPinFn, CfgDeps};
+use common::fwk::{BoxPinFn, CfgDepsArc};
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
@@ -10,6 +10,7 @@ pub struct FooASflCfgInfo {
     pub b: i32,
 }
 
+#[derive(Clone)]
 pub struct FooASflDeps {
     pub bar_a_bf: BoxPinFn<u64, String>,
 }
@@ -25,12 +26,12 @@ pub struct FooAOut {
     pub res: String,
 }
 
-pub static FOO_A_SFL_CFG_DEPS: OnceCell<CfgDeps<FooASflCfgInfo, FooASflDeps>> = OnceCell::new();
+pub static FOO_A_SFL_CFG_DEPS: OnceCell<CfgDepsArc<FooASflCfgInfo, FooASflDeps>> = OnceCell::new();
 
 pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     let FooAIn { sleep_millis } = input;
     sleep(Duration::from_millis(sleep_millis)).await;
-    let (cfg, FooASflDeps { bar_a_bf }) = CfgDeps::get(&FOO_A_SFL_CFG_DEPS);
+    let (cfg, FooASflDeps { bar_a_bf }) = CfgDepsArc::get_from_once_cell(&FOO_A_SFL_CFG_DEPS);
     let a = cfg.a.clone() + "-foo";
     let b = cfg.b + 3;
     let res = format!("fooSfl(): a={}, b={}, bar=({})", a, b, bar_a_bf(0).await);

@@ -1,5 +1,6 @@
 use actix_web::{web, App, HttpServer};
-use pushdepstovar::{fs::foo_a_sfl, fwk::handler_of, startup::init_a_refreshable};
+use common::web::handler_of;
+use pushdepstovar::{fs::foo_a_sfl, startup::init_a_refreshable};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

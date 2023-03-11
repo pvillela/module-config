@@ -1,8 +1,7 @@
 use super::{bar_a_bf_init_no_refresh, bar_a_bf_init_refreshable};
-use crate::config::AppCfgInfo;
 use crate::fs::{bar_a_bf, FooASflCfgInfo, FooASflDeps, FOO_A_SFL_CFG_DEPS};
-use crate::fwk::box_pin_async_fn;
-use crate::fwk::{CfgDeps, RefreshMode};
+use common::config::AppCfgInfo;
+use common::fwk::{box_pin_async_fn, CfgDepsArc, RefreshMode};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -18,7 +17,7 @@ fn foo_a_sfl_adapt_cfg_src(
     refresh_mode: RefreshMode,
     deps: FooASflDeps,
 ) {
-    CfgDeps::set_with_cfg_adapter(
+    CfgDepsArc::set_with_cfg_adapter(
         &FOO_A_SFL_CFG_DEPS,
         origin,
         foo_a_sfl_cfg_adapter,

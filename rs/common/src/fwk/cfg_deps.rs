@@ -166,12 +166,11 @@ pub trait CfgDepsMut<T, TX: Clone, U: Clone> {
 impl<T, TX, U> core::fmt::Debug for CfgDepsRaw<T, TX, U>
 where
     TX: From<T> + Clone + core::fmt::Debug,
-    U: core::fmt::Debug,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let txt = format!(
-            "<refresh_mode: {:?}, cache: {:?}, deps: {:?}>",
-            self.refresh_mode, self.cache, self.deps,
+            "<refresh_mode: {:?}, cache: {:?}>",
+            self.refresh_mode, self.cache,
         );
         f.write_str(&txt)
     }
@@ -442,13 +441,15 @@ pub type CfgDepsRefCellId<T, U> = CfgDepsRefCell<T, T, U>;
 
 pub type CfgDepsArcSwapId<T, U> = CfgDepsArcSwap<T, T, U>;
 
+pub type CfgDepsArc<T, U> = CfgDepsArcSwapArc<T, U>;
+
 pub type CfgDepsDefault<T, U> = CfgDepsArcSwapArc<T, U>;
 
 impl<T, TX, U, IM> CfgDeps<T, TX, U, IM>
 where
     T: Clone,
     TX: From<T> + Clone + core::fmt::Debug,
-    U: Clone + core::fmt::Debug,
+    U: Clone,
     IM: InnerMut<CfgDepsRaw<T, TX, U>>,
 {
     pub fn new(

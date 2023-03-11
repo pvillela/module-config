@@ -1,6 +1,6 @@
-use crate::config::AppCfgInfo;
 use crate::fs::{BarABfCfgInfo, BAR_A_BF_CFG_DEPS};
-use crate::fwk::{CfgDeps, RefreshMode};
+use common::config::AppCfgInfo;
+use common::fwk::{CfgDepsArc, RefreshMode};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -16,7 +16,7 @@ fn bar_abf_adapt_cfg_src(
     refresh_mode: RefreshMode,
     deps: (),
 ) {
-    CfgDeps::set_with_cfg_adapter(
+    CfgDepsArc::set_with_cfg_adapter(
         &BAR_A_BF_CFG_DEPS,
         origin,
         bar_abf_cfg_adapter,

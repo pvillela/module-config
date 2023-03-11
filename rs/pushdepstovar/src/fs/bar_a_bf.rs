@@ -1,4 +1,4 @@
-use crate::fwk::CfgDeps;
+use common::fwk::CfgDepsArc;
 use once_cell::sync::OnceCell;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -9,11 +9,11 @@ pub struct BarABfCfgInfo {
     pub v: String,
 }
 
-pub static BAR_A_BF_CFG_DEPS: OnceCell<CfgDeps<BarABfCfgInfo, ()>> = OnceCell::new();
+pub static BAR_A_BF_CFG_DEPS: OnceCell<CfgDepsArc<BarABfCfgInfo, ()>> = OnceCell::new();
 
 pub async fn bar_a_bf(sleep_millis: u64) -> String {
     sleep(Duration::from_millis(sleep_millis)).await;
-    let (cfg, _) = CfgDeps::get(&BAR_A_BF_CFG_DEPS);
+    let (cfg, _) = CfgDepsArc::get_from_once_cell(&BAR_A_BF_CFG_DEPS);
     let u = cfg.u + 1;
     let v = cfg.v.clone() + "-bar";
     format!("barBf(): u={}, v={}", u, v)
