@@ -1,5 +1,6 @@
 use super::bar_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
+use common::fs_util::foo_core;
 use common::fwk::{CfgDepsDefault, RefreshMode};
 
 type FooSflCfgInfo = common::fs_data::FooSflCfgInfo;
@@ -11,9 +12,10 @@ pub struct FooSflDeps {
 
 pub fn foo_sfl() -> String {
     let (cfg, FooSflDeps { bar_bf }) = FOO_SFL_CFG_DEPS.with(|c| c.get());
-    let a = cfg.a.clone() + "-foo";
-    let b = cfg.b + 3;
-    format!("fooSfl(): a={}, b={}, bar=({})", a, b, bar_bf())
+    let a = cfg.a.clone();
+    let b = cfg.b;
+    let bar_ret = bar_bf();
+    foo_core(a, b, bar_ret)
 }
 
 thread_local! {

@@ -1,5 +1,6 @@
 use super::bar_a_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
+use common::fs_util::foo_core;
 use common::fwk::{box_pin_async_fn, BoxPinFn, CfgDepsDefault, RefreshMode};
 use std::time::Duration;
 use tokio::time::sleep;
@@ -24,18 +25,16 @@ impl std::fmt::Debug for FooASflDeps {
 pub async fn foo_a_sfl(input: FooIn) -> FooOut {
     let FooIn { sleep_millis } = input;
     sleep(Duration::from_millis(sleep_millis)).await;
-    let (a, b, d) = {
+    // Block below used as workaround for case when CfgDepsDefault is based on Rc (instead of Arc)
+    // to make compiler see the Rc is dropped before it leaks into the Future.
+    let (a, b, bar) = {
         let (cfg, d) = FOO_A_SFL_CFG_DEPS.with(CfgDepsDefault::get);
-        let a = cfg.a.clone() + "-foo";
-        let b = cfg.b + 3;
-        (a, b, d)
+        let a = cfg.a.clone();
+        let b = cfg.b;
+        (a, b, d.bar_a_bf)
     };
-    let res = format!(
-        "fooSfl(): a={}, b={}, bar=({})",
-        a,
-        b,
-        (d.bar_a_bf)(0).await
-    );
+    let bar_res = bar(0).await;
+    let res = foo_core(a, b, bar_res);
     FooOut { res }
 }
 

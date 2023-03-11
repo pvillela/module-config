@@ -1,4 +1,4 @@
-use common::fwk::CfgDepsArc;
+use common::{fs_util::foo_core, fwk::CfgDepsArc};
 use once_cell::sync::OnceCell;
 
 #[derive(Debug, Clone)]
@@ -16,7 +16,8 @@ pub static FOO_SFL_CFG_DEPS: OnceCell<CfgDepsArc<FooSflCfgInfo, FooSflDeps>> = O
 
 pub fn foo_sfl() -> String {
     let (cfg, FooSflDeps { bar_bf }) = CfgDepsArc::get_from_once_cell(&FOO_SFL_CFG_DEPS);
-    let a = cfg.a.clone() + "-foo";
-    let b = cfg.b + 3;
-    format!("fooSfl(): a={}, b={}, bar=({})", a, b, bar_bf())
+    let a = cfg.a.clone();
+    let b = cfg.b;
+    let bar_res = bar_bf();
+    foo_core(a, b, bar_res)
 }

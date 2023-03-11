@@ -444,7 +444,9 @@ pub type CfgDepsArcSwapId<T, U> = CfgDepsArcSwap<T, T, U>;
 
 pub type CfgDepsArc<T, U> = CfgDepsArcSwapArc<T, U>;
 
-pub type CfgDepsDefault<T, U> = CfgDepsArcSwapArc<T, U>;
+// pub type CfgDepsDefault<T, U> = CfgDepsArcSwapArc<T, U>;
+// pub type CfgDepsDefault<T, U> = CfgDepsRefCellArc<T, U>;
+pub type CfgDepsDefault<T, U> = CfgDepsRefCellRc<T, U>;
 
 impl<T, TX, U, IM> CfgDeps<T, TX, U, IM>
 where
