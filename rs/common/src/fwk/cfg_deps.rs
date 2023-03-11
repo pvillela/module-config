@@ -1,14 +1,85 @@
+use arc_swap::ArcSwap;
 use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-pub struct InnerMut<T, TX, U, I>(RefCell<I>, PhantomData<T>, PhantomData<TX>, PhantomData<U>)
+pub trait InnerMut<I> {
+    fn get_inner(&self) -> &Self;
+
+    fn get_inner_clone(&self) -> I;
+
+    fn set_inner(&self, inner: I);
+
+    fn from(_: I) -> Self;
+
+    fn with<V>(&self, _: impl Fn(&I) -> V) -> V;
+}
+
+impl<I: Clone> InnerMut<I> for ArcSwap<I> {
+    fn get_inner(&self) -> &Self {
+        self
+    }
+
+    fn get_inner_clone(&self) -> I {
+        let inner = self.get_inner();
+        let inner = inner.load().as_ref().clone();
+        inner
+    }
+
+    fn set_inner(&self, inner: I) {
+        // println!("<<< set_inner: {:?}", inner);
+        self.store(Arc::new(inner));
+    }
+
+    fn from(x: I) -> Self {
+        ArcSwap::new(Arc::new(x))
+    }
+
+    fn with<V>(&self, f: impl Fn(&I) -> V) -> V {
+        f(self.load().as_ref())
+    }
+}
+
+impl<I: Clone> InnerMut<I> for RefCell<I> {
+    fn get_inner(&self) -> &Self {
+        self
+    }
+
+    fn get_inner_clone(&self) -> I {
+        let inner = self.get_inner();
+        let inner = inner.borrow().clone();
+        inner
+    }
+
+    fn set_inner(&self, inner: I) {
+        // println!("<<< set_inner: {:?}", inner);
+        self.replace(inner);
+    }
+
+    fn from(x: I) -> Self {
+        RefCell::new(x)
+    }
+
+    fn with<V>(&self, f: impl Fn(&I) -> V) -> V {
+        let x = &self.borrow();
+        f(x)
+    }
+}
+
+pub struct CfgDepsInnerMut<T, TX, U, I, IM>(
+    IM,
+    PhantomData<T>,
+    PhantomData<TX>,
+    PhantomData<U>,
+    PhantomData<I>,
+)
 where
     TX: From<T> + Clone + core::fmt::Debug,
     U: Clone,
-    I: CfgDepsMut<T, TX, U> + Clone + core::fmt::Debug;
+    I: CfgDepsMut<T, TX, U> + Clone + core::fmt::Debug,
+    IM: InnerMut<I>;
 
 #[derive(Clone)]
 pub struct CfgDepsRaw<T, TX, U>
@@ -210,32 +281,29 @@ where
     }
 }
 
-impl<T, TX, U, I> InnerMut<T, TX, U, I>
+impl<T, TX, U, I, IM> CfgDepsInnerMut<T, TX, U, I, IM>
 where
     TX: From<T> + Clone + core::fmt::Debug,
     U: Clone,
     I: CfgDepsMut<T, TX, U> + Clone + core::fmt::Debug,
+    IM: InnerMut<I>,
 {
-    fn get_inner(&self) -> &RefCell<I> {
-        let inner = &self.0;
-        // println!(">>> get_inner: {:?}", inner);
-        inner
+    fn get_inner(&self) -> &IM {
+        self.0.get_inner()
     }
 
     fn get_inner_clone(&self) -> I {
-        let inner = self.get_inner();
-        let inner = inner.borrow().clone();
-        inner
+        self.0.get_inner_clone()
     }
 
     fn set_inner(&self, inner: I) {
-        // println!("<<< set_inner: {:?}", inner);
-        self.0.replace(inner);
+        self.0.set_inner(inner);
     }
 
     fn new_priv(inner: I) -> Self {
-        InnerMut(
-            RefCell::new(inner.into()),
+        CfgDepsInnerMut(
+            IM::from(inner),
+            PhantomData,
             PhantomData,
             PhantomData,
             PhantomData,
@@ -269,16 +337,18 @@ where
     }
 
     pub fn get(&self) -> (TX, U) {
-        let inner = self.get_inner().borrow();
-        let (cfg, deps) = if inner.cache_expired() {
-            let mut inner = inner.clone();
-            let (cfg, deps, _) = inner.get_mut();
-            self.set_inner(inner);
-            (cfg, deps)
-        } else {
-            inner.get_cached()
+        let inner = self.get_inner();
+        let f = move |inner: &I| -> (TX, U) {
+            if inner.cache_expired() {
+                let mut inner = inner.clone();
+                let (cfg, deps, _) = inner.get_mut();
+                self.set_inner(inner);
+                (cfg, deps)
+            } else {
+                inner.get_cached()
+            }
         };
-        (cfg, deps)
+        inner.with(f)
     }
 
     /// Updates the receiver with a configuration info source, refresh mode, and a dependencies data
@@ -313,11 +383,12 @@ where
     }
 }
 
-impl<T, TX, U, I> CfgDepsImmut<T, TX, U> for InnerMut<T, TX, U, I>
+impl<T, TX, U, I, IM> CfgDepsImmut<T, TX, U> for CfgDepsInnerMut<T, TX, U, I, IM>
 where
     TX: From<T> + Clone + core::fmt::Debug,
     U: Clone,
     I: CfgDepsMut<T, TX, U> + Clone + core::fmt::Debug,
+    IM: InnerMut<I>,
 {
     fn get(&self) -> (TX, U) {
         Self::get(self)
@@ -351,21 +422,34 @@ where
 
 // Type aliases for CfgDeps.
 
-pub type CfgDeps<T, TX, U> = InnerMut<T, TX, U, CfgDepsRaw<T, TX, U>>;
+pub type CfgDeps<T, TX, U, IM> = CfgDepsInnerMut<T, TX, U, CfgDepsRaw<T, TX, U>, IM>;
 
-pub type CfgDepsRc<T, U> = CfgDeps<T, Rc<T>, U>;
+pub type CfgDepsRefCell<T, TX, U> =
+    CfgDepsInnerMut<T, TX, U, CfgDepsRaw<T, TX, U>, RefCell<CfgDepsRaw<T, TX, U>>>;
 
-pub type CfgDepsArc<T, U> = CfgDeps<T, Arc<T>, U>;
+pub type CfgDepsArcSwap<T, TX, U> =
+    CfgDepsInnerMut<T, TX, U, CfgDepsRaw<T, TX, U>, ArcSwap<CfgDepsRaw<T, TX, U>>>;
 
-pub type CfgDepsId<T, U> = CfgDeps<T, T, U>;
+pub type CfgDepsRefCellRc<T, U> = CfgDepsRefCell<T, Rc<T>, U>;
 
-pub type CfgDepsDefault<T, U> = CfgDepsRc<T, U>;
+pub type CfgDepsArcSwapRc<T, U> = CfgDepsArcSwap<T, Rc<T>, U>;
 
-impl<T, TX, U> CfgDeps<T, TX, U>
+pub type CfgDepsRefCellArc<T, U> = CfgDepsRefCell<T, Arc<T>, U>;
+
+pub type CfgDepsArcSwapArc<T, U> = CfgDepsArcSwap<T, Arc<T>, U>;
+
+pub type CfgDepsRefCellId<T, U> = CfgDepsRefCell<T, T, U>;
+
+pub type CfgDepsArcSwapId<T, U> = CfgDepsArcSwap<T, T, U>;
+
+pub type CfgDepsDefault<T, U> = CfgDepsArcSwapArc<T, U>;
+
+impl<T, TX, U, IM> CfgDeps<T, TX, U, IM>
 where
     T: Clone,
     TX: From<T> + Clone + core::fmt::Debug,
     U: Clone + core::fmt::Debug,
+    IM: InnerMut<CfgDepsRaw<T, TX, U>>,
 {
     pub fn new(
         src: impl 'static + Fn() -> T + Send + Sync,
