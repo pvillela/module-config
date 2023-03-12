@@ -1,13 +1,12 @@
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
 use common::fwk::{box_pin_async_fn, BoxPinFn, CfgDepsArcSwapArc};
-use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
 pub type FooASflT = BoxPinFn<FooAIn, FooAOut>;
 
-pub type FooASflCfgDeps = Arc<CfgDepsArcSwapArc<FooASflCfgInfo, FooASflDeps>>;
+pub type FooASflCfgDeps = CfgDepsArcSwapArc<FooASflCfgInfo, FooASflDeps>;
 
 #[derive(Clone)]
 pub struct FooASflDeps {
@@ -25,13 +24,13 @@ pub struct FooSflDeps {
     pub bar_bf: fn() -> String,
 }
 
-pub fn foo_a_sfl_c(cfg_deps: FooASflCfgDeps) -> FooASflT {
+pub fn foo_a_sfl_c(cfg_deps: &FooASflCfgDeps) -> FooASflT {
+    let cfg_deps = cfg_deps.clone();
     let f = move |input: FooAIn| {
-        let cfg_deps = cfg_deps.clone();
+        let (c, d) = cfg_deps.get();
         async move {
             let FooAIn { sleep_millis } = input;
             sleep(Duration::from_millis(sleep_millis)).await;
-            let (c, d) = cfg_deps.get();
             let a = c.a.clone();
             let b = c.b;
             let bar_res = (d.bar_a_bf)(0).await;

@@ -383,6 +383,19 @@ where
     }
 }
 
+impl<T, TX, U, I, IM> Clone for CfgDepsInnerMut<T, TX, U, I, IM>
+where
+    TX: From<T> + Clone + core::fmt::Debug,
+    U: Clone,
+    I: CfgDepsMut<T, TX, U> + Clone + core::fmt::Debug,
+    IM: InnerMut<I>,
+{
+    fn clone(&self) -> Self {
+        let inner = self.get_inner_clone();
+        Self::new_priv(inner)
+    }
+}
+
 impl<T, TX, U, I, IM> CfgDepsImmut<T, TX, U> for CfgDepsInnerMut<T, TX, U, I, IM>
 where
     TX: From<T> + Clone + core::fmt::Debug,
