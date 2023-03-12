@@ -838,6 +838,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "pushdepstovar_c"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "arc-swap",
+ "futures",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "pushdepstovar_o"
 version = "0.1.0"
 dependencies = [
