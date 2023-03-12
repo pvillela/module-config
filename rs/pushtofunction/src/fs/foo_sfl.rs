@@ -1,11 +1,10 @@
+use common::fs_data::FooSflCfgInfo;
 use common::fs_util::foo_core;
-use common::fwk::{CfgDepsDefault, CfgDepsMut};
-
-type FooSflCfgInfo = common::fs_data::FooSflCfgInfo;
+use common::fwk::CfgDepsDefault;
 
 pub type FooSflT = Box<dyn FnMut() -> String>;
 
-type FooSflCfgDeps = CfgDepsDefault<FooSflCfgInfo, FooSflDeps>;
+pub type FooSflCfgDeps = CfgDepsDefault<FooSflCfgInfo, FooSflDeps>;
 
 #[derive(Clone, Debug)]
 pub struct FooSflDeps {
@@ -13,9 +12,8 @@ pub struct FooSflDeps {
 }
 
 pub fn foo_sfl_c(cfg_deps: FooSflCfgDeps) -> FooSflT {
-    let mut x = cfg_deps.get_inner_clone();
     let f = move || {
-        let (cfg, deps, _) = x.get_mut();
+        let (cfg, deps) = cfg_deps.get();
         let a = cfg.a.clone();
         let b = cfg.b;
         let bar_bf = deps.bar_bf;

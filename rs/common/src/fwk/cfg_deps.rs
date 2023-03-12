@@ -182,7 +182,7 @@ where
     TX: From<T> + Clone + core::fmt::Debug,
     U: Clone,
 {
-    pub fn new(
+    fn new(
         src: impl 'static + Fn() -> T + Send + Sync,
         refresh_mode: RefreshMode,
         deps: U,
@@ -200,7 +200,7 @@ where
     }
 
     /// Function to update self with a refreshed the cache.
-    pub fn refresh(&mut self) {
+    fn refresh(&mut self) {
         let cfg_value: TX = (self.src)().into();
         let cache = Cache {
             last_refresh: Instant::now(),
@@ -209,7 +209,7 @@ where
         self.cache = cache;
     }
 
-    pub fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode, deps: U) -> Self
+    fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode, deps: U) -> Self
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
