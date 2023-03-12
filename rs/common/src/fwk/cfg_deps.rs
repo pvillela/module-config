@@ -288,11 +288,11 @@ where
     I: CfgDepsMut<T, TX, U> + Clone + core::fmt::Debug,
     IM: InnerMut<I>,
 {
-    pub fn get_inner(&self) -> &IM {
+    fn get_inner(&self) -> &IM {
         self.0.get_inner()
     }
 
-    pub fn get_inner_clone(&self) -> I {
+    fn get_inner_clone(&self) -> I {
         self.0.get_inner_clone()
     }
 
