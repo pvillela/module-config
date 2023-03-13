@@ -8,7 +8,7 @@ pub type BarBfCfgDeps = CfgDepsDefault<BarBfCfgInfo, ()>;
 
 pub fn bar_bf_c(cfg_deps: BarBfCfgDeps) -> BarBfT {
     let f = move || {
-        let (cfg, _) = cfg_deps.get();
+        let (cfg, _) = cfg_deps.get_cfg_deps();
         let u = cfg.u;
         let v = cfg.v.clone();
         bar_core(u, v)

@@ -16,7 +16,7 @@ pub struct FooSflDeps {
 pub fn bar_a_bf_c(cfg_deps: &BarABfCfgDeps) -> BarASflT {
     let cfg_deps = cfg_deps.clone();
     let f = move |sleep_millis: u64| {
-        let (cfg, _) = cfg_deps.get();
+        let (cfg, _) = cfg_deps.get_cfg_deps();
         async move {
             sleep(Duration::from_millis(sleep_millis)).await;
             let u = cfg.u;

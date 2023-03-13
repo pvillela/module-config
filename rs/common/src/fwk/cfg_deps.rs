@@ -101,7 +101,7 @@ pub trait CfgDepsImmut<T, TX: Clone, U: Clone> {
     /// Returns a pair containing an Arc of the configuration data and the dependencies data structure.
     /// Although the reference to self is immutable, the receiver may have interior mutability and
     /// update a configuration data cache as a result of this call.
-    fn get(&self) -> (TX, U) {
+    fn get_cfg_deps(&self) -> (TX, U) {
         (self.get_cfg(), self.get_deps())
     }
 
@@ -279,8 +279,8 @@ where
     IM: InnerMut<I>,
 {
     // I don't understand why I have to do this as this method is defined in trait CfgDepsImmut.
-    pub fn get(&self) -> (TX, U) {
-        CfgDepsImmut::get(self)
+    pub fn get_cfg_deps(&self) -> (TX, U) {
+        CfgDepsImmut::get_cfg_deps(self)
     }
 
     fn get_inner(&self) -> &IM {

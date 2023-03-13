@@ -13,7 +13,7 @@ pub struct FooSflDeps {
 
 pub fn foo_sfl_c(cfg_deps: FooSflCfgDeps) -> FooSflT {
     let f = move || {
-        let (cfg, deps) = cfg_deps.get();
+        let (cfg, deps) = cfg_deps.get_cfg_deps();
         let a = cfg.a.clone();
         let b = cfg.b;
         let bar_bf = deps.bar_bf;

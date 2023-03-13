@@ -28,7 +28,7 @@ pub async fn foo_a_sfl(input: FooIn) -> FooOut {
     // Block below used as workaround for case when CfgDepsDefault is based on Rc (instead of Arc)
     // to make compiler see the Rc is dropped before it leaks into the Future.
     let (a, b, bar) = {
-        let (cfg, d) = FOO_A_SFL_CFG_DEPS.with(CfgDepsDefault::get);
+        let (cfg, d) = FOO_A_SFL_CFG_DEPS.with(CfgDepsDefault::get_cfg_deps);
         let a = cfg.a.clone();
         let b = cfg.b;
         (a, b, d.bar_a_bf)
