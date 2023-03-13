@@ -8,11 +8,6 @@ pub type BarASflT = BoxPinFn<u64, String>;
 
 pub type BarABfCfgDeps = CfgDepsArcSwapArc<BarABfCfgInfo, ()>;
 
-#[derive(Clone, Debug)]
-pub struct FooSflDeps {
-    pub bar_bf: fn() -> String,
-}
-
 pub fn bar_a_bf_c(cfg_deps: &BarABfCfgDeps) -> BarASflT {
     let cfg_deps = cfg_deps.clone();
     let f = move |sleep_millis: u64| {

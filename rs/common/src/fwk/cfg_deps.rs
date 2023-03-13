@@ -481,3 +481,31 @@ where
         Self::new_with_cfg_adapter_f(f, g, refresh_mode, deps, CfgDepsRaw::new_with_cfg_adapter)
     }
 }
+
+impl<T, TX, U, IM> CfgDeps<T, TX, U, IM>
+where
+    T: 'static + Clone + Send + Sync,
+    TX: From<T> + Clone + core::fmt::Debug,
+    U: Clone,
+    IM: InnerMut<CfgDepsRaw<T, TX, U>>,
+{
+    pub fn new_with_const_or_cfg_adapter<S, F, G>(
+        k: Option<&'static T>,
+        f: F,
+        g: G,
+        refresh_mode: RefreshMode,
+        deps: U,
+    ) -> Self
+    where
+        F: 'static + Fn() -> Arc<S> + Send + Sync,
+        G: 'static + Fn(&S) -> T + Send + Sync,
+    {
+        match k {
+            Some(k) => {
+                let src = move || k.clone();
+                Self::new(src, refresh_mode, deps)
+            }
+            None => Self::new_with_cfg_adapter(f, g, refresh_mode, deps),
+        }
+    }
+}

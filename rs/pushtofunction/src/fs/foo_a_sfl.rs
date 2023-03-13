@@ -19,11 +19,6 @@ pub struct FooASflDeps {
 //     }
 // }
 
-#[derive(Clone, Debug)]
-pub struct FooSflDeps {
-    pub bar_bf: fn() -> String,
-}
-
 pub fn foo_a_sfl_c(cfg_deps: &FooASflCfgDeps) -> FooASflT {
     let cfg_deps = cfg_deps.clone();
     let f = move |input: FooAIn| {
