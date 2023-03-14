@@ -287,6 +287,16 @@ where
     IM: InnerMut<I>,
 {
     // I don't understand why I have to do this as this method is defined in trait CfgDepsImmut.
+    pub fn get_cfg(&self) -> TX {
+        CfgDepsImmut::get_cfg(self)
+    }
+
+    // I don't understand why I have to do this as this method is defined in trait CfgDepsImmut.
+    pub fn get_deps(&self) -> U {
+        CfgDepsImmut::get_deps(self)
+    }
+
+    // I don't understand why I have to do this as this method is defined in trait CfgDepsImmut.
     pub fn get_cfg_deps(&self) -> (TX, U) {
         CfgDepsImmut::get_cfg_deps(self)
     }
