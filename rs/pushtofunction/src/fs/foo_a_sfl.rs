@@ -19,8 +19,7 @@ pub struct FooASflDeps {
 //     }
 // }
 
-pub fn foo_a_sfl_c(cfg_deps: &FooASflCfgDeps) -> FooASflT {
-    let cfg_deps = cfg_deps.clone();
+pub fn foo_a_sfl_c(cfg_deps: FooASflCfgDeps) -> FooASflT {
     let f = move |input: FooAIn| {
         let (c, d) = cfg_deps.get_cfg_deps();
         async move {

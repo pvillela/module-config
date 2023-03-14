@@ -8,8 +8,7 @@ pub type BarASflT = ArcPinFn<u64, String>;
 
 pub type BarABfCfgDeps = CfgDepsArcSwapArc<BarABfCfgInfo, ()>;
 
-pub fn bar_a_bf_c(cfg_deps: &BarABfCfgDeps) -> BarASflT {
-    let cfg_deps = cfg_deps.clone();
+pub fn bar_a_bf_c(cfg_deps: BarABfCfgDeps) -> BarASflT {
     let f = move |sleep_millis: u64| {
         let (cfg, _) = cfg_deps.get_cfg_deps();
         async move {
