@@ -1,4 +1,4 @@
-use common::fwk::{box_pin_async_fn, RefreshMode};
+use common::fwk::{arc_pin_async_fn, RefreshMode};
 use common::tokio_run::{run, RunIn};
 use pulldepswithoverride::fs::{foo_a_sfl, BAR_A_BF_CFG_DEPS, FOO_A_SFL_CFG_DEPS};
 use std::time::Duration;
@@ -15,7 +15,7 @@ async fn main() {
 
     println!("\n*** run -- total 80 ms sleep time, 10_000 concurrency, 100 repeats");
     run(RunIn {
-        foo_a_sfl: box_pin_async_fn(foo_a_sfl),
+        foo_a_sfl: arc_pin_async_fn(foo_a_sfl),
         unit_time_millis: 10,
         app_cfg_first_refresh_units: 1,
         app_cfg_refresh_delta_units: 1,
