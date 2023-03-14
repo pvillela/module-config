@@ -9,14 +9,18 @@ fn main() {
     BAR_BF_CFG_DEPS
         .with(|c| c.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(60))));
 
-    let handle = thread::spawn(move || foo_sfl());
-    let res = handle.join().unwrap();
-    println!("{}", res);
+    // Everything going on in one thread because the static cfg deps variables are thread-local.
+    let handle = thread::spawn(move || {
+        let res = foo_sfl();
+        println!("{}", res);
 
-    refresh_app_configuration();
-    println!("App configuration refreshed -- there should be no difference in output.");
+        thread::sleep(Duration::from_millis(30));
 
-    let handle = thread::spawn(move || foo_sfl());
-    let res = handle.join().unwrap();
-    println!("{}", res);
+        refresh_app_configuration();
+        println!("App configuration refreshed -- there should be no difference in output.");
+
+        let res = foo_sfl();
+        println!("{}", res);
+    });
+    let _ = handle.join().unwrap();
 }

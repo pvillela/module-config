@@ -222,16 +222,24 @@ where
     }
 
     fn cache_expired(&self) -> bool {
-        match self.refresh_mode {
+        // println!("refresh_mode={:?}", self.refresh_mode);
+        let res = match self.refresh_mode {
             RefreshMode::NoRefresh => false,
             RefreshMode::Refreshable(cache_ttl) => {
+                // println!(
+                //     "cache.last_refresh.elapsed()={:?}, cache_ttl={:?}",
+                //     self.cache.last_refresh.elapsed(),
+                //     cache_ttl
+                // );
                 if self.cache.last_refresh.elapsed() > cache_ttl {
                     true
                 } else {
                     false
                 }
             }
-        }
+        };
+        // println!("cache_expired={}", res);
+        res
     }
 
     fn get_cfg(&mut self) -> TX {
@@ -385,17 +393,21 @@ where
 {
     fn get_cfg(&self) -> TX {
         let inner = self.get_inner();
-        let f = move |inner: &I| -> TX {
-            if inner.cache_expired() {
-                let mut inner = inner.clone();
-                let cfg = inner.get_cfg();
-                self.set_inner(inner);
-                cfg
-            } else {
-                inner.get_cfg_cached()
-            }
-        };
-        inner.with(f)
+
+        let f_cache_expired = move |i: &I| -> bool { i.cache_expired() };
+
+        let f_cfg_cached = move |i: &I| -> TX { i.get_cfg_cached() };
+
+        let cache_expired = inner.with(f_cache_expired);
+
+        if cache_expired {
+            let mut inner = self.get_inner_clone();
+            let cfg = inner.get_cfg();
+            self.set_inner(inner);
+            cfg
+        } else {
+            inner.with(f_cfg_cached)
+        }
     }
 
     fn get_deps(&self) -> U {
