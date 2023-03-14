@@ -1,15 +1,15 @@
 use common::fs_data::FooSflCfgInfo;
 use common::fs_util::foo_core;
-use common::fwk::CfgDepsArcSwapArc;
-use std::sync::Arc;
+use common::fwk::CfgDepsRefCellRc;
+use std::rc::Rc;
 
-pub type FooSflT = Arc<dyn Fn() -> String + Send + Sync>;
+pub type FooSflT = Rc<dyn Fn() -> String>;
 
-pub type FooSflCfgDeps = CfgDepsArcSwapArc<FooSflCfgInfo, FooSflDeps>;
+pub type FooSflCfgDeps = CfgDepsRefCellRc<FooSflCfgInfo, FooSflDeps>;
 
 #[derive(Clone)]
 pub struct FooSflDeps {
-    pub bar_bf: Arc<dyn Fn() -> String + Send + Sync>,
+    pub bar_bf: Rc<dyn Fn() -> String>,
 }
 
 pub fn foo_sfl_c(cfg_deps: FooSflCfgDeps) -> FooSflT {
@@ -22,5 +22,5 @@ pub fn foo_sfl_c(cfg_deps: FooSflCfgDeps) -> FooSflT {
         let bar_ret = bar_bf();
         foo_core(a, b, bar_ret)
     };
-    Arc::new(f)
+    Rc::new(f)
 }
