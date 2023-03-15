@@ -2,7 +2,7 @@ use actix_web::{web, App, HttpServer};
 use common::{
     fs_data::{BarBfCfgInfo, FooSflCfgInfo},
     fwk::RefreshMode,
-    web::handler_of_boxed_web,
+    web::handler_of_web,
 };
 use pushtofunction::fs::{
     bar_aw_bf_c, foo_aw_sfl_c, BarAwBfCfgDeps, FooAwSflCfgDeps, FooAwSflDeps,
@@ -12,7 +12,7 @@ use pushtofunction::fs::{
 async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         let foo_sfl_cfg_info = FooSflCfgInfo {
-            a: "foo_aw_test1".to_owned(),
+            a: "foo_a_test1".to_owned(),
             b: 1,
         };
         let bar_bf_cfg_info = BarBfCfgInfo {
@@ -34,8 +34,8 @@ async fn main() -> std::io::Result<()> {
             FooAwSflDeps { bar_a_bf },
         );
 
-        let foo_aw_sfl = foo_aw_sfl_c(foo_cfg_deps);
-        let arc_f = handler_of_boxed_web(foo_aw_sfl);
+        let foo_a_sfl = foo_aw_sfl_c(foo_cfg_deps);
+        let arc_f = handler_of_web(foo_a_sfl);
         let f = move |i| arc_f(i);
         App::new().route("/", web::post().to(f))
     })

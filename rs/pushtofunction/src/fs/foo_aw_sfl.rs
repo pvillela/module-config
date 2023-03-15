@@ -13,6 +13,12 @@ pub struct FooAwSflDeps {
     pub bar_a_bf: ArcPinFnWeb<u64, String>,
 }
 
+// impl std::fmt::Debug for FooASflDeps {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         f.write_str("<FooASflDeps>")
+//     }
+// }
+
 pub fn foo_aw_sfl_c(cfg_deps: FooAwSflCfgDeps) -> FooAwSflT {
     let f = move |input: FooAIn| {
         let (c, d) = cfg_deps.get_cfg_deps();

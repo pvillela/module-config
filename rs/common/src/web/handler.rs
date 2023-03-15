@@ -24,13 +24,16 @@ where
     })
 }
 
-pub fn handler_of_boxed_web<
+pub fn handler_of_web<
     S: 'static + serde::Deserialize<'static>,
     T: 'static + Responder + Send + Sync,
 >(
     f: ArcPinFnWeb<S, T>,
-) -> Box<dyn Fn(web::Json<S>) -> Pin<Box<dyn Future<Output = T>>> + 'static> {
-    Box::new(move |info: web::Json<S>| {
+) -> Arc<dyn Fn(web::Json<S>) -> Pin<Box<dyn Future<Output = T>>> + 'static>
+// where
+//     Fut: Pin<Box<Future<Output = T> + Send + Sync>>,
+{
+    Arc::new(move |info: web::Json<S>| {
         let input = info.into_inner();
         f(input)
     })
