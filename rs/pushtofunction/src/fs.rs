@@ -9,5 +9,8 @@ pub mod boot;
 mod foo_a_sfl;
 pub use foo_a_sfl::*;
 
+mod foo_aw_sfl;
+pub use foo_aw_sfl::*;
+
 mod foo_sfl;
 pub use foo_sfl::*;

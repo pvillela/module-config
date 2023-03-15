@@ -1,4 +1,4 @@
-use crate::fwk::ArcPinFn;
+use crate::fwk::BoxPinFnWeb;
 use actix_web::{body::BoxBody, http::header::ContentType, web, HttpResponse, Responder};
 use futures::Future;
 use std::{pin::Pin, sync::Arc};
@@ -24,16 +24,13 @@ where
     })
 }
 
-pub fn handler_of_boxed<
+pub fn handler_of_boxed_web<
     S: 'static + serde::Deserialize<'static>,
     T: 'static + Responder + Send + Sync,
 >(
-    f: ArcPinFn<S, T>,
-) -> Arc<dyn Fn(web::Json<S>) -> Pin<Box<dyn Future<Output = T>>> + Send + Sync + 'static>
-// where
-//     Fut: Pin<Box<Future<Output = T> + Send + Sync>>,
-{
-    Arc::new(move |info: web::Json<S>| {
+    f: BoxPinFnWeb<S, T>,
+) -> Box<dyn Fn(web::Json<S>) -> Pin<Box<dyn Future<Output = T>>> + 'static> {
+    Box::new(move |info: web::Json<S>| {
         let input = info.into_inner();
         f(input)
     })
