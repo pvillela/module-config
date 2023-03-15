@@ -4,13 +4,13 @@ use pulldepswithoverride::fs::{foo_sfl, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS};
 use std::{thread, time::Duration};
 
 fn main() {
-    FOO_SFL_CFG_DEPS
-        .with(|c| c.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(60))));
-    BAR_BF_CFG_DEPS
-        .with(|c| c.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(60))));
-
     // Everything going on in one thread because the static cfg deps variables are thread-local.
     let handle = thread::spawn(move || {
+        FOO_SFL_CFG_DEPS
+            .with(|c| c.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(60))));
+        BAR_BF_CFG_DEPS
+            .with(|c| c.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(60))));
+
         let res = foo_sfl();
         println!("{}", res);
 

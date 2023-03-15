@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use common::config::get_app_configuration;
 use common::fwk::RefreshMode;
 use common::tokio_run::{run, RunIn};
@@ -9,7 +11,10 @@ async fn main() {
     println!("===== ptf_run_foo_a_bar_a_tokio_with_cache =====");
 
     println!("\n*** run -- total 0 ms sleep time, 10_000 concurrency, 100 repeats");
-    let foo_a_sfl = foo_a_sfl_boot(get_app_configuration, RefreshMode::NoRefresh);
+    let foo_a_sfl = foo_a_sfl_boot(
+        get_app_configuration,
+        RefreshMode::Refreshable(Duration::from_millis(100)),
+    );
     run(RunIn {
         foo_a_sfl,
         unit_time_millis: 0,
@@ -24,7 +29,10 @@ async fn main() {
     .await;
 
     println!("\n*** run -- total 80 ms sleep time, 10_000 concurrency, 100 repeats");
-    let foo_a_sfl = foo_a_sfl_boot(get_app_configuration, RefreshMode::NoRefresh);
+    let foo_a_sfl = foo_a_sfl_boot(
+        get_app_configuration,
+        RefreshMode::Refreshable(Duration::from_millis(100)),
+    );
     run(RunIn {
         foo_a_sfl,
         unit_time_millis: 10,

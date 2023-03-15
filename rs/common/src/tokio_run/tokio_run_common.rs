@@ -52,7 +52,6 @@ pub async fn run(input: RunIn) {
                 start_time.elapsed()
             );
         }
-        refresh_app_configuration();
     });
 
     let run_concurrent = |i: usize| {
