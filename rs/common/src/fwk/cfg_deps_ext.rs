@@ -10,7 +10,7 @@ where
     IM: InnerMut<I>,
 {
     pub fn get_from_once_cell(cell: &OnceCell<Self>) -> (TX, U) {
-        cell.get().expect("OnceCell not initialized").get()
+        cell.get().expect("OnceCell not initialized").get_cfg_deps()
     }
 }
 

@@ -1,7 +1,7 @@
 use common::{
     fs_data::{FooAIn, FooAOut},
     fs_util::foo_core,
-    fwk::{BoxPinFn, CfgDepsArc},
+    fwk::{ArcPinFn, CfgDepsArc},
 };
 use once_cell::sync::OnceCell;
 use std::time::Duration;
@@ -15,7 +15,7 @@ pub struct FooASflCfgInfo {
 
 #[derive(Clone)]
 pub struct FooASflDeps {
-    pub bar_a_bf: BoxPinFn<u64, String>,
+    pub bar_a_bf: ArcPinFn<u64, String>,
 }
 
 pub static FOO_A_SFL_CFG_DEPS: OnceCell<CfgDepsArc<FooASflCfgInfo, FooASflDeps>> = OnceCell::new();

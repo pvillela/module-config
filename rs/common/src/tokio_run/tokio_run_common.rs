@@ -1,13 +1,13 @@
 use crate::config::{initialize_app_configuration, refresh_app_configuration};
 use crate::fs_data::{FooAIn, FooAOut};
-use crate::fwk::BoxPinFn;
+use crate::fwk::ArcPinFn;
 use futures::future::join_all;
 use std::time::{Duration, Instant};
 use tokio;
 use tokio::time::sleep;
 
 pub struct RunIn {
-    pub foo_a_sfl: BoxPinFn<FooAIn, FooAOut>,
+    pub foo_a_sfl: ArcPinFn<FooAIn, FooAOut>,
     pub unit_time_millis: u64,
     pub app_cfg_first_refresh_units: u64,
     pub app_cfg_refresh_delta_units: u64,

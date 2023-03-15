@@ -1,5 +1,5 @@
 use common::fs_data::FooAIn;
-use common::fwk::{box_pin_async_fn, CfgDepsArc, RefreshMode};
+use common::fwk::{arc_pin_async_fn, CfgDepsArc, RefreshMode};
 use pushdepstovar::fs::{
     bar_a_bf, foo_a_sfl, BarABfCfgInfo, FooASflCfgInfo, FooASflDeps, BAR_A_BF_CFG_DEPS,
     FOO_A_SFL_CFG_DEPS,
@@ -15,7 +15,7 @@ pub async fn common_test(
         move || foo_sfl_cfg_info.clone(),
         RefreshMode::NoRefresh,
         FooASflDeps {
-            bar_a_bf: box_pin_async_fn(bar_a_bf),
+            bar_a_bf: arc_pin_async_fn(bar_a_bf),
         },
     );
 

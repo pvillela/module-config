@@ -1,22 +1,18 @@
-use std::sync::Arc;
+use common::fs_data::BarBfCfgInfo;
+use common::fs_util::bar_core;
+use common::fwk::CfgDepsRefCellRc;
+use std::rc::Rc;
 
-#[derive(Debug, Clone)]
-pub struct BarBfCfgInfo {
-    pub u: i32,
-    pub v: String,
-}
+pub type BarBfT = Rc<dyn Fn() -> String>;
 
-pub struct BarBfCfgSrc {
-    pub get: Box<dyn Fn() -> Arc<BarBfCfgInfo> + Send + Sync>,
-}
+pub type BarBfCfgDeps = CfgDepsRefCellRc<BarBfCfgInfo, ()>;
 
-pub type BarBfT = Arc<dyn Fn() -> String + Send + Sync>;
-
-pub fn bar_bf_c(cfg: BarBfCfgSrc) -> BarBfT {
-    Arc::new(move || {
-        let cfg = (cfg.get)();
-        let u = cfg.u + 1;
-        let v = cfg.v.clone() + "-bar";
-        format!("barBf(): u={}, v={}", u, v)
-    })
+pub fn bar_bf_c(cfg_deps: BarBfCfgDeps) -> BarBfT {
+    let f = move || {
+        let cfg = cfg_deps.get_cfg();
+        let u = cfg.u;
+        let v = cfg.v.clone();
+        bar_core(u, v)
+    };
+    Rc::new(f)
 }

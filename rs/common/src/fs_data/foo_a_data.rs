@@ -1,8 +1,11 @@
+use super::FooSflCfgInfo;
 use crate::web::common_respond_to;
 use actix_web::{body::BoxBody, HttpRequest, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize)]
+pub type FooASflCfgInfo = FooSflCfgInfo;
+
+#[derive(Clone, Deserialize)]
 pub struct FooAIn {
     pub sleep_millis: u64,
 }

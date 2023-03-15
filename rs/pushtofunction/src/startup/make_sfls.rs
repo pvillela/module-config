@@ -1,7 +1,6 @@
-use crate::config::get_app_configuration;
-use crate::config::AppCfgInfo;
 use crate::fs::boot::foo_sfl_boot;
 use crate::fs::FooSflT;
+use common::config::{get_app_configuration, AppCfgInfo};
 use std::sync::Arc;
 
 pub fn make_foo_sfl() -> FooSflT {

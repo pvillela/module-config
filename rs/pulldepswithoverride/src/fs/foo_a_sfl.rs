@@ -1,7 +1,7 @@
 use super::bar_a_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{box_pin_async_fn, BoxPinFn, CfgDepsDefault, RefreshMode};
+use common::fwk::{arc_pin_async_fn, ArcPinFn, CfgDepsDefault, RefreshMode};
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -13,7 +13,7 @@ type FooOut = common::fs_data::FooAOut;
 
 #[derive(Clone)]
 pub struct FooASflDeps {
-    pub bar_a_bf: BoxPinFn<u64, String>,
+    pub bar_a_bf: ArcPinFn<u64, String>,
 }
 
 impl std::fmt::Debug for FooASflDeps {
@@ -28,7 +28,7 @@ pub async fn foo_a_sfl(input: FooIn) -> FooOut {
     // Block below used as workaround for case when CfgDepsDefault is based on Rc (instead of Arc)
     // to make compiler see the Rc is dropped before it leaks into the Future.
     let (a, b, bar) = {
-        let (cfg, d) = FOO_A_SFL_CFG_DEPS.with(CfgDepsDefault::get);
+        let (cfg, d) = FOO_A_SFL_CFG_DEPS.with(CfgDepsDefault::get_cfg_deps);
         let a = cfg.a.clone();
         let b = cfg.b;
         (a, b, d.bar_a_bf)
@@ -46,7 +46,7 @@ pub static FOO_A_SFL_CFG_DEPS: CfgDepsDefault<FooSflCfgInfo, FooASflDeps> =
         RefreshMode::NoRefresh,
         // RefreshMode::Refreshable(Duration::from_millis(60)),
         FooASflDeps {
-            bar_a_bf: box_pin_async_fn(bar_a_bf),
+            bar_a_bf: arc_pin_async_fn(bar_a_bf),
         },
     )
 }

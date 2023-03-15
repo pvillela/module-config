@@ -6,8 +6,6 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 pub trait InnerMut<I> {
-    fn get_inner(&self) -> &Self;
-
     fn get_inner_clone(&self) -> I;
 
     fn set_inner(&self, inner: I);
@@ -18,13 +16,8 @@ pub trait InnerMut<I> {
 }
 
 impl<I: Clone> InnerMut<I> for ArcSwap<I> {
-    fn get_inner(&self) -> &Self {
-        self
-    }
-
     fn get_inner_clone(&self) -> I {
-        let inner = self.get_inner();
-        let inner = inner.load().as_ref().clone();
+        let inner = self.load().as_ref().clone();
         inner
     }
 
@@ -44,13 +37,8 @@ impl<I: Clone> InnerMut<I> for ArcSwap<I> {
 }
 
 impl<I: Clone> InnerMut<I> for RefCell<I> {
-    fn get_inner(&self) -> &Self {
-        self
-    }
-
     fn get_inner_clone(&self) -> I {
-        let inner = self.get_inner();
-        let inner = inner.borrow().clone();
+        let inner = self.borrow().clone();
         inner
     }
 
@@ -106,10 +94,16 @@ struct Cache<V> {
 }
 
 pub trait CfgDepsImmut<T, TX: Clone, U: Clone> {
+    fn get_cfg(&self) -> TX;
+
+    fn get_deps(&self) -> U;
+
     /// Returns a pair containing an Arc of the configuration data and the dependencies data structure.
     /// Although the reference to self is immutable, the receiver may have interior mutability and
     /// update a configuration data cache as a result of this call.
-    fn get(&self) -> (TX, U);
+    fn get_cfg_deps(&self) -> (TX, U) {
+        (self.get_cfg(), self.get_deps())
+    }
 
     /// Sets a static module CfgDeps with a configuration info source, refresh mode, and a dependencies data
     /// structure.
@@ -131,17 +125,16 @@ pub trait CfgDepsImmut<T, TX: Clone, U: Clone> {
 }
 
 pub trait CfgDepsMut<T, TX: Clone, U: Clone> {
-    /// Returns a pair containing the configuration data and the dependencies data structure.
-    /// The configuration data returned is whatever is in the cache, even if stale.
-    fn get_cached(&self) -> (TX, U);
+    /// Returns the configuration data in the cache, even if stale.
+    fn get_cfg_cached(&self) -> TX;
 
     fn cache_expired(&self) -> bool;
 
-    /// Returns a triple containing the configuration data, the dependencies data structure,
-    /// and an indicator of whether it is true that the object was mutated.
     /// This will return the current configuration data, according to the object's cache refresh policy,
     /// with a possible change to cache state as a side-effect.
-    fn get_mut(&mut self) -> (TX, U, bool);
+    fn get_cfg(&mut self) -> TX;
+
+    fn get_deps(&self) -> U;
 
     fn replace(&mut self, other: Self);
 
@@ -182,7 +175,7 @@ where
     TX: From<T> + Clone + core::fmt::Debug,
     U: Clone,
 {
-    pub fn new(
+    fn new(
         src: impl 'static + Fn() -> T + Send + Sync,
         refresh_mode: RefreshMode,
         deps: U,
@@ -200,7 +193,7 @@ where
     }
 
     /// Function to update self with a refreshed the cache.
-    pub fn refresh(&mut self) {
+    fn refresh(&mut self) {
         let cfg_value: TX = (self.src)().into();
         let cache = Cache {
             last_refresh: Instant::now(),
@@ -209,7 +202,7 @@ where
         self.cache = cache;
     }
 
-    pub fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode, deps: U) -> Self
+    fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode, deps: U) -> Self
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
@@ -224,35 +217,40 @@ where
     TX: From<T> + Clone + core::fmt::Debug,
     U: Clone,
 {
-    fn get_cached(&self) -> (TX, U) {
-        let cfg = self.cache.value.clone();
-        let deps = self.deps.clone();
-        (cfg, deps)
+    fn get_cfg_cached(&self) -> TX {
+        self.cache.value.clone()
     }
 
     fn cache_expired(&self) -> bool {
-        match self.refresh_mode {
+        // println!("refresh_mode={:?}", self.refresh_mode);
+        let res = match self.refresh_mode {
             RefreshMode::NoRefresh => false,
             RefreshMode::Refreshable(cache_ttl) => {
+                // println!(
+                //     "cache.last_refresh.elapsed()={:?}, cache_ttl={:?}",
+                //     self.cache.last_refresh.elapsed(),
+                //     cache_ttl
+                // );
                 if self.cache.last_refresh.elapsed() > cache_ttl {
                     true
                 } else {
                     false
                 }
             }
-        }
+        };
+        // println!("cache_expired={}", res);
+        res
     }
 
-    fn get_mut(&mut self) -> (TX, U, bool) {
-        let mutated = if self.cache_expired() {
+    fn get_cfg(&mut self) -> TX {
+        if self.cache_expired() {
             self.refresh();
-            true
-        } else {
-            false
-        };
-        let cfg = self.cache.value.clone();
-        let deps = self.deps.clone();
-        (cfg, deps, mutated)
+        }
+        self.cache.value.clone()
+    }
+
+    fn get_deps(&self) -> U {
+        self.deps.clone()
     }
 
     fn replace(&mut self, other: Self) {
@@ -288,8 +286,23 @@ where
     I: CfgDepsMut<T, TX, U> + Clone + core::fmt::Debug,
     IM: InnerMut<I>,
 {
+    // I don't understand why I have to do this as this method is defined in trait CfgDepsImmut.
+    pub fn get_cfg(&self) -> TX {
+        CfgDepsImmut::get_cfg(self)
+    }
+
+    // I don't understand why I have to do this as this method is defined in trait CfgDepsImmut.
+    pub fn get_deps(&self) -> U {
+        CfgDepsImmut::get_deps(self)
+    }
+
+    // I don't understand why I have to do this as this method is defined in trait CfgDepsImmut.
+    pub fn get_cfg_deps(&self) -> (TX, U) {
+        CfgDepsImmut::get_cfg_deps(self)
+    }
+
     fn get_inner(&self) -> &IM {
-        self.0.get_inner()
+        &self.0
     }
 
     fn get_inner_clone(&self) -> I {
@@ -336,21 +349,6 @@ where
         Self::new_priv(factory(f, g, refresh_mode, deps))
     }
 
-    pub fn get(&self) -> (TX, U) {
-        let inner = self.get_inner();
-        let f = move |inner: &I| -> (TX, U) {
-            if inner.cache_expired() {
-                let mut inner = inner.clone();
-                let (cfg, deps, _) = inner.get_mut();
-                self.set_inner(inner);
-                (cfg, deps)
-            } else {
-                inner.get_cached()
-            }
-        };
-        inner.with(f)
-    }
-
     /// Updates the receiver with a configuration info source, refresh mode, and a dependencies data
     /// structure.
     pub fn update_all(
@@ -383,6 +381,19 @@ where
     }
 }
 
+impl<T, TX, U, I, IM> Clone for CfgDepsInnerMut<T, TX, U, I, IM>
+where
+    TX: From<T> + Clone + core::fmt::Debug,
+    U: Clone,
+    I: CfgDepsMut<T, TX, U> + Clone + core::fmt::Debug,
+    IM: InnerMut<I>,
+{
+    fn clone(&self) -> Self {
+        let inner = self.get_inner_clone();
+        Self::new_priv(inner)
+    }
+}
+
 impl<T, TX, U, I, IM> CfgDepsImmut<T, TX, U> for CfgDepsInnerMut<T, TX, U, I, IM>
 where
     TX: From<T> + Clone + core::fmt::Debug,
@@ -390,8 +401,29 @@ where
     I: CfgDepsMut<T, TX, U> + Clone + core::fmt::Debug,
     IM: InnerMut<I>,
 {
-    fn get(&self) -> (TX, U) {
-        Self::get(self)
+    fn get_cfg(&self) -> TX {
+        let inner = self.get_inner();
+
+        let f_cache_expired = move |i: &I| -> bool { i.cache_expired() };
+
+        let f_cfg_cached = move |i: &I| -> TX { i.get_cfg_cached() };
+
+        let cache_expired = inner.with(f_cache_expired);
+
+        if cache_expired {
+            let mut inner = self.get_inner_clone();
+            let cfg = inner.get_cfg();
+            self.set_inner(inner);
+            cfg
+        } else {
+            inner.with(f_cfg_cached)
+        }
+    }
+
+    fn get_deps(&self) -> U {
+        let inner = self.get_inner();
+        let f = move |inner: &I| -> U { inner.get_deps() };
+        inner.with(f)
     }
 
     /// Updates the receiver with a configuration info source, refresh mode, and a dependencies data
@@ -469,5 +501,33 @@ where
         G: 'static + Fn(&S) -> T + Send + Sync,
     {
         Self::new_with_cfg_adapter_f(f, g, refresh_mode, deps, CfgDepsRaw::new_with_cfg_adapter)
+    }
+}
+
+impl<T, TX, U, IM> CfgDeps<T, TX, U, IM>
+where
+    T: 'static + Clone + Send + Sync,
+    TX: From<T> + Clone + core::fmt::Debug,
+    U: Clone,
+    IM: InnerMut<CfgDepsRaw<T, TX, U>>,
+{
+    pub fn new_with_const_or_cfg_adapter<S, F, G>(
+        k: Option<&'static T>,
+        f: F,
+        g: G,
+        refresh_mode: RefreshMode,
+        deps: U,
+    ) -> Self
+    where
+        F: 'static + Fn() -> Arc<S> + Send + Sync,
+        G: 'static + Fn(&S) -> T + Send + Sync,
+    {
+        match k {
+            Some(k) => {
+                let src = move || k.clone();
+                Self::new(src, refresh_mode, deps)
+            }
+            None => Self::new_with_cfg_adapter(f, g, refresh_mode, deps),
+        }
     }
 }

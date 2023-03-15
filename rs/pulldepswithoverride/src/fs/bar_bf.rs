@@ -5,7 +5,7 @@ use common::fwk::{CfgDepsDefault, RefreshMode};
 type BarBfCfgInfo = common::fs_data::BarBfCfgInfo;
 
 pub fn bar_bf() -> String {
-    let (cfg, _) = BAR_BF_CFG_DEPS.with(|c| c.get());
+    let (cfg, _) = BAR_BF_CFG_DEPS.with(|c| c.get_cfg_deps());
     let u = cfg.u;
     let v = cfg.v.clone();
     bar_core(u, v)

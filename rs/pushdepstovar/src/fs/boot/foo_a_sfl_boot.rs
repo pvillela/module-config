@@ -1,7 +1,7 @@
 use super::{bar_a_bf_init_no_refresh, bar_a_bf_init_refreshable};
 use crate::fs::{bar_a_bf, FooASflCfgInfo, FooASflDeps, FOO_A_SFL_CFG_DEPS};
 use common::config::AppCfgInfo;
-use common::fwk::{box_pin_async_fn, CfgDepsArc, RefreshMode};
+use common::fwk::{arc_pin_async_fn, CfgDepsArc, RefreshMode};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -33,7 +33,7 @@ pub fn foo_a_sfl_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>, cache_tt
         app_cfg_src,
         RefreshMode::Refreshable(cache_ttl),
         FooASflDeps {
-            bar_a_bf: box_pin_async_fn(bar_a_bf),
+            bar_a_bf: arc_pin_async_fn(bar_a_bf),
         },
     );
 }
@@ -45,7 +45,7 @@ pub fn foo_a_sfl_init_no_refresh(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
         app_cfg_src,
         RefreshMode::NoRefresh,
         FooASflDeps {
-            bar_a_bf: box_pin_async_fn(bar_a_bf),
+            bar_a_bf: arc_pin_async_fn(bar_a_bf),
         },
     );
 }
