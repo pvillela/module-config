@@ -49,3 +49,47 @@ where
         }
     }
 }
+
+pub struct CfgDepsInput<S, T, U> {
+    f: Option<fn() -> Arc<S>>,
+    g: Option<fn(&S) -> T>,
+    refresh_mode: Option<RefreshMode>,
+    deps: Option<U>,
+}
+
+impl<T, TX, U, IM> CfgDeps<T, TX, U, IM>
+where
+    T: 'static + Clone,
+    TX: From<T> + Clone + core::fmt::Debug,
+    U: Clone,
+    IM: InnerMut<CfgDepsRaw<T, TX, U>>,
+{
+    pub fn new_with_override<S: 'static>(
+        cell: &OnceCell<CfgDepsInput<S, T, U>>,
+        f: fn() -> Arc<S>,
+        g: fn(&S) -> T,
+        refresh_mode: RefreshMode,
+        deps: U,
+    ) -> Self {
+        let ov = match cell.get() {
+            Some(ov) => CfgDepsInput {
+                f: ov.f,
+                g: ov.g,
+                refresh_mode: ov.refresh_mode.clone(),
+                deps: ov.deps.clone(),
+            },
+            None => CfgDepsInput {
+                f: None,
+                g: None,
+                refresh_mode: None,
+                deps: None,
+            },
+        };
+        Self::new_with_cfg_adapter(
+            ov.f.unwrap_or(f),
+            ov.g.unwrap_or(g),
+            ov.refresh_mode.unwrap_or(refresh_mode),
+            ov.deps.unwrap_or(deps),
+        )
+    }
+}
