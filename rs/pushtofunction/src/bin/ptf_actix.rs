@@ -4,7 +4,9 @@ use common::{
     fwk::RefreshMode,
     web::handler_of_boxed_web,
 };
-use pushtofunction::fs::{bar_a_bf_c, foo_aw_sfl_c, BarABfCfgDeps, FooAwSflCfgDeps, FooAwSflDeps};
+use pushtofunction::fs::{
+    bar_aw_bf_c, foo_aw_sfl_c, BarAwBfCfgDeps, FooAwSflCfgDeps, FooAwSflDeps,
+};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -18,13 +20,13 @@ async fn main() -> std::io::Result<()> {
             v: "bar_a_test1".to_owned(),
         };
 
-        let bar_cfg_deps = BarABfCfgDeps::new(
+        let bar_cfg_deps = BarAwBfCfgDeps::new(
             move || bar_bf_cfg_info.clone().into(),
             RefreshMode::NoRefresh,
             (),
         );
 
-        let bar_a_bf = bar_a_bf_c(bar_cfg_deps);
+        let bar_a_bf = bar_aw_bf_c(bar_cfg_deps);
 
         let foo_cfg_deps = FooAwSflCfgDeps::new(
             move || foo_sfl_cfg_info.clone().into(),

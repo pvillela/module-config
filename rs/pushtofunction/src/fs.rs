@@ -1,6 +1,9 @@
 mod bar_a_bf;
 pub use bar_a_bf::*;
 
+mod bar_aw_bf;
+pub use bar_aw_bf::*;
+
 mod bar_bf;
 pub use bar_bf::*;
 
