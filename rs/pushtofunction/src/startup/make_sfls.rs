@@ -1,19 +1,38 @@
-use crate::fs::boot::foo_sfl_boot;
-use crate::fs::FooSflT;
-use common::config::{get_app_configuration, AppCfgInfo};
-use std::sync::Arc;
+use crate::fs::boot::{foo_a_sfl_boot, foo_aw_sfl_boot, foo_sfl_boot};
+use crate::fs::{FooASflT, FooAwSflT, FooSflT};
+use common::config::get_app_configuration;
+use common::fwk::RefreshMode;
+use std::time::Duration;
 
-pub fn make_foo_sfl() -> FooSflT {
-    foo_sfl_boot(get_app_configuration)
+pub fn make_foo_sfl_refreshable() -> FooSflT {
+    foo_sfl_boot(
+        get_app_configuration,
+        RefreshMode::Refreshable(Duration::from_millis(60)),
+    )
 }
 
-pub fn make_foo_sfl1() -> FooSflT {
-    let app_cfg_src1 = move || {
-        Arc::new(AppCfgInfo {
-            x: "custom".to_owned(),
-            y: 84,
-            z: true,
-        })
-    };
-    foo_sfl_boot(app_cfg_src1)
+pub fn make_foo_sfl_no_refresh() -> FooSflT {
+    foo_sfl_boot(get_app_configuration, RefreshMode::NoRefresh)
+}
+
+pub fn make_foo_a_sfl_refreshable() -> FooASflT {
+    foo_a_sfl_boot(
+        get_app_configuration,
+        RefreshMode::Refreshable(Duration::from_millis(60)),
+    )
+}
+
+pub fn make_foo_a_sfl_no_refresh() -> FooASflT {
+    foo_a_sfl_boot(get_app_configuration, RefreshMode::NoRefresh)
+}
+
+pub fn make_foo_aw_sfl_refreshable() -> FooAwSflT {
+    foo_aw_sfl_boot(
+        get_app_configuration,
+        RefreshMode::Refreshable(Duration::from_millis(60)),
+    )
+}
+
+pub fn make_foo_aw_sfl_no_refresh() -> FooAwSflT {
+    foo_aw_sfl_boot(get_app_configuration, RefreshMode::NoRefresh)
 }

@@ -46,3 +46,9 @@ where
 {
     Rc::new(move |s| Box::pin(f(s)))
 }
+
+/// Function that can be used as a placeholder for a configuration source during development.
+/// Supports any configuration info type and panics if called.
+pub fn nil_app_cfg<T>() -> Arc<T> {
+    todo!("Configuration source not provided.")
+}

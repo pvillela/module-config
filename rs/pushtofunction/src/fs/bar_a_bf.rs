@@ -4,11 +4,11 @@ use common::fwk::{arc_pin_async_fn, ArcPinFn, CfgDepsArcSwapArc};
 use std::time::Duration;
 use tokio::time::sleep;
 
-pub type BarASflT = ArcPinFn<u64, String>;
+pub type BarABfT = ArcPinFn<u64, String>;
 
 pub type BarABfCfgDeps = CfgDepsArcSwapArc<BarABfCfgInfo, ()>;
 
-pub fn bar_a_bf_c(cfg_deps: BarABfCfgDeps) -> BarASflT {
+pub fn bar_a_bf_c(cfg_deps: BarABfCfgDeps) -> BarABfT {
     let f = move |sleep_millis: u64| {
         let (cfg, _) = cfg_deps.get_cfg_deps();
         async move {

@@ -11,31 +11,31 @@ use pushtofunction::fs::{
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
-        let foo_sfl_cfg_info = FooSflCfgInfo {
-            a: "foo_a_test1".to_owned(),
+        let foo_aw_sfl_cfg_info = FooSflCfgInfo {
+            a: "foo_aw_test1".to_owned(),
             b: 1,
         };
-        let bar_bf_cfg_info = BarBfCfgInfo {
+        let bar_aw_bf_cfg_info = BarBfCfgInfo {
             u: 11,
             v: "bar_a_test1".to_owned(),
         };
 
-        let bar_cfg_deps = BarAwBfCfgDeps::new(
-            move || bar_bf_cfg_info.clone().into(),
+        let bar_aw_cfg_deps = BarAwBfCfgDeps::new(
+            move || bar_aw_bf_cfg_info.clone().into(),
             RefreshMode::NoRefresh,
             (),
         );
 
-        let bar_a_bf = bar_aw_bf_c(bar_cfg_deps);
+        let bar_aw_bf = bar_aw_bf_c(bar_aw_cfg_deps);
 
-        let foo_cfg_deps = FooAwSflCfgDeps::new(
-            move || foo_sfl_cfg_info.clone().into(),
+        let foo_aw_cfg_deps = FooAwSflCfgDeps::new(
+            move || foo_aw_sfl_cfg_info.clone().into(),
             RefreshMode::NoRefresh,
-            FooAwSflDeps { bar_a_bf },
+            FooAwSflDeps { bar_aw_bf },
         );
 
-        let foo_a_sfl = foo_aw_sfl_c(foo_cfg_deps);
-        let arc_f = handler_of_web(foo_a_sfl);
+        let foo_aw_sfl = foo_aw_sfl_c(foo_aw_cfg_deps);
+        let arc_f = handler_of_web(foo_aw_sfl);
         let f = move |i| arc_f(i);
         App::new().route("/", web::post().to(f))
     })
