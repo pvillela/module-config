@@ -9,7 +9,7 @@ use tokio::time::sleep;
 
 type FooASflCfgDeps = CfgDepsDefault<FooASflCfgInfo, FooASflDeps>;
 
-pub type FooASflCfgDepsOvr = CfgDepsOvr<AppCfgInfo, FooASflCfgInfo, FooASflDeps>;
+pub type FooASflCfgDepsOvr = CfgDepsOvr<FooASflCfgInfo, FooASflDeps>;
 
 #[derive(Clone)]
 pub struct FooASflDeps {

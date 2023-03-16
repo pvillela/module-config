@@ -50,9 +50,8 @@ where
     }
 }
 
-pub struct CfgDepsOvr<S, T, U> {
-    pub app_cfg_src: Option<fn() -> Arc<S>>,
-    pub cfg_adapter: Option<fn(&S) -> T>,
+pub struct CfgDepsOvr<T, U> {
+    pub cfg_src: Option<fn() -> T>,
     pub refresh_mode: Option<RefreshMode>,
     pub deps: Option<U>,
 }
@@ -65,7 +64,7 @@ where
     IM: InnerMut<CfgDepsRaw<T, TX, U>>,
 {
     pub fn new_with_override<S: 'static>(
-        ovr: Option<&CfgDepsOvr<S, T, U>>,
+        ovr: Option<&CfgDepsOvr<T, U>>,
         f: fn() -> Arc<S>,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
@@ -73,23 +72,29 @@ where
     ) -> Self {
         let ov = match ovr {
             Some(ov) => CfgDepsOvr {
-                app_cfg_src: ov.app_cfg_src,
-                cfg_adapter: ov.cfg_adapter,
+                cfg_src: ov.cfg_src,
                 refresh_mode: ov.refresh_mode.clone(),
                 deps: ov.deps.clone(),
             },
             None => CfgDepsOvr {
-                app_cfg_src: None,
-                cfg_adapter: None,
+                cfg_src: None,
                 refresh_mode: None,
                 deps: None,
             },
         };
-        Self::new_with_cfg_adapter(
-            ov.app_cfg_src.unwrap_or(f),
-            ov.cfg_adapter.unwrap_or(g),
-            ov.refresh_mode.unwrap_or(refresh_mode),
-            ov.deps.unwrap_or(deps),
-        )
+        if ov.cfg_src == None {
+            Self::new_with_cfg_adapter(
+                f,
+                g,
+                ov.refresh_mode.unwrap_or(refresh_mode),
+                ov.deps.unwrap_or(deps),
+            )
+        } else {
+            Self::new(
+                ov.cfg_src.unwrap(),
+                ov.refresh_mode.unwrap_or(refresh_mode),
+                ov.deps.unwrap_or(deps),
+            )
+        }
     }
 }

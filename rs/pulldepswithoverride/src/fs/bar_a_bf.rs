@@ -8,7 +8,7 @@ use tokio::time::sleep;
 
 type BarABfCfgDeps = CfgDepsDefault<BarABfCfgInfo, ()>;
 
-pub type BarABfCfgDepsOvr = CfgDepsOvr<AppCfgInfo, BarABfCfgInfo, ()>;
+pub type BarABfCfgDepsOvr = CfgDepsOvr<BarABfCfgInfo, ()>;
 
 pub async fn bar_a_bf(sleep_millis: u64) -> String {
     sleep(Duration::from_millis(sleep_millis)).await;

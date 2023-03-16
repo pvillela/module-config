@@ -12,8 +12,7 @@ async fn main() {
 
     let _ = FOO_A_SFL_CFG_DEPS_OVERRIDE
         .set(FooASflCfgDepsOvr {
-            app_cfg_src: None,
-            cfg_adapter: None,
+            cfg_src: None,
             refresh_mode: Some(RefreshMode::NoRefresh),
             deps: None,
         })
@@ -22,8 +21,7 @@ async fn main() {
 
     let _ = BAR_A_BF_CFG_DEPS_OVERRIDE
         .set(BarABfCfgDepsOvr {
-            app_cfg_src: None,
-            cfg_adapter: None,
+            cfg_src: None,
             refresh_mode: Some(RefreshMode::NoRefresh),
             deps: None,
         })
