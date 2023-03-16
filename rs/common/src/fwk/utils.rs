@@ -17,6 +17,21 @@ where
     Arc::new(move |s| Box::pin(f(s)))
 }
 
+// /// Type of boxed and pinned wrapper of async functions.
+// pub type ArcPinFnL<'a, S, T> =
+//     Box<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'a + Send + Sync>> + Send + Sync>;
+
+// /// Boxes and pins an async function so it can be passed across theads.
+// pub fn arc_pin_async_fn_l<'a, S: 'a, T: Send + Sync, Fut>(
+//     f: impl Fn(S) -> Fut + 'a + Send + Sync,
+// ) -> ArcPinFnL<'a, S, T>
+// where
+//     Fut: 'a + Future<Output = T> + Send + Sync,
+// {
+//     Box::new(move |s| Box::pin(f(s)))
+//     // todo!()
+// }
+
 /// Type of boxed and pinned wrapper of async functions.
 pub type ArcPinFnWeb<S, T> = Arc<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static>>>;
 

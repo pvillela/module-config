@@ -269,12 +269,12 @@ where
     }
 
     // I don't understand why I have to do this as this method is defined in trait CfgDepsImmutNc.
-    pub fn get_deps(&self) -> &U {
+    pub fn get_deps<'a>(&'a self) -> &'a U {
         &CfgDepsImmutNc::get_deps(self)
     }
 
     // I don't understand why I have to do this as this method is defined in trait CfgDepsImmutNc.
-    pub fn get_cfg_deps(&self) -> (TX, &U) {
+    pub fn get_cfg_deps<'a>(&'a self) -> (TX, &'a U) {
         CfgDepsImmutNc::get_cfg_deps(self)
     }
 
