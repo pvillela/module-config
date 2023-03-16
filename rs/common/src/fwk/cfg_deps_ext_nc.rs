@@ -10,7 +10,7 @@ where
     I: CfgDepsMutNc<T, TX> + Clone + core::fmt::Debug,
     IM: InnerMutNc<I>,
 {
-    pub fn get_from_once_cell<'a>(cell: &'a OnceCell<Self>) -> (TX, &'a U) {
+    pub fn get_from_once_cell(cell: &OnceCell<Self>) -> (TX, &U) {
         cell.get().expect("OnceCell not initialized").get_cfg_deps()
     }
 }
