@@ -50,11 +50,11 @@ where
     }
 }
 
-pub struct CfgDepsInput<S, T, U> {
-    f: Option<fn() -> Arc<S>>,
-    g: Option<fn(&S) -> T>,
-    refresh_mode: Option<RefreshMode>,
-    deps: Option<U>,
+pub struct CfgDepsOvr<S, T, U> {
+    pub app_cfg_src: Option<fn() -> Arc<S>>,
+    pub cfg_adapter: Option<fn(&S) -> T>,
+    pub refresh_mode: Option<RefreshMode>,
+    pub deps: Option<U>,
 }
 
 impl<T, TX, U, IM> CfgDeps<T, TX, U, IM>
@@ -65,29 +65,29 @@ where
     IM: InnerMut<CfgDepsRaw<T, TX, U>>,
 {
     pub fn new_with_override<S: 'static>(
-        cell: &OnceCell<CfgDepsInput<S, T, U>>,
+        cell: &OnceCell<CfgDepsOvr<S, T, U>>,
         f: fn() -> Arc<S>,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
         deps: U,
     ) -> Self {
         let ov = match cell.get() {
-            Some(ov) => CfgDepsInput {
-                f: ov.f,
-                g: ov.g,
+            Some(ov) => CfgDepsOvr {
+                app_cfg_src: ov.app_cfg_src,
+                cfg_adapter: ov.cfg_adapter,
                 refresh_mode: ov.refresh_mode.clone(),
                 deps: ov.deps.clone(),
             },
-            None => CfgDepsInput {
-                f: None,
-                g: None,
+            None => CfgDepsOvr {
+                app_cfg_src: None,
+                cfg_adapter: None,
                 refresh_mode: None,
                 deps: None,
             },
         };
         Self::new_with_cfg_adapter(
-            ov.f.unwrap_or(f),
-            ov.g.unwrap_or(g),
+            ov.app_cfg_src.unwrap_or(f),
+            ov.cfg_adapter.unwrap_or(g),
             ov.refresh_mode.unwrap_or(refresh_mode),
             ov.deps.unwrap_or(deps),
         )

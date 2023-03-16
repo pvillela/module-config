@@ -20,13 +20,13 @@ pub fn foo_sfl() -> String {
 
 thread_local! {
 pub static FOO_SFL_CFG_DEPS: CfgDepsDefault<FooSflCfgInfo, FooSflDeps> =
-        CfgDepsDefault::new_with_cfg_adapter(
-            get_app_configuration,
-            foo_sfl_cfg_adapter,
-            RefreshMode::NoRefresh,
-            // RefreshMode::Refreshable(Duration::from_millis(999)),
-            FooSflDeps { bar_bf },
-        );
+    CfgDepsDefault::new_with_cfg_adapter(
+        get_app_configuration,
+        foo_sfl_cfg_adapter,
+        RefreshMode::NoRefresh,
+        // RefreshMode::Refreshable(Duration::from_millis(999)),
+        FooSflDeps { bar_bf },
+    );
 }
 
 fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
