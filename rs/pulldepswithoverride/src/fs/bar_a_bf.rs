@@ -21,7 +21,7 @@ pub async fn bar_a_bf(sleep_millis: u64) -> String {
 thread_local! {
 pub static BAR_A_BF_CFG_DEPS: BarABfCfgDeps =
     BarABfCfgDeps::new_with_override(
-        &BAR_A_BF_CFG_DEPS_OVERRIDE,
+        BAR_A_BF_CFG_DEPS_OVERRIDE.get(),
         get_app_configuration,
         bar_a_bf_cfg_adapter,
         RefreshMode::NoRefresh,

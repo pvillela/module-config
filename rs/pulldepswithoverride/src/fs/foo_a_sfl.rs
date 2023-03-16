@@ -24,7 +24,6 @@ impl std::fmt::Debug for FooASflDeps {
 
 pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     let FooAIn { sleep_millis } = input;
-    sleep(Duration::from_millis(sleep_millis)).await;
     // Block below used as workaround for case when CfgDepsDefault is based on Rc (instead of Arc)
     // to make compiler see the Rc is dropped before it leaks into the Future.
     let (a, b, bar) = {
@@ -33,6 +32,7 @@ pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
         let b = cfg.b;
         (a, b, d.bar_a_bf)
     };
+    sleep(Duration::from_millis(sleep_millis)).await;
     let bar_res = bar(0).await;
     let res = foo_core(a, b, bar_res);
     FooAOut { res }
@@ -41,7 +41,7 @@ pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
 thread_local! {
 pub static FOO_A_SFL_CFG_DEPS: FooASflCfgDeps =
     FooASflCfgDeps::new_with_override(
-        &FOO_A_SFL_CFG_DEPS_OVERRIDE,
+        FOO_A_SFL_CFG_DEPS_OVERRIDE.get(),
         get_app_configuration,
         foo_a_sfl_cfg_adapter,
         RefreshMode::NoRefresh,

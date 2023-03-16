@@ -65,13 +65,13 @@ where
     IM: InnerMut<CfgDepsRaw<T, TX, U>>,
 {
     pub fn new_with_override<S: 'static>(
-        cell: &OnceCell<CfgDepsOvr<S, T, U>>,
+        ovr: Option<&CfgDepsOvr<S, T, U>>,
         f: fn() -> Arc<S>,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
         deps: U,
     ) -> Self {
-        let ov = match cell.get() {
+        let ov = match ovr {
             Some(ov) => CfgDepsOvr {
                 app_cfg_src: ov.app_cfg_src,
                 cfg_adapter: ov.cfg_adapter,
