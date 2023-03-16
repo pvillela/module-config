@@ -21,13 +21,24 @@ where
 pub type ArcPinFnWeb<S, T> = Arc<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static>>>;
 
 /// Boxes and pins an async function so it can be passed across theads.
-pub fn arc_pin_async_fn_web<S: 'static, T: Send + Sync, Fut>(
+pub fn arc_pin_async_fn_web<S, T: Send + Sync, Fut>(
     f: impl Fn(S) -> Fut + 'static,
 ) -> ArcPinFnWeb<S, T>
 where
     Fut: 'static + Future<Output = T>,
 {
     Arc::new(move |s| Box::pin(f(s)))
+}
+
+/// Type of boxed wrapper of async functions.
+pub type MinBoxFn<S, T> = Box<dyn Fn(S) -> Box<dyn Future<Output = T>>>;
+
+/// Boxes and pins an async function so it can be passed across theads.
+pub fn min_box_async_fn<S, T, Fut>(f: impl Fn(S) -> Fut + 'static) -> MinBoxFn<S, T>
+where
+    Fut: Future<Output = T> + 'static,
+{
+    Box::new(move |s| Box::new(f(s)))
 }
 
 pub fn type_name<T>(_: &T) -> &'static str {
