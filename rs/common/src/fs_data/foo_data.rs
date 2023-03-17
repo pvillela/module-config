@@ -1,4 +1,5 @@
 pub use foo_a_data::*;
+pub use foo_an_data::*;
 pub use foo_aw_data::*;
 pub use foo_data::*;
 
@@ -36,6 +37,16 @@ mod foo_a_data {
             common_respond_to(self)
         }
     }
+}
+
+mod foo_an_data {
+    use super::{FooAIn, FooAOut, FooASflCfgInfo};
+
+    pub type FooAnSflCfgInfo = FooASflCfgInfo;
+
+    pub type FooAnIn = FooAIn;
+
+    pub type FooAnOut = FooAOut;
 }
 
 mod foo_aw_data {

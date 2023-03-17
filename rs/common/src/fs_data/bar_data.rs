@@ -13,6 +13,11 @@ pub struct BarBfCfgInfo {
 pub type BarABfCfgInfo = BarBfCfgInfo;
 
 ///////////////////
+// bar_an_bf
+
+pub type BarAnBfCfgInfo = BarBfCfgInfo;
+
+///////////////////
 // bar_aw_bf
 
 pub type BarAwBfCfgInfo = BarBfCfgInfo;

@@ -1,8 +1,8 @@
-mod common_test;
+mod common_test_n;
 
-use common::fs_data::BarBfCfgInfo;
-use common::fs_data::FooSflCfgInfo;
-use common_test::common_test;
+use common::fs_data::BarAnBfCfgInfo;
+use common::fs_data::FooAnSflCfgInfo;
+use common_test_n::common_test;
 use tokio;
 
 mod t1 {
@@ -11,11 +11,11 @@ mod t1 {
     #[tokio::test]
     async fn test1() {
         let res = common_test(
-            FooSflCfgInfo {
+            FooAnSflCfgInfo {
                 a: "foo_a_test1".to_owned(),
                 b: 1,
             },
-            BarBfCfgInfo {
+            BarAnBfCfgInfo {
                 u: 11,
                 v: "bar_a_test1".to_owned(),
             },
@@ -34,11 +34,11 @@ mod t2 {
     #[tokio::test]
     async fn test2() {
         let res = common_test(
-            FooSflCfgInfo {
+            FooAnSflCfgInfo {
                 a: "foo_a_test2".to_owned(),
                 b: 2,
             },
-            BarBfCfgInfo {
+            BarAnBfCfgInfo {
                 u: 22,
                 v: "bar_a_test2".to_owned(),
             },
