@@ -1,14 +1,14 @@
 use common::fs_data::BarAnBfCfgInfo;
 use common::fs_data::{FooAnIn, FooAnSflCfgInfo};
 use common::fwk::RefreshMode;
-use pulldepswithoverride::fs::{foo_an_sfl, BAR_AN_BF_CFG_DEPS, FOO_AN_SFL_CFG_DEPS};
+use pulldepswithoverride::fs::{foo_an_sfl, BAR_AN_BF_CFG, FOO_AN_SFL_CFG};
 use tokio;
 
 pub async fn common_test(
     foo_an_sfl_cfg_info: FooAnSflCfgInfo,
     bar_an_bf_cfg_info: BarAnBfCfgInfo,
 ) -> Option<String> {
-    FOO_AN_SFL_CFG_DEPS.with(|c| {
+    FOO_AN_SFL_CFG.with(|c| {
         c.update_all(
             move || foo_an_sfl_cfg_info.clone(),
             RefreshMode::NoRefresh,
@@ -18,7 +18,7 @@ pub async fn common_test(
         )
     });
 
-    BAR_AN_BF_CFG_DEPS.with(|c| {
+    BAR_AN_BF_CFG.with(|c| {
         c.update_all(
             move || bar_an_bf_cfg_info.clone(),
             RefreshMode::NoRefresh,

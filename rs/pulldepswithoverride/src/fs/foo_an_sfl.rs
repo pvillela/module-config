@@ -1,19 +1,21 @@
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{arc_pin_async_fn, ArcPinFn, CfgDepsOvr, CfgDepsRefCellRcNc, RefreshMode};
+use common::fwk::{
+    arc_pin_async_fn, static_ref_with_override, ArcPinFn, CfgOvd, CfgRefCellRc, RefreshMode,
+};
 use once_cell::sync::{Lazy, OnceCell};
 use std::time::Duration;
 use tokio::time::sleep;
 
 use super::bar_an_bf;
 
-type FooAnSflCfgDeps = CfgDepsRefCellRcNc<FooASflCfgInfo, &'static FooAnSflDeps>;
+type FooAnSflCfg = CfgRefCellRc<FooASflCfgInfo>;
 type FooAnSflCfgInfo = FooASflCfgInfo;
 type FooAnIn = FooAIn;
 type FooAnOut = FooAOut;
 
-pub type FooAnSflCfgDepsOvr = CfgDepsOvr<FooASflCfgInfo, &'static FooAnSflDeps>;
+pub type FooAnSflCfgOvd = CfgOvd<FooASflCfgInfo>;
 
 #[derive(Clone)]
 pub struct FooAnSflDeps {
@@ -30,7 +32,7 @@ pub async fn foo_an_sfl(input: FooAnIn) -> FooAnOut {
     let FooAnIn { sleep_millis } = input;
     let d = &FOO_AN_SFL_DEPS;
     let (a, b) = {
-        let cfg = FOO_AN_SFL_CFG_DEPS.with(|c| c.get_cfg());
+        let cfg = FOO_AN_SFL_CFG.with(|c| c.get_cfg());
         let a = cfg.a.clone();
         let b = cfg.b;
         (a, b)
@@ -41,22 +43,27 @@ pub async fn foo_an_sfl(input: FooAnIn) -> FooAnOut {
     FooAnOut { res }
 }
 
-pub static FOO_AN_SFL_DEPS: Lazy<FooAnSflDeps> = Lazy::new(|| FooAnSflDeps {
-    bar_a_bf: arc_pin_async_fn(bar_an_bf),
+pub static FOO_AN_SFL_DEPS: Lazy<&FooAnSflDeps> = Lazy::new(|| {
+    static_ref_with_override(
+        FOO_AN_SFL_DEPS_OVERRIDE.get(),
+        FooAnSflDeps {
+            bar_a_bf: arc_pin_async_fn(bar_an_bf),
+        },
+    )
 });
 
 thread_local! {
-pub static FOO_AN_SFL_CFG_DEPS: FooAnSflCfgDeps =
-    FooAnSflCfgDeps::new_with_override(
-        FOO_AN_SFL_CFG_DEPS_OVERRIDE.get(),
+pub static FOO_AN_SFL_CFG: FooAnSflCfg =
+    FooAnSflCfg::new_with_override(
+        FOO_AN_SFL_CFG_OVERRIDE.get(),
         get_app_configuration,
         foo_an_sfl_cfg_adapter,
         RefreshMode::NoRefresh,
-        &FOO_AN_SFL_DEPS,
     )
 }
 
-pub static FOO_AN_SFL_CFG_DEPS_OVERRIDE: OnceCell<FooAnSflCfgDepsOvr> = OnceCell::new();
+pub static FOO_AN_SFL_CFG_OVERRIDE: OnceCell<FooAnSflCfgOvd> = OnceCell::new();
+pub static FOO_AN_SFL_DEPS_OVERRIDE: OnceCell<FooAnSflDeps> = OnceCell::new();
 
 fn foo_an_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooAnSflCfgInfo {
     FooAnSflCfgInfo {

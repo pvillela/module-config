@@ -59,16 +59,10 @@ impl<I: Clone> InnerMutNc<I> for RefCell<I> {
     }
 }
 
-pub struct CfgDepsInnerMutNc<T, TX, U, I, IM>(
-    IM,
-    U,
-    PhantomData<T>,
-    PhantomData<TX>,
-    PhantomData<I>,
-)
+pub struct CfgInnerMut<T, TX, I, IM>(IM, PhantomData<T>, PhantomData<TX>, PhantomData<I>)
 where
     TX: From<T> + Clone + core::fmt::Debug,
-    I: CfgDepsMutNc<T, TX> + Clone + core::fmt::Debug,
+    I: CfgMut<T, TX> + Clone + core::fmt::Debug,
     IM: InnerMutNc<I>;
 
 #[derive(Clone)]
@@ -87,20 +81,10 @@ struct Cache<V> {
     value: V,
 }
 
-pub trait CfgDepsImmutNc<T, TX: Clone, U> {
+pub trait CfgImmut<T, TX: Clone> {
     fn get_cfg(&self) -> TX;
 
-    fn get_deps(&self) -> &U;
-
-    /// Returns a pair containing an Arc of the configuration data and the dependencies data structure.
-    /// Although the reference to self is immutable, the receiver may have interior mutability and
-    /// update a configuration data cache as a result of this call.
-    fn get_cfg_deps(&self) -> (TX, &U) {
-        (self.get_cfg(), self.get_deps())
-    }
-
-    /// Sets a static module CfgDepsNc with a configuration info source, refresh mode, and a dependencies data
-    /// structure.
+    /// Sets a static module-level Cfg with a configuration info source and refresh mode.
     fn update_all(
         &self,
         cfg_src_fn: impl 'static + Fn() -> T + Send + Sync,
@@ -110,14 +94,14 @@ pub trait CfgDepsImmutNc<T, TX: Clone, U> {
     fn update_refresh_mode(&self, refresh_mode: RefreshMode);
 
     /// Composes an application info source f with an adapter g for a particular module, then
-    /// sets it and the refresh mode and deps data structure to the static module CfgDepsNc.
+    /// sets it and the refresh mode to the static module-level Cfg.
     fn update_with_cfg_adapter<S, F, G>(&self, f: F, g: G, refresh_mode: RefreshMode)
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync;
 }
 
-pub trait CfgDepsMutNc<T, TX: Clone> {
+pub trait CfgMut<T, TX: Clone> {
     /// Returns the configuration data in the cache, even if stale.
     fn get_cfg_cached(&self) -> TX;
 
@@ -129,8 +113,7 @@ pub trait CfgDepsMutNc<T, TX: Clone> {
 
     fn replace(&mut self, other: Self);
 
-    /// Updates the receiver with a configuration info source, refresh mode, and a dependencies data
-    /// structure.
+    /// Updates the receiver with a configuration info source and refresh mode.
     fn update_all(
         &mut self,
         src: impl 'static + Fn() -> T + Send + Sync,
@@ -140,7 +123,7 @@ pub trait CfgDepsMutNc<T, TX: Clone> {
     fn update_refresh_mode(&mut self, refresh_mode: RefreshMode);
 
     /// Composes an application info source f with an adapter g for a particular module, then
-    /// sets it and the refresh mode and deps data structure to the receiver.
+    /// sets it and the refresh mode to the receiver.
     fn update_with_cfg_adapter<S, F, G>(&mut self, f: F, g: G, refresh_mode: RefreshMode)
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
@@ -196,7 +179,7 @@ where
     }
 }
 
-impl<T, TX> CfgDepsMutNc<T, TX> for CfgRaw<T, TX>
+impl<T, TX> CfgMut<T, TX> for CfgRaw<T, TX>
 where
     TX: From<T> + Clone + core::fmt::Debug,
 {
@@ -257,25 +240,15 @@ where
     }
 }
 
-impl<T, TX, U, I, IM> CfgDepsInnerMutNc<T, TX, U, I, IM>
+impl<T, TX, I, IM> CfgInnerMut<T, TX, I, IM>
 where
     TX: From<T> + Clone + core::fmt::Debug,
-    I: CfgDepsMutNc<T, TX> + Clone + core::fmt::Debug,
+    I: CfgMut<T, TX> + Clone + core::fmt::Debug,
     IM: InnerMutNc<I>,
 {
     // I don't understand why I have to do this as this method is defined in trait CfgDepsImmutNc.
     pub fn get_cfg(&self) -> TX {
-        CfgDepsImmutNc::get_cfg(self)
-    }
-
-    // I don't understand why I have to do this as this method is defined in trait CfgDepsImmutNc.
-    pub fn get_deps(&self) -> &U {
-        &CfgDepsImmutNc::get_deps(self)
-    }
-
-    // I don't understand why I have to do this as this method is defined in trait CfgDepsImmutNc.
-    pub fn get_cfg_deps(&self) -> (TX, &U) {
-        CfgDepsImmutNc::get_cfg_deps(self)
+        CfgImmut::get_cfg(self)
     }
 
     fn get_inner(&self) -> &IM {
@@ -290,38 +263,35 @@ where
         self.0.set_inner(inner);
     }
 
-    fn new_priv(inner: I, deps: U) -> Self {
-        CfgDepsInnerMutNc(IM::from(inner), deps, PhantomData, PhantomData, PhantomData)
+    fn new_priv(inner: I) -> Self {
+        CfgInnerMut(IM::from(inner), PhantomData, PhantomData, PhantomData)
     }
 
     pub fn new_f<F>(
         src: F,
         refresh_mode: RefreshMode,
-        deps: U,
         factory: impl Fn(F, RefreshMode) -> I,
     ) -> Self
     where
         F: 'static + Fn() -> T + Send + Sync,
     {
-        Self::new_priv(factory(src, refresh_mode), deps)
+        Self::new_priv(factory(src, refresh_mode))
     }
 
     pub fn new_with_cfg_adapter_f<S, F, G>(
         f: F,
         g: G,
         refresh_mode: RefreshMode,
-        deps: U,
         factory: impl Fn(F, G, RefreshMode) -> I,
     ) -> Self
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
     {
-        Self::new_priv(factory(f, g, refresh_mode), deps)
+        Self::new_priv(factory(f, g, refresh_mode))
     }
 
-    /// Updates the receiver with a configuration info source, refresh mode, and a dependencies data
-    /// structure.
+    /// Updates the receiver with a configuration info source and refresh mode.
     pub fn update_all(
         &self,
         src: impl 'static + Fn() -> T + Send + Sync,
@@ -339,7 +309,7 @@ where
     }
 
     /// Composes an application info source f with an adapter g for a particular module, then
-    /// sets it and the refresh mode and deps data structure to the receiver.
+    /// sets it and the refresh mode to the receiver.
     pub fn update_with_cfg_adapter<S, F, G>(&self, f: F, g: G, refresh_mode: RefreshMode)
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
@@ -351,7 +321,7 @@ where
     }
 }
 
-// impl<T, TX, U, I, IM> Clone for CfgDepsInnerMutNc<T, TX, U, I, IM>
+// impl<T, TX, I, IM> Clone for CfgInnerMut<T, TX, I, IM>
 // where
 //     TX: From<T> + Clone + core::fmt::Debug,
 //     I: CfgDepsMutNc<T, TX> + Clone + core::fmt::Debug,
@@ -363,10 +333,10 @@ where
 //     }
 // }
 
-impl<T, TX, U, I, IM> CfgDepsImmutNc<T, TX, U> for CfgDepsInnerMutNc<T, TX, U, I, IM>
+impl<T, TX, I, IM> CfgImmut<T, TX> for CfgInnerMut<T, TX, I, IM>
 where
     TX: From<T> + Clone + core::fmt::Debug,
-    I: CfgDepsMutNc<T, TX> + Clone + core::fmt::Debug,
+    I: CfgMut<T, TX> + Clone + core::fmt::Debug,
     IM: InnerMutNc<I>,
 {
     fn get_cfg(&self) -> TX {
@@ -388,12 +358,7 @@ where
         }
     }
 
-    fn get_deps(&self) -> &U {
-        &self.1
-    }
-
-    /// Updates the receiver with a configuration info source, refresh mode, and a dependencies data
-    /// structure.
+    /// Updates the receiver with a configuration info source and refresh mode.
     fn update_all(&self, src: impl 'static + Fn() -> T + Send + Sync, refresh_mode: RefreshMode) {
         Self::update_all(self, src, refresh_mode)
     }
@@ -403,7 +368,7 @@ where
     }
 
     /// Composes an application info source f with an adapter g for a particular module, then
-    /// sets it and the refresh mode and deps data structure to the receiver.
+    /// sets it and the refresh mode to the receiver.
     fn update_with_cfg_adapter<S, F, G>(&self, f: F, g: G, refresh_mode: RefreshMode)
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
@@ -415,56 +380,50 @@ where
 
 // Type aliases for CfgDepsNc.
 
-pub type CfgDepsNc<T, TX, U, IM> = CfgDepsInnerMutNc<T, TX, U, CfgRaw<T, TX>, IM>;
+pub type Cfg<T, TX, IM> = CfgInnerMut<T, TX, CfgRaw<T, TX>, IM>;
 
-pub type CfgDepsRefCellNc<T, TX, U> =
-    CfgDepsInnerMutNc<T, TX, U, CfgRaw<T, TX>, RefCell<CfgRaw<T, TX>>>;
+pub type CfgRefCell<T, TX> = CfgInnerMut<T, TX, CfgRaw<T, TX>, RefCell<CfgRaw<T, TX>>>;
 
-pub type CfgDepsArcSwapNc<T, TX, U> =
-    CfgDepsInnerMutNc<T, TX, U, CfgRaw<T, TX>, ArcSwap<CfgRaw<T, TX>>>;
+pub type CfgArcSwap<T, TX> = CfgInnerMut<T, TX, CfgRaw<T, TX>, ArcSwap<CfgRaw<T, TX>>>;
 
-pub type CfgDepsRefCellRcNc<T, U> = CfgDepsRefCellNc<T, Rc<T>, U>;
+pub type CfgRefCellRc<T> = CfgRefCell<T, Rc<T>>;
 
-pub type CfgDepsArcSwapRcNc<T, U> = CfgDepsArcSwapNc<T, Rc<T>, U>;
+pub type CfgArcSwapRc<T> = CfgArcSwap<T, Rc<T>>;
 
-pub type CfgDepsRefCellArcNc<T, U> = CfgDepsRefCellNc<T, Arc<T>, U>;
+pub type CfgRefCellArc<T> = CfgRefCell<T, Arc<T>>;
 
-pub type CfgDepsArcSwapArcNc<T, U> = CfgDepsArcSwapNc<T, Arc<T>, U>;
+pub type CfgArcSwapArc<T> = CfgArcSwap<T, Arc<T>>;
 
-pub type CfgDepsRefCellIdNc<T, U> = CfgDepsRefCellNc<T, T, U>;
+pub type CfgRefCellId<T> = CfgRefCell<T, T>;
 
-pub type CfgDepsArcSwapIdNc<T, U> = CfgDepsArcSwapNc<T, T, U>;
+pub type CfgArcSwapId<T> = CfgArcSwap<T, T>;
 
-pub type CfgDepsArcNc<T, U> = CfgDepsArcSwapArcNc<T, U>;
+pub type CfgArc<T> = CfgArcSwapArc<T>;
 
-// pub type CfgDepsDefaultNc<T, U> = CfgDepsArcSwapArcNc<T, U>;
-// pub type CfgDepsDefaultNc<T, U> = CfgDepsRefCellArcNc<T, U>;
-pub type CfgDepsDefaultNc<T, U> = CfgDepsRefCellRcNc<T, U>;
+// pub type CfgDefault<T> = CfgArcSwapArc<T>;
+// pub type CfgDefault<T> = CfgRefCellArc<T>;
+pub type CfgDefault<T> = CfgRefCellRc<T>;
 
-impl<T, TX, U, IM> CfgDepsNc<T, TX, U, IM>
+impl<T, TX, IM> Cfg<T, TX, IM>
 where
     T: Clone,
     TX: From<T> + Clone + core::fmt::Debug,
     IM: InnerMutNc<CfgRaw<T, TX>>,
 {
-    pub fn new(
-        src: impl 'static + Fn() -> T + Send + Sync,
-        refresh_mode: RefreshMode,
-        deps: U,
-    ) -> Self {
-        Self::new_f(src, refresh_mode, deps, CfgRaw::new)
+    pub fn new(src: impl 'static + Fn() -> T + Send + Sync, refresh_mode: RefreshMode) -> Self {
+        Self::new_f(src, refresh_mode, CfgRaw::new)
     }
 
-    pub fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode, deps: U) -> Self
+    pub fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode) -> Self
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
     {
-        Self::new_with_cfg_adapter_f(f, g, refresh_mode, deps, CfgRaw::new_with_cfg_adapter)
+        Self::new_with_cfg_adapter_f(f, g, refresh_mode, CfgRaw::new_with_cfg_adapter)
     }
 }
 
-impl<T, TX, U, IM> CfgDepsNc<T, TX, U, IM>
+impl<T, TX, IM> Cfg<T, TX, IM>
 where
     T: 'static + Clone + Send + Sync,
     TX: From<T> + Clone + core::fmt::Debug,
@@ -475,7 +434,6 @@ where
         f: F,
         g: G,
         refresh_mode: RefreshMode,
-        deps: U,
     ) -> Self
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
@@ -484,9 +442,9 @@ where
         match k {
             Some(k) => {
                 let src = move || k.clone();
-                Self::new(src, refresh_mode, deps)
+                Self::new(src, refresh_mode)
             }
-            None => Self::new_with_cfg_adapter(f, g, refresh_mode, deps),
+            None => Self::new_with_cfg_adapter(f, g, refresh_mode),
         }
     }
 }

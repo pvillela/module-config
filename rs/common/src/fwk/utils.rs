@@ -78,3 +78,13 @@ where
 pub fn nil_app_cfg<T>() -> Arc<T> {
     todo!("Configuration source not provided.")
 }
+
+/// Returns a static reference to a value or an override if the override exists.
+/// The references are required to be static to avoid memory leaks.
+pub fn static_ref_with_override<T>(ovd: Option<&'static T>, value: T) -> &'static T {
+    if let Some(ovd) = ovd {
+        ovd
+    } else {
+        Box::leak(Box::new(value))
+    }
+}

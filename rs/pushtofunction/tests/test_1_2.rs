@@ -23,10 +23,7 @@ mod t1 {
         .await;
         assert_eq!(
             res,
-            Some(
-                "fooSfl(): a=foo_a_test1-foo, b=4, bar=(barBf(): u=12, v=bar_a_test1-bar)"
-                    .to_owned()
-            )
+            Some("foo: a=foo_a_test1-foo, b=4, bar=(bar: u=12, v=bar_a_test1-bar)".to_owned())
         );
     }
 }
@@ -49,10 +46,7 @@ mod t2 {
         .await;
         assert_eq!(
             res,
-            Some(
-                "fooSfl(): a=foo_a_test2-foo, b=5, bar=(barBf(): u=23, v=bar_a_test2-bar)"
-                    .to_owned()
-            )
+            Some("foo: a=foo_a_test2-foo, b=5, bar=(bar: u=23, v=bar_a_test2-bar)".to_owned())
         );
     }
 }
