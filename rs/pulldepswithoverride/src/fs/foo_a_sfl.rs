@@ -2,35 +2,35 @@ use super::bar_a_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{arc_pin_async_fn, ArcPinFn, CfgDepsDefault, CfgDepsOvr, RefreshMode};
-use once_cell::sync::OnceCell;
+use common::fwk::{
+    arc_pin_async_fn, static_ref_with_override, ArcPinFn, CfgOvd, CfgRefCellRc, RefreshMode,
+};
+use once_cell::sync::{Lazy, OnceCell};
 use std::time::Duration;
 use tokio::time::sleep;
 
-type FooASflCfgDeps = CfgDepsDefault<FooASflCfgInfo, FooASflDeps>;
+type FooASflCfg = CfgRefCellRc<FooASflCfgInfo>;
 
-pub type FooASflCfgDepsOvr = CfgDepsOvr<FooASflCfgInfo, FooASflDeps>;
+pub type FooASflCfgOvd = CfgOvd<FooASflCfgInfo>;
 
-#[derive(Clone)]
 pub struct FooASflDeps {
-    pub bar_a_bf: ArcPinFn<u64, String>,
+    pub bar_an_bf: ArcPinFn<u64, String>,
 }
 
 impl std::fmt::Debug for FooASflDeps {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("<FooASflDeps>")
+        f.write_str("<FooAnSflDeps>")
     }
 }
 
 pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     let FooAIn { sleep_millis } = input;
-    // Block below used as workaround for case when CfgDepsDefault is based on Rc (instead of Arc)
-    // to make compiler see the Rc is dropped before it leaks into the Future.
-    let (a, b, bar) = {
-        let (cfg, d) = FOO_A_SFL_CFG_DEPS.with(|c| c.get_cfg_deps());
+    let FooASflDeps { bar_an_bf: bar } = &FOO_A_SFL_DEPS as &FooASflDeps;
+    let (a, b) = {
+        let cfg = FOO_A_SFL_CFG.with(|c| c.get_cfg());
         let a = cfg.a.clone();
         let b = cfg.b;
-        (a, b, d.bar_a_bf)
+        (a, b)
     };
     sleep(Duration::from_millis(sleep_millis)).await;
     let bar_res = bar(0).await;
@@ -38,20 +38,27 @@ pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     FooAOut { res }
 }
 
+pub static FOO_A_SFL_DEPS: Lazy<&FooASflDeps> = Lazy::new(|| {
+    static_ref_with_override(
+        FOO_A_SFL_DEPS_OVERRIDE.get(),
+        FooASflDeps {
+            bar_an_bf: arc_pin_async_fn(bar_a_bf),
+        },
+    )
+});
+
 thread_local! {
-pub static FOO_A_SFL_CFG_DEPS: FooASflCfgDeps =
-    FooASflCfgDeps::new_with_override(
-        FOO_A_SFL_CFG_DEPS_OVERRIDE.get(),
+pub static FOO_A_SFL_CFG: FooASflCfg =
+    FooASflCfg::new_with_override(
+        FOO_A_SFL_CFG_OVERRIDE.get(),
         get_app_configuration,
         foo_a_sfl_cfg_adapter,
         RefreshMode::NoRefresh,
-        FooASflDeps {
-            bar_a_bf: arc_pin_async_fn(bar_a_bf),
-        },
     )
 }
 
-pub static FOO_A_SFL_CFG_DEPS_OVERRIDE: OnceCell<FooASflCfgDepsOvr> = OnceCell::new();
+pub static FOO_A_SFL_CFG_OVERRIDE: OnceCell<FooASflCfgOvd> = OnceCell::new();
+pub static FOO_A_SFL_DEPS_OVERRIDE: OnceCell<FooASflDeps> = OnceCell::new();
 
 fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
     FooASflCfgInfo {

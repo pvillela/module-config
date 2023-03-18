@@ -3,11 +3,21 @@ use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
 use std::sync::Arc;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
-use super::RefreshMode;
+#[derive(Clone, Debug)]
+pub enum RefreshMode {
+    NoRefresh,
+    Refreshable(Duration),
+}
 
-pub trait InnerMutNc<I> {
+#[derive(Debug, Clone)]
+struct Cache<V> {
+    last_refresh: Instant,
+    value: V,
+}
+
+pub trait InnerMut<I> {
     fn get_inner_clone(&self) -> I;
 
     fn set_inner(&self, inner: I);
@@ -17,7 +27,7 @@ pub trait InnerMutNc<I> {
     fn with<V>(&self, _: impl Fn(&I) -> V) -> V;
 }
 
-impl<I: Clone> InnerMutNc<I> for ArcSwap<I> {
+impl<I: Clone> InnerMut<I> for ArcSwap<I> {
     fn get_inner_clone(&self) -> I {
         let inner = self.load().as_ref().clone();
         inner
@@ -38,7 +48,7 @@ impl<I: Clone> InnerMutNc<I> for ArcSwap<I> {
     }
 }
 
-impl<I: Clone> InnerMutNc<I> for RefCell<I> {
+impl<I: Clone> InnerMut<I> for RefCell<I> {
     fn get_inner_clone(&self) -> I {
         let inner = self.borrow().clone();
         inner
@@ -63,7 +73,7 @@ pub struct CfgInnerMut<T, TX, I, IM>(IM, PhantomData<T>, PhantomData<TX>, Phanto
 where
     TX: From<T> + Clone + core::fmt::Debug,
     I: CfgMut<T, TX> + Clone + core::fmt::Debug,
-    IM: InnerMutNc<I>;
+    IM: InnerMut<I>;
 
 #[derive(Clone)]
 pub struct CfgRaw<T, TX>
@@ -73,12 +83,6 @@ where
     src: Arc<dyn 'static + Fn() -> T + Send + Sync>,
     refresh_mode: RefreshMode,
     cache: Cache<TX>,
-}
-
-#[derive(Debug, Clone)]
-struct Cache<V> {
-    last_refresh: Instant,
-    value: V,
 }
 
 pub trait CfgImmut<T, TX: Clone> {
@@ -147,7 +151,10 @@ impl<T, TX> CfgRaw<T, TX>
 where
     TX: From<T> + Clone + core::fmt::Debug,
 {
-    fn new(src: impl 'static + Fn() -> T + Send + Sync, refresh_mode: RefreshMode) -> Self {
+    pub(crate) fn new(
+        src: impl 'static + Fn() -> T + Send + Sync,
+        refresh_mode: RefreshMode,
+    ) -> Self {
         let cfg = src();
         CfgRaw {
             src: Arc::new(src),
@@ -169,7 +176,7 @@ where
         self.cache = cache;
     }
 
-    fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode) -> Self
+    pub(crate) fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode) -> Self
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
@@ -244,9 +251,9 @@ impl<T, TX, I, IM> CfgInnerMut<T, TX, I, IM>
 where
     TX: From<T> + Clone + core::fmt::Debug,
     I: CfgMut<T, TX> + Clone + core::fmt::Debug,
-    IM: InnerMutNc<I>,
+    IM: InnerMut<I>,
 {
-    // I don't understand why I have to do this as this method is defined in trait CfgDepsImmutNc.
+    // I don't understand why I have to do this as this method is defined in trait CfgImmut.
     pub fn get_cfg(&self) -> TX {
         CfgImmut::get_cfg(self)
     }
@@ -324,7 +331,7 @@ where
 // impl<T, TX, I, IM> Clone for CfgInnerMut<T, TX, I, IM>
 // where
 //     TX: From<T> + Clone + core::fmt::Debug,
-//     I: CfgDepsMutNc<T, TX> + Clone + core::fmt::Debug,
+//     I: CfgDepsMut<T, TX> + Clone + core::fmt::Debug,
 //     IM: InnerMutNc<I>,
 // {
 //     fn clone(&self) -> Self {
@@ -337,7 +344,7 @@ impl<T, TX, I, IM> CfgImmut<T, TX> for CfgInnerMut<T, TX, I, IM>
 where
     TX: From<T> + Clone + core::fmt::Debug,
     I: CfgMut<T, TX> + Clone + core::fmt::Debug,
-    IM: InnerMutNc<I>,
+    IM: InnerMut<I>,
 {
     fn get_cfg(&self) -> TX {
         let inner = self.get_inner();
@@ -380,11 +387,11 @@ where
 
 // Type aliases for CfgDepsNc.
 
-pub type Cfg<T, TX, IM> = CfgInnerMut<T, TX, CfgRaw<T, TX>, IM>;
+pub type CfgStd<T, TX, IM> = CfgInnerMut<T, TX, CfgRaw<T, TX>, IM>;
 
-pub type CfgRefCell<T, TX> = CfgInnerMut<T, TX, CfgRaw<T, TX>, RefCell<CfgRaw<T, TX>>>;
+pub type CfgRefCell<T, TX> = CfgStd<T, TX, RefCell<CfgRaw<T, TX>>>;
 
-pub type CfgArcSwap<T, TX> = CfgInnerMut<T, TX, CfgRaw<T, TX>, ArcSwap<CfgRaw<T, TX>>>;
+pub type CfgArcSwap<T, TX> = CfgStd<T, TX, ArcSwap<CfgRaw<T, TX>>>;
 
 pub type CfgRefCellRc<T> = CfgRefCell<T, Rc<T>>;
 
@@ -398,17 +405,15 @@ pub type CfgRefCellId<T> = CfgRefCell<T, T>;
 
 pub type CfgArcSwapId<T> = CfgArcSwap<T, T>;
 
-pub type CfgArc<T> = CfgArcSwapArc<T>;
-
 // pub type CfgDefault<T> = CfgArcSwapArc<T>;
 // pub type CfgDefault<T> = CfgRefCellArc<T>;
 pub type CfgDefault<T> = CfgRefCellRc<T>;
 
-impl<T, TX, IM> Cfg<T, TX, IM>
+impl<T, TX, IM> CfgStd<T, TX, IM>
 where
     T: Clone,
     TX: From<T> + Clone + core::fmt::Debug,
-    IM: InnerMutNc<CfgRaw<T, TX>>,
+    IM: InnerMut<CfgRaw<T, TX>>,
 {
     pub fn new(src: impl 'static + Fn() -> T + Send + Sync, refresh_mode: RefreshMode) -> Self {
         Self::new_f(src, refresh_mode, CfgRaw::new)
@@ -423,11 +428,11 @@ where
     }
 }
 
-impl<T, TX, IM> Cfg<T, TX, IM>
+impl<T, TX, IM> CfgStd<T, TX, IM>
 where
     T: 'static + Clone + Send + Sync,
     TX: From<T> + Clone + core::fmt::Debug,
-    IM: InnerMutNc<CfgRaw<T, TX>>,
+    IM: InnerMut<CfgRaw<T, TX>>,
 {
     pub fn new_with_const_or_cfg_adapter<S, F, G>(
         k: Option<&'static T>,

@@ -1,4 +1,4 @@
-use super::{Cfg, CfgInnerMut, CfgMut, CfgRaw, InnerMutNc, RefreshMode};
+use super::{CfgInnerMut, CfgMut, CfgRaw, CfgStd, InnerMut, RefreshMode};
 use once_cell::sync::OnceCell;
 use std::sync::Arc;
 
@@ -6,18 +6,18 @@ impl<T, TX, I, IM> CfgInnerMut<T, TX, I, IM>
 where
     TX: From<T> + Clone + core::fmt::Debug,
     I: CfgMut<T, TX> + Clone + core::fmt::Debug,
-    IM: InnerMutNc<I>,
+    IM: InnerMut<I>,
 {
     pub fn get_from_once_cell(cell: &OnceCell<Self>) -> TX {
         cell.get().expect("OnceCell not initialized").get_cfg()
     }
 }
 
-impl<T, TX, IM> Cfg<T, TX, IM>
+impl<T, TX, IM> CfgStd<T, TX, IM>
 where
     T: Clone,
     TX: From<T> + Clone + core::fmt::Debug,
-    IM: InnerMutNc<CfgRaw<T, TX>>,
+    IM: InnerMut<CfgRaw<T, TX>>,
 {
     pub fn set(
         cell: &OnceCell<Self>,
@@ -51,11 +51,11 @@ pub struct CfgOvd<T> {
     pub refresh_mode: Option<RefreshMode>,
 }
 
-impl<T, TX, IM> Cfg<T, TX, IM>
+impl<T, TX, IM> CfgStd<T, TX, IM>
 where
     T: 'static + Clone,
     TX: From<T> + Clone + core::fmt::Debug,
-    IM: InnerMutNc<CfgRaw<T, TX>>,
+    IM: InnerMut<CfgRaw<T, TX>>,
 {
     pub fn new_with_override<S: 'static>(
         ovr: Option<&CfgOvd<T>>,
