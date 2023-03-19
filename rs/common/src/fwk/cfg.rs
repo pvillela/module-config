@@ -69,11 +69,10 @@ impl<I: Clone> InnerMut<I> for RefCell<I> {
     }
 }
 
-pub struct CfgInnerMut<T, TX, I, IM>(IM, PhantomData<T>, PhantomData<TX>, PhantomData<I>)
+pub struct Cfg<T, TX, IM>(IM, PhantomData<T>, PhantomData<TX>)
 where
     TX: From<T> + Clone + core::fmt::Debug,
-    I: CfgMut<T, TX> + Clone + core::fmt::Debug,
-    IM: InnerMut<I>;
+    IM: InnerMut<CfgRaw<T, TX>>;
 
 #[derive(Clone)]
 pub struct CfgRaw<T, TX>
@@ -88,50 +87,9 @@ where
 pub trait CfgImmut<T, TX: Clone> {
     fn get_cfg(&self) -> TX;
 
-    /// Sets a static module-level Cfg with a configuration info source and refresh mode.
-    fn update_all(
-        &self,
-        cfg_src_fn: impl 'static + Fn() -> T + Send + Sync,
-        refresh_mode: RefreshMode,
-    );
+    fn get_cfg_src(&self) -> Arc<dyn 'static + Fn() -> T + Send + Sync>;
 
-    fn update_refresh_mode(&self, refresh_mode: RefreshMode);
-
-    /// Composes an application info source f with an adapter g for a particular module, then
-    /// sets it and the refresh mode to the static module-level Cfg.
-    fn update_with_cfg_adapter<S, F, G>(&self, f: F, g: G, refresh_mode: RefreshMode)
-    where
-        F: 'static + Fn() -> Arc<S> + Send + Sync,
-        G: 'static + Fn(&S) -> T + Send + Sync;
-}
-
-pub trait CfgMut<T, TX: Clone> {
-    /// Returns the configuration data in the cache, even if stale.
-    fn get_cfg_cached(&self) -> TX;
-
-    fn cache_expired(&self) -> bool;
-
-    /// This will return the current configuration data, according to the object's cache refresh policy,
-    /// with a possible change to cache state as a side-effect.
-    fn get_cfg(&mut self) -> TX;
-
-    fn replace(&mut self, other: Self);
-
-    /// Updates the receiver with a configuration info source and refresh mode.
-    fn update_all(
-        &mut self,
-        src: impl 'static + Fn() -> T + Send + Sync,
-        refresh_mode: RefreshMode,
-    );
-
-    fn update_refresh_mode(&mut self, refresh_mode: RefreshMode);
-
-    /// Composes an application info source f with an adapter g for a particular module, then
-    /// sets it and the refresh mode to the receiver.
-    fn update_with_cfg_adapter<S, F, G>(&mut self, f: F, g: G, refresh_mode: RefreshMode)
-    where
-        F: 'static + Fn() -> Arc<S> + Send + Sync,
-        G: 'static + Fn(&S) -> T + Send + Sync;
+    fn get_refresh_mode(&self) -> RefreshMode;
 }
 
 impl<T, TX> core::fmt::Debug for CfgRaw<T, TX>
@@ -184,17 +142,12 @@ where
         let src = move || g(&f());
         Self::new(src, refresh_mode)
     }
-}
 
-impl<T, TX> CfgMut<T, TX> for CfgRaw<T, TX>
-where
-    TX: From<T> + Clone + core::fmt::Debug,
-{
-    fn get_cfg_cached(&self) -> TX {
+    pub(crate) fn get_cfg_cached(&self) -> TX {
         self.cache.value.clone()
     }
 
-    fn cache_expired(&self) -> bool {
+    pub(crate) fn cache_expired(&self) -> bool {
         // println!("refresh_mode={:?}", self.refresh_mode);
         let res = match self.refresh_mode {
             RefreshMode::NoRefresh => false,
@@ -215,43 +168,26 @@ where
         res
     }
 
-    fn get_cfg(&mut self) -> TX {
+    pub(crate) fn get_cfg(&mut self) -> TX {
         if self.cache_expired() {
             self.refresh();
         }
         self.cache.value.clone()
     }
 
-    fn replace(&mut self, other: Self) {
-        *self = other;
+    pub(crate) fn get_cfg_src(&self) -> Arc<dyn 'static + Fn() -> T + Send + Sync> {
+        self.src.clone()
     }
 
-    fn update_all(
-        &mut self,
-        src: impl 'static + Fn() -> T + Send + Sync,
-        refresh_mode: RefreshMode,
-    ) {
-        self.replace(Self::new(src, refresh_mode));
-    }
-
-    fn update_refresh_mode(&mut self, refresh_mode: RefreshMode) {
-        self.refresh_mode = refresh_mode;
-    }
-
-    fn update_with_cfg_adapter<S, F, G>(&mut self, f: F, g: G, refresh_mode: RefreshMode)
-    where
-        F: 'static + Fn() -> Arc<S> + Send + Sync,
-        G: 'static + Fn(&S) -> T + Send + Sync,
-    {
-        self.replace(Self::new_with_cfg_adapter(f, g, refresh_mode));
+    pub(crate) fn get_refresh_mode(&self) -> RefreshMode {
+        self.refresh_mode.clone()
     }
 }
 
-impl<T, TX, I, IM> CfgInnerMut<T, TX, I, IM>
+impl<T, TX, IM> Cfg<T, TX, IM>
 where
     TX: From<T> + Clone + core::fmt::Debug,
-    I: CfgMut<T, TX> + Clone + core::fmt::Debug,
-    IM: InnerMut<I>,
+    IM: InnerMut<CfgRaw<T, TX>>,
 {
     // I don't understand why I have to do this as this method is defined in trait CfgImmut.
     pub fn get_cfg(&self) -> TX {
@@ -262,22 +198,22 @@ where
         &self.0
     }
 
-    fn get_inner_clone(&self) -> I {
+    fn get_inner_clone(&self) -> CfgRaw<T, TX> {
         self.0.get_inner_clone()
     }
 
-    fn set_inner(&self, inner: I) {
+    fn set_inner(&self, inner: CfgRaw<T, TX>) {
         self.0.set_inner(inner);
     }
 
-    fn new_priv(inner: I) -> Self {
-        CfgInnerMut(IM::from(inner), PhantomData, PhantomData, PhantomData)
+    fn new_priv(inner: CfgRaw<T, TX>) -> Self {
+        Cfg(IM::from(inner), PhantomData, PhantomData)
     }
 
     pub fn new_f<F>(
         src: F,
         refresh_mode: RefreshMode,
-        factory: impl Fn(F, RefreshMode) -> I,
+        factory: impl Fn(F, RefreshMode) -> CfgRaw<T, TX>,
     ) -> Self
     where
         F: 'static + Fn() -> T + Send + Sync,
@@ -289,7 +225,7 @@ where
         f: F,
         g: G,
         refresh_mode: RefreshMode,
-        factory: impl Fn(F, G, RefreshMode) -> I,
+        factory: impl Fn(F, G, RefreshMode) -> CfgRaw<T, TX>,
     ) -> Self
     where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
@@ -297,61 +233,19 @@ where
     {
         Self::new_priv(factory(f, g, refresh_mode))
     }
-
-    /// Updates the receiver with a configuration info source and refresh mode.
-    pub fn update_all(
-        &self,
-        src: impl 'static + Fn() -> T + Send + Sync,
-        refresh_mode: RefreshMode,
-    ) {
-        let mut inner = self.get_inner_clone();
-        inner.update_all(src, refresh_mode);
-        self.set_inner(inner);
-    }
-
-    pub fn update_refresh_mode(&self, refresh_mode: RefreshMode) {
-        let mut inner = self.get_inner_clone();
-        inner.update_refresh_mode(refresh_mode);
-        self.set_inner(inner);
-    }
-
-    /// Composes an application info source f with an adapter g for a particular module, then
-    /// sets it and the refresh mode to the receiver.
-    pub fn update_with_cfg_adapter<S, F, G>(&self, f: F, g: G, refresh_mode: RefreshMode)
-    where
-        F: 'static + Fn() -> Arc<S> + Send + Sync,
-        G: 'static + Fn(&S) -> T + Send + Sync,
-    {
-        let mut inner = self.get_inner_clone();
-        inner.update_with_cfg_adapter(f, g, refresh_mode);
-        self.set_inner(inner);
-    }
 }
 
-// impl<T, TX, I, IM> Clone for CfgInnerMut<T, TX, I, IM>
-// where
-//     TX: From<T> + Clone + core::fmt::Debug,
-//     I: CfgDepsMut<T, TX> + Clone + core::fmt::Debug,
-//     IM: InnerMutNc<I>,
-// {
-//     fn clone(&self) -> Self {
-//         let inner = self.get_inner_clone();
-//         Self::new_priv(inner)
-//     }
-// }
-
-impl<T, TX, I, IM> CfgImmut<T, TX> for CfgInnerMut<T, TX, I, IM>
+impl<T, TX, IM> CfgImmut<T, TX> for Cfg<T, TX, IM>
 where
     TX: From<T> + Clone + core::fmt::Debug,
-    I: CfgMut<T, TX> + Clone + core::fmt::Debug,
-    IM: InnerMut<I>,
+    IM: InnerMut<CfgRaw<T, TX>>,
 {
     fn get_cfg(&self) -> TX {
         let inner = self.get_inner();
 
-        let f_cache_expired = move |i: &I| -> bool { i.cache_expired() };
+        let f_cache_expired = move |i: &CfgRaw<T, TX>| -> bool { i.cache_expired() };
 
-        let f_cfg_cached = move |i: &I| -> TX { i.get_cfg_cached() };
+        let f_cfg_cached = move |i: &CfgRaw<T, TX>| -> TX { i.get_cfg_cached() };
 
         let cache_expired = inner.with(f_cache_expired);
 
@@ -365,33 +259,22 @@ where
         }
     }
 
-    /// Updates the receiver with a configuration info source and refresh mode.
-    fn update_all(&self, src: impl 'static + Fn() -> T + Send + Sync, refresh_mode: RefreshMode) {
-        Self::update_all(self, src, refresh_mode)
+    fn get_cfg_src(&self) -> Arc<dyn 'static + Fn() -> T + Send + Sync> {
+        let f = move |i: &CfgRaw<T, TX>| i.get_cfg_src();
+        self.get_inner().with(f)
     }
 
-    fn update_refresh_mode(&self, refresh_mode: RefreshMode) {
-        Self::update_refresh_mode(&self, refresh_mode)
-    }
-
-    /// Composes an application info source f with an adapter g for a particular module, then
-    /// sets it and the refresh mode to the receiver.
-    fn update_with_cfg_adapter<S, F, G>(&self, f: F, g: G, refresh_mode: RefreshMode)
-    where
-        F: 'static + Fn() -> Arc<S> + Send + Sync,
-        G: 'static + Fn(&S) -> T + Send + Sync,
-    {
-        Self::update_with_cfg_adapter(&self, f, g, refresh_mode)
+    fn get_refresh_mode(&self) -> RefreshMode {
+        let f = move |i: &CfgRaw<T, TX>| i.get_refresh_mode();
+        self.get_inner().with(f)
     }
 }
 
 // Type aliases for CfgDepsNc.
 
-pub type CfgStd<T, TX, IM> = CfgInnerMut<T, TX, CfgRaw<T, TX>, IM>;
+pub type CfgRefCell<T, TX> = Cfg<T, TX, RefCell<CfgRaw<T, TX>>>;
 
-pub type CfgRefCell<T, TX> = CfgStd<T, TX, RefCell<CfgRaw<T, TX>>>;
-
-pub type CfgArcSwap<T, TX> = CfgStd<T, TX, ArcSwap<CfgRaw<T, TX>>>;
+pub type CfgArcSwap<T, TX> = Cfg<T, TX, ArcSwap<CfgRaw<T, TX>>>;
 
 pub type CfgRefCellRc<T> = CfgRefCell<T, Rc<T>>;
 
@@ -400,6 +283,7 @@ pub type CfgArcSwapRc<T> = CfgArcSwap<T, Rc<T>>;
 pub type CfgRefCellArc<T> = CfgRefCell<T, Arc<T>>;
 
 pub type CfgArcSwapArc<T> = CfgArcSwap<T, Arc<T>>;
+pub type CfgArc<T> = CfgArcSwapArc<T>;
 
 pub type CfgRefCellId<T> = CfgRefCell<T, T>;
 
@@ -409,7 +293,7 @@ pub type CfgArcSwapId<T> = CfgArcSwap<T, T>;
 // pub type CfgDefault<T> = CfgRefCellArc<T>;
 pub type CfgDefault<T> = CfgRefCellRc<T>;
 
-impl<T, TX, IM> CfgStd<T, TX, IM>
+impl<T, TX, IM> Cfg<T, TX, IM>
 where
     T: Clone,
     TX: From<T> + Clone + core::fmt::Debug,
@@ -428,7 +312,7 @@ where
     }
 }
 
-impl<T, TX, IM> CfgStd<T, TX, IM>
+impl<T, TX, IM> Cfg<T, TX, IM>
 where
     T: 'static + Clone + Send + Sync,
     TX: From<T> + Clone + core::fmt::Debug,

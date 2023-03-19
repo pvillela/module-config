@@ -1,32 +1,36 @@
 use common::{
-    fs_data::{FooAIn, FooAOut},
+    fs_data::{FooAIn, FooAOut, FooASflCfgInfo},
     fs_util::foo_core,
-    fwk::{ArcPinFn, CfgDepsArc},
+    fwk::{get_from_once_cell, ArcPinFn, CfgDef, CfgRefCellRc},
 };
 use once_cell::sync::OnceCell;
 use std::time::Duration;
 use tokio::time::sleep;
 
-#[derive(Debug, Clone)]
-pub struct FooASflCfgInfo {
-    pub a: String,
-    pub b: i32,
-}
+pub type FooASflCfg = CfgRefCellRc<FooASflCfgInfo>;
 
-#[derive(Clone)]
 pub struct FooASflDeps {
     pub bar_a_bf: ArcPinFn<u64, String>,
 }
 
-pub static FOO_A_SFL_CFG_DEPS: OnceCell<CfgDepsArc<FooASflCfgInfo, FooASflDeps>> = OnceCell::new();
-
 pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     let FooAIn { sleep_millis } = input;
     sleep(Duration::from_millis(sleep_millis)).await;
-    let (cfg, FooASflDeps { bar_a_bf }) = CfgDepsArc::get_from_once_cell(&FOO_A_SFL_CFG_DEPS);
+    let cfg = FOO_A_SFL_CFG.with(|c| c.get_cfg());
+    let FooASflDeps { bar_a_bf } = get_from_once_cell(&FOO_A_SFL_DEPS);
     let a = cfg.a.clone();
     let b = cfg.b;
     let bar_res = bar_a_bf(0).await;
     let res = foo_core(a, b, bar_res);
     FooAOut { res }
 }
+
+thread_local! {
+static FOO_A_SFL_CFG: FooASflCfg =
+    FooASflCfg::new_from_def(
+        FOO_A_SFL_CFG_DEF.get(),
+    )
+}
+
+pub static FOO_A_SFL_CFG_DEF: OnceCell<CfgDef<FooASflCfgInfo>> = OnceCell::new();
+pub static FOO_A_SFL_DEPS: OnceCell<FooASflDeps> = OnceCell::new();

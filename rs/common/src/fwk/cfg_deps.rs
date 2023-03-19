@@ -1,4 +1,4 @@
-use super::{CfgArcSwap, CfgImmut, CfgRaw, CfgRefCell, CfgStd, InnerMut, RefreshMode};
+use super::{Cfg, CfgArcSwap, CfgImmut, CfgRaw, CfgRefCell, InnerMut, RefreshMode};
 use std::marker::PhantomData;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -66,7 +66,7 @@ where
 
 // Type aliases for CfgDeps.
 
-pub type CfgDepsStd<T, TX, IM, U> = CfgDeps<T, TX, CfgStd<T, TX, IM>, U>;
+pub type CfgDepsStd<T, TX, IM, U> = CfgDeps<T, TX, Cfg<T, TX, IM>, U>;
 
 pub type CfgDepsRefCell<T, TX, U> = CfgDepsStd<T, TX, CfgRefCell<T, TX>, U>;
 
@@ -102,7 +102,7 @@ where
         refresh_mode: RefreshMode,
         deps: U,
     ) -> Self {
-        Self::new_f(src, refresh_mode, deps, CfgStd::new)
+        Self::new_f(src, refresh_mode, deps, Cfg::new)
     }
 
     pub fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode, deps: U) -> Self
@@ -110,7 +110,7 @@ where
         F: 'static + Fn() -> Arc<S> + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
     {
-        Self::new_with_cfg_adapter_f(f, g, refresh_mode, deps, CfgStd::new_with_cfg_adapter)
+        Self::new_with_cfg_adapter_f(f, g, refresh_mode, deps, Cfg::new_with_cfg_adapter)
     }
 }
 

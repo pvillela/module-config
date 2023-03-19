@@ -14,18 +14,12 @@ type FooASflCfg = CfgRefCellRc<FooASflCfgInfo>;
 pub type FooASflCfgOvd = CfgOvd<FooASflCfgInfo>;
 
 pub struct FooASflDeps {
-    pub bar_an_bf: ArcPinFn<u64, String>,
-}
-
-impl std::fmt::Debug for FooASflDeps {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("<FooAnSflDeps>")
-    }
+    pub bar_a_bf: ArcPinFn<u64, String>,
 }
 
 pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     let FooAIn { sleep_millis } = input;
-    let FooASflDeps { bar_an_bf: bar } = &FOO_A_SFL_DEPS as &FooASflDeps;
+    let FooASflDeps { bar_a_bf: bar } = &FOO_A_SFL_DEPS as &FooASflDeps;
     let (a, b) = {
         let cfg = FOO_A_SFL_CFG.with(|c| c.get_cfg());
         let a = cfg.a.clone();
@@ -42,7 +36,7 @@ pub static FOO_A_SFL_DEPS: Lazy<&FooASflDeps> = Lazy::new(|| {
     static_ref_with_override(
         FOO_A_SFL_DEPS_OVERRIDE.get(),
         FooASflDeps {
-            bar_an_bf: arc_pin_async_fn(bar_a_bf),
+            bar_a_bf: arc_pin_async_fn(bar_a_bf),
         },
     )
 });

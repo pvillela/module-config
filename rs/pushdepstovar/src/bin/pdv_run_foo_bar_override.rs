@@ -1,13 +1,13 @@
 use common::config::refresh_app_configuration;
 use common::fwk::{CfgDepsArc, RefreshMode};
 use pushdepstovar::fs::{
-    bar_bf, foo_sfl, BarBfCfgInfo, FooSflCfgInfo, FooSflDeps, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS,
+    bar_bf, foo_sfl, BarBfCfgInfo, FooSflCfgInfo, FooSflDeps, BAR_BF_CFG_DEPS, FOO_SFL_CFG_AND_DEPS,
 };
 use std::thread;
 
 fn main() {
     CfgDepsArc::set(
-        &FOO_SFL_CFG_DEPS,
+        &FOO_SFL_CFG_AND_DEPS,
         || FooSflCfgInfo {
             a: "foo_override".to_owned(),
             b: 11,

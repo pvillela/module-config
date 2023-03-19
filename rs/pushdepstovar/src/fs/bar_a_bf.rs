@@ -1,20 +1,33 @@
-use common::{fs_util::bar_core, fwk::CfgDepsArc};
+use common::config::AppCfgInfo;
+use common::fs_data::BarABfCfgInfo;
+use common::fs_util::bar_core;
+use common::fwk::{CfgDef, CfgRefCellRc};
 use once_cell::sync::OnceCell;
 use std::time::Duration;
 use tokio::time::sleep;
 
-#[derive(Debug, Clone)]
-pub struct BarABfCfgInfo {
-    pub u: i32,
-    pub v: String,
-}
-
-pub static BAR_A_BF_CFG_DEPS: OnceCell<CfgDepsArc<BarABfCfgInfo, ()>> = OnceCell::new();
+type BarABfCfg = CfgRefCellRc<BarABfCfgInfo>;
 
 pub async fn bar_a_bf(sleep_millis: u64) -> String {
     sleep(Duration::from_millis(sleep_millis)).await;
-    let (cfg, _) = CfgDepsArc::get_from_once_cell(&BAR_A_BF_CFG_DEPS);
+    let cfg = BAR_A_BF_CFG_TL.with(|c| c.get_cfg());
     let u = cfg.u;
     let v = cfg.v.clone();
     bar_core(u, v)
+}
+
+thread_local! {
+pub static BAR_A_BF_CFG_TL: BarABfCfg =
+    BarABfCfg::new_from_def(
+        BAR_A_BF_CFG_DEF.get(),
+    )
+}
+
+pub static BAR_A_BF_CFG_DEF: OnceCell<CfgDef<BarABfCfgInfo>> = OnceCell::new();
+
+fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarABfCfgInfo {
+    BarABfCfgInfo {
+        u: app_cfg.y,
+        v: app_cfg.x.clone(),
+    }
 }

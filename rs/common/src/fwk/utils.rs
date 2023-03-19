@@ -3,6 +3,8 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::sync::Arc;
 
+use once_cell::sync::OnceCell;
+
 /// Type of boxed and pinned wrapper of async functions.
 pub type ArcPinFn<S, T> =
     Arc<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync>;
@@ -87,4 +89,8 @@ pub fn static_ref_with_override<T>(ovd: Option<&'static T>, value: T) -> &'stati
     } else {
         Box::leak(Box::new(value))
     }
+}
+
+pub fn get_from_once_cell<T>(cell: &OnceCell<T>) -> &T {
+    cell.get().expect("OnceCell not initialized.")
 }
