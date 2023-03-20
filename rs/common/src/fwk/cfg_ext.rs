@@ -23,7 +23,7 @@ where
 {
     pub fn set_once_cell(
         cell: &OnceCell<Self>,
-        src: &'static dyn Fn() -> T,
+        src: &'static (dyn Fn() -> T + Send + Sync),
         refresh_mode: RefreshMode,
     ) {
         let res = cell.set(Self::new(src, refresh_mode));

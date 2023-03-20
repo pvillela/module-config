@@ -14,14 +14,16 @@ pub struct FooAwSflDeps {
 }
 
 pub fn foo_aw_sfl_c(cfg_deps: FooAwSflCfgDeps) -> FooAwSflT {
+    let d = cfg_deps.get_deps();
     let f = move |input: FooAwIn| {
-        let (c, d) = cfg_deps.get_cfg_deps();
+        let c = cfg_deps.get_cfg();
+        let bar = &d.bar_aw_bf;
         async move {
             let FooAwIn { sleep_millis } = input;
             sleep(Duration::from_millis(sleep_millis)).await;
             let a = c.a.clone();
             let b = c.b;
-            let bar_res = (d.bar_aw_bf)(0).await;
+            let bar_res = bar(0).await;
             let res = foo_core(a, b, bar_res);
             FooAwOut { res }
         }

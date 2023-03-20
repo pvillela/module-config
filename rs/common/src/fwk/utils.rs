@@ -118,3 +118,7 @@ pub fn static_closure_0_thread_safe<T>(
 ) -> &'static (dyn Fn() -> T + Send + Sync) {
     Box::leak(Box::new(f))
 }
+
+pub type StaticFn<S, T> = &'static (dyn Fn(S) -> T + Send + Sync);
+
+pub type StaticFn0<T> = &'static (dyn Fn() -> T + Send + Sync);
