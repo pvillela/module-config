@@ -85,6 +85,9 @@ pub fn get_from_once_cell<T>(cell: &OnceCell<T>) -> &T {
     cell.get().expect("OnceCell not initialized.")
 }
 
+/// Sets a OnceCell and prints a message if the cell was already initialized.
+/// Handling the result if optional if the caller doesn't want to take action in
+/// case the cell was already initialized.
 pub fn set_once_cell<T>(cell: &OnceCell<T>, x: T) -> Result<(), T> {
     let res = cell.set(x);
     if res.is_err() {
@@ -104,8 +107,8 @@ pub fn static_ref_with_override<T>(ovd: Option<&'static T>, value: T) -> &'stati
 }
 
 pub fn compose_static_0_arc<S: 'static, T>(
-    f: fn() -> Arc<S>,
-    g: fn(&S) -> T,
+    f: impl Fn() -> Arc<S> + 'static + Send + Sync, //fn() -> Arc<S>,
+    g: impl Fn(&S) -> T + 'static + Send + Sync,    //fn(&S) -> T,
 ) -> &'static (dyn Fn() -> T + Send + Sync) {
     Box::leak(Box::new(move || g(&f())))
 }

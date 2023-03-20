@@ -1,13 +1,13 @@
 use common::config::refresh_app_configuration;
 use common::fs_data::{BarBfCfgInfo, FooSflCfgInfo};
 use common::fs_util::bar_core;
-use common::fwk::{static_closure_0_thread_safe, CfgOvd, RefreshMode};
+use common::fwk::{set_once_cell, static_closure_0_thread_safe, CfgOvd, RefreshMode};
 use pulldepswithoverride::fs::{
     foo_sfl, BAR_BF_CFG, BAR_BF_CFG_OVERRIDE, FOO_SFL_CFG_OVERRIDE, FOO_SFL_DEPS_OVERRIDE,
 };
 use std::thread;
 
-pub fn bar_ovd_bf() -> String {
+fn bar_ovd_bf() -> String {
     let cfg = BAR_BF_CFG.with(|c| c.get_cfg());
     let u = cfg.u * 1000;
     let v = cfg.v.clone() + "-bar_ovd_bf";
@@ -24,7 +24,10 @@ fn main() {
         Some(RefreshMode::NoRefresh),
     );
 
-    let _ = FOO_SFL_DEPS_OVERRIDE.set(pulldepswithoverride::fs::FooSflDeps { bar_bf: bar_ovd_bf });
+    let _ = set_once_cell(
+        &FOO_SFL_DEPS_OVERRIDE,
+        pulldepswithoverride::fs::FooSflDeps { bar_bf: bar_ovd_bf },
+    );
 
     let _ = CfgOvd::set_once_cell(
         &BAR_BF_CFG_OVERRIDE,

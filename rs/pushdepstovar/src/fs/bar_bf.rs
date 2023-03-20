@@ -1,4 +1,3 @@
-use common::config::AppCfgInfo;
 use common::fs_data::BarBfCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::{CfgDef, CfgRefCellRc};
@@ -21,10 +20,3 @@ pub static BAR_BF_CFG_TL: BarBfCfg =
 }
 
 pub static BAR_BF_CFG_DEF: OnceCell<CfgDef<BarBfCfgInfo>> = OnceCell::new();
-
-fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
-    BarBfCfgInfo {
-        u: app_cfg.y,
-        v: app_cfg.x.clone(),
-    }
-}

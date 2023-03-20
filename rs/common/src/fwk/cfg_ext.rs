@@ -106,7 +106,10 @@ impl<T> CfgDef<T> {
         }
     }
 
-    pub fn new_with_cfg_src_fn(cfg_src: fn() -> T, refresh_mode: RefreshMode) -> Self {
+    pub fn new_with_cfg_src(
+        cfg_src: impl Fn() -> T + Send + Sync + 'static,
+        refresh_mode: RefreshMode,
+    ) -> Self {
         CfgDef {
             cfg_src: static_closure_0_thread_safe(cfg_src),
             refresh_mode,
@@ -122,12 +125,12 @@ impl<T> CfgDef<T> {
         Self::new(src, refresh_mode)
     }
 
-    pub fn set_once_cell_with_cfg_src_fn(
+    pub fn set_once_cell_with_cfg_src(
         cell: &OnceCell<Self>,
-        cfg_src: fn() -> T,
+        cfg_src: impl Fn() -> T + Send + Sync + 'static,
         refresh_mode: RefreshMode,
     ) {
-        let _ = set_once_cell(cell, Self::new_with_cfg_src_fn(cfg_src, refresh_mode));
+        let _ = set_once_cell(cell, Self::new_with_cfg_src(cfg_src, refresh_mode));
     }
 
     pub fn set_once_cell_with_cfg_adapter<S: 'static>(

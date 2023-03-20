@@ -12,10 +12,7 @@ fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
     }
 }
 
-fn bar_bf_adapt_cfg_src(
-    origin: impl Fn() -> Arc<AppCfgInfo> + 'static + Send + Sync,
-    refresh_mode: RefreshMode,
-) {
+fn bar_bf_adapt_cfg_src(origin: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) {
     CfgDef::set_once_cell_with_cfg_adapter(
         &BAR_BF_CFG_DEF,
         origin,

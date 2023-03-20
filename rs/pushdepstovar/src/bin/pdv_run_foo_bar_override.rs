@@ -1,29 +1,39 @@
 use common::config::refresh_app_configuration;
-use common::fwk::{CfgDepsArc, RefreshMode};
-use pushdepstovar::fs::{
-    bar_bf, foo_sfl, BarBfCfgInfo, FooSflCfgInfo, FooSflDeps, BAR_BF_CFG_DEPS, FOO_SFL_CFG_AND_DEPS,
-};
+use common::fs_data::{BarBfCfgInfo, FooSflCfgInfo};
+use common::fs_util::bar_core;
+use common::fwk::{set_once_cell, static_closure_0_thread_safe, CfgDef, RefreshMode};
+use pushdepstovar::fs::{foo_sfl, BAR_BF_CFG_DEF, BAR_BF_CFG_TL, FOO_SFL_CFG_DEF, FOO_SFL_DEPS};
 use std::thread;
 
+fn bar_ovd_bf() -> String {
+    let cfg = BAR_BF_CFG_TL.with(|c| c.get_cfg());
+    let u = cfg.u * 1000;
+    let v = cfg.v.clone() + "-bar_ovd_bf";
+    bar_core(u, v)
+}
+
 fn main() {
-    CfgDepsArc::set(
-        &FOO_SFL_CFG_AND_DEPS,
-        || FooSflCfgInfo {
+    let _ = CfgDef::set_once_cell_with_cfg_src(
+        &FOO_SFL_CFG_DEF,
+        static_closure_0_thread_safe(|| FooSflCfgInfo {
             a: "foo_override".to_owned(),
             b: 11,
-        },
+        }),
         RefreshMode::NoRefresh,
-        FooSflDeps { bar_bf },
     );
 
-    CfgDepsArc::set(
-        &BAR_BF_CFG_DEPS,
-        || BarBfCfgInfo {
+    let _ = set_once_cell(
+        &FOO_SFL_DEPS,
+        pushdepstovar::fs::FooSflDeps { bar_bf: bar_ovd_bf },
+    );
+
+    let _ = CfgDef::set_once_cell_with_cfg_src(
+        &BAR_BF_CFG_DEF,
+        static_closure_0_thread_safe(|| BarBfCfgInfo {
             u: 33,
             v: "bar_override".to_owned(),
-        },
+        }),
         RefreshMode::NoRefresh,
-        (),
     );
 
     let handle = thread::spawn(move || foo_sfl());

@@ -15,11 +15,14 @@ pub struct FooASflDeps {
 
 pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     let FooAIn { sleep_millis } = input;
-    sleep(Duration::from_millis(sleep_millis)).await;
-    let cfg = FOO_A_SFL_CFG.with(|c| c.get_cfg());
     let FooASflDeps { bar_a_bf } = get_from_once_cell(&FOO_A_SFL_DEPS);
-    let a = cfg.a.clone();
-    let b = cfg.b;
+    sleep(Duration::from_millis(sleep_millis)).await;
+    let (a, b) = {
+        let cfg = FOO_A_SFL_CFG.with(|c| c.get_cfg());
+        let a = cfg.a.clone();
+        let b = cfg.b;
+        (a, b)
+    };
     let bar_res = bar_a_bf(0).await;
     let res = foo_core(a, b, bar_res);
     FooAOut { res }
