@@ -1,4 +1,7 @@
-use super::{Cfg, CfgImmut, CfgRaw, InnerMut, RefreshMode};
+use super::{
+    compose_static_0_arc, set_once_cell, static_closure_0_thread_safe, Cfg, CfgImmut, CfgRaw,
+    InnerMut, RefreshMode,
+};
 use once_cell::sync::OnceCell;
 use std::sync::Arc;
 
@@ -20,7 +23,7 @@ where
 {
     pub fn set_once_cell(
         cell: &OnceCell<Self>,
-        src: impl 'static + Fn() -> T + Send + Sync,
+        src: &'static dyn Fn() -> T,
         refresh_mode: RefreshMode,
     ) {
         let res = cell.set(Self::new(src, refresh_mode));
@@ -29,15 +32,12 @@ where
         }
     }
 
-    pub fn set_once_cell_with_cfg_adapter<S, F, G>(
+    pub fn set_once_cell_with_cfg_adapter<S: 'static>(
         cell: &OnceCell<Self>,
-        f: F,
-        g: G,
+        f: fn() -> Arc<S>,
+        g: fn(&S) -> T,
         refresh_mode: RefreshMode,
-    ) where
-        F: 'static + Fn() -> Arc<S> + Send + Sync,
-        G: 'static + Fn(&S) -> T + Send + Sync,
-    {
+    ) {
         let res = cell.set(Self::new_with_cfg_adapter(f, g, refresh_mode));
         if let Err(_) = res {
             println!("OnceCell already initialized");
@@ -45,46 +45,98 @@ where
     }
 }
 
-pub struct CfgOvd<T> {
-    pub cfg_src: Option<fn() -> T>,
-    pub refresh_mode: Option<RefreshMode>,
+pub struct CfgOvd<T: 'static> {
+    cfg_src: Option<&'static (dyn Fn() -> T + Send + Sync)>,
+    refresh_mode: Option<RefreshMode>,
 }
 
-pub struct CfgDef<T> {
-    cfg_src: Box<dyn Fn() -> T + Send + Sync>,
+// TODO: REMOVE BELOW.
+// impl<T: 'static + Send + Sync> CfgOvd<T> {
+//     pub fn set_once_cell_with_function(
+//         cell: &OnceCell<Self>,
+//         cfg_src: Option<fn() -> T>,
+//         refresh_mode: Option<RefreshMode>,
+//     ) {
+//         if cell.get().is_some() {
+//             println!("OnceCell already initialized");
+//             return;
+//         }
+
+//         let f = cfg_src.unwrap();
+//         // let cfg_src =
+//         let cfg_src = Box::leak(Box::new(move || f()));
+//         // let cfg_src = cfg_src.unwrap();
+//         // let cfg_src = static_closure_0_thread_safe(f);
+//         let res = cell.set(CfgOvd {
+//             cfg_src: Some(cfg_src),
+//             refresh_mode,
+//         });
+//         if let Err(_) = res {
+//             println!("OnceCell already initialized");
+//         }
+//     }
+// }
+
+impl<T> CfgOvd<T> {
+    pub fn set_once_cell(
+        cell: &OnceCell<CfgOvd<T>>,
+        cfg_src: Option<&'static (dyn Fn() -> T + Send + Sync)>,
+        refresh_mode: Option<RefreshMode>,
+    ) -> Result<(), Self> {
+        set_once_cell(
+            cell,
+            CfgOvd {
+                cfg_src,
+                refresh_mode,
+            },
+        )
+    }
+}
+
+pub struct CfgDef<T: 'static> {
+    cfg_src: &'static (dyn Fn() -> T + Send + Sync),
     refresh_mode: RefreshMode,
 }
 
 impl<T> CfgDef<T> {
-    pub fn new(cfg_src: impl 'static + Fn() -> T + Send + Sync, refresh_mode: RefreshMode) -> Self {
+    pub fn new(cfg_src: &'static (dyn Fn() -> T + Send + Sync), refresh_mode: RefreshMode) -> Self {
         CfgDef {
-            cfg_src: Box::new(cfg_src),
+            cfg_src,
             refresh_mode,
         }
     }
 
-    pub fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode) -> Self
-    where
-        F: 'static + Fn() -> Arc<S> + Send + Sync,
-        G: 'static + Fn(&S) -> T + Send + Sync,
-    {
-        let src = move || g(&f());
+    pub fn new_with_cfg_src_fn(cfg_src: fn() -> T, refresh_mode: RefreshMode) -> Self {
+        CfgDef {
+            cfg_src: static_closure_0_thread_safe(cfg_src),
+            refresh_mode,
+        }
+    }
+
+    pub fn new_with_cfg_adapter<S: 'static>(
+        f: fn() -> Arc<S>,
+        g: fn(&S) -> T,
+        refresh_mode: RefreshMode,
+    ) -> Self {
+        let src = compose_static_0_arc(f, g);
         Self::new(src, refresh_mode)
     }
 
-    pub fn set_once_cell_with_cfg_adapter<S, F, G>(
+    pub fn set_once_cell_with_cfg_src_fn(
         cell: &OnceCell<Self>,
-        f: F,
-        g: G,
+        cfg_src: fn() -> T,
         refresh_mode: RefreshMode,
-    ) where
-        F: 'static + Fn() -> Arc<S> + Send + Sync,
-        G: 'static + Fn(&S) -> T + Send + Sync,
-    {
-        let res = cell.set(Self::new_with_cfg_adapter(f, g, refresh_mode));
-        if let Err(_) = res {
-            println!("OnceCell already initialized");
-        }
+    ) {
+        let _ = set_once_cell(cell, Self::new_with_cfg_src_fn(cfg_src, refresh_mode));
+    }
+
+    pub fn set_once_cell_with_cfg_adapter<S: 'static>(
+        cell: &OnceCell<Self>,
+        f: fn() -> Arc<S>,
+        g: fn(&S) -> T,
+        refresh_mode: RefreshMode,
+    ) {
+        let _ = set_once_cell(cell, Self::new_with_cfg_adapter(f, g, refresh_mode));
     }
 }
 
@@ -110,23 +162,21 @@ where
                 refresh_mode: None,
             },
         };
-        if ovd.cfg_src == None {
+        if ovd.cfg_src.is_none() {
             Self::new_with_cfg_adapter(f, g, ovd.refresh_mode.unwrap_or(refresh_mode))
         } else {
-            Self::new(
-                ovd.cfg_src.unwrap(),
-                ovd.refresh_mode.unwrap_or(refresh_mode),
-            )
+            let src = ovd.cfg_src.unwrap();
+            Self::new(src, ovd.refresh_mode.unwrap_or(refresh_mode))
         }
     }
 
     pub fn new_from_static<C, TX1>(cfg_opt: Option<&'static C>) -> Self
     where
         TX1: Clone,
-        C: CfgImmut<T, TX1> + Send + Sync,
+        C: CfgImmut<T, TX1>,
     {
         if let Some(cfg) = cfg_opt {
-            Self::new(|| cfg.get_cfg_src()(), cfg.get_refresh_mode())
+            Self::new(cfg.get_cfg_src(), cfg.get_refresh_mode())
         } else {
             panic!("Configuration not initialized.")
         }
@@ -134,7 +184,7 @@ where
 
     pub fn new_from_def(def_opt: Option<&'static CfgDef<T>>) -> Self {
         if let Some(def) = def_opt {
-            Self::new(|| (def.cfg_src)(), def.refresh_mode.clone())
+            Self::new(def.cfg_src, def.refresh_mode.clone())
         } else {
             panic!("Configuration not initialized.")
         }

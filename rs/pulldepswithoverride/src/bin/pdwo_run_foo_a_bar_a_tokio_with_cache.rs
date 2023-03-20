@@ -1,10 +1,9 @@
 use std::time::Duration;
 
-use common::fwk::{arc_pin_async_fn, RefreshMode};
+use common::fwk::{arc_pin_async_fn, CfgOvd, RefreshMode};
 use common::tokio_run::{run, RunIn};
 use pulldepswithoverride::fs::{
-    foo_a_sfl, BarABfCfgDepsOvr, FooASflCfgDepsOvr, BAR_A_BF_CFG_DEPS_OVERRIDE,
-    FOO_A_SFL_CFG_DEPS_OVERRIDE,
+    foo_a_sfl, BAR_A_BF_CFG_OVERRIDE, FOO_A_SFL_CFG_OVERRIDE, FOO_A_SFL_DEPS_OVERRIDE,
 };
 use tokio;
 
@@ -12,23 +11,22 @@ use tokio;
 async fn main() {
     println!("===== pdwo_run_foo_a_bar_a_tokio_with_cache =====");
 
-    let _ = FOO_A_SFL_CFG_DEPS_OVERRIDE
-        .set(FooASflCfgDepsOvr {
-            cfg_src: None,
-            refresh_mode: Some(RefreshMode::Refreshable(Duration::from_millis(100))),
-            deps: None,
-        })
-        .ok()
-        .expect("FOO_A_SFL_CFG_DEPS_OVERRIDE already initialized");
+    let _ = CfgOvd::set_once_cell(
+        &FOO_A_SFL_CFG_OVERRIDE,
+        None,
+        Some(RefreshMode::Refreshable(Duration::from_millis(100))),
+    );
 
-    let _ = BAR_A_BF_CFG_DEPS_OVERRIDE
-        .set(BarABfCfgDepsOvr {
-            cfg_src: None,
-            refresh_mode: Some(RefreshMode::Refreshable(Duration::from_millis(100))),
-            deps: None,
-        })
-        .ok()
-        .expect("BAR_A_BF_CFG_DEPS_OVERRIDE already initialized");
+    // Below can be deleted; included only to prove it compiles.
+    let _ = FOO_A_SFL_DEPS_OVERRIDE.set(pulldepswithoverride::fs::FooASflDeps {
+        bar_a_bf: arc_pin_async_fn(pulldepswithoverride::fs::bar_a_bf),
+    });
+
+    let _ = CfgOvd::set_once_cell(
+        &BAR_A_BF_CFG_OVERRIDE,
+        None,
+        Some(RefreshMode::Refreshable(Duration::from_millis(100))),
+    );
 
     println!("\n*** run -- total 0 ms sleep time, 10_000 concurrency, 100 repeats");
     run(RunIn {

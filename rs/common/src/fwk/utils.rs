@@ -81,6 +81,18 @@ pub fn nil_app_cfg<T>() -> Arc<T> {
     todo!("Configuration source not provided.")
 }
 
+pub fn get_from_once_cell<T>(cell: &OnceCell<T>) -> &T {
+    cell.get().expect("OnceCell not initialized.")
+}
+
+pub fn set_once_cell<T>(cell: &OnceCell<T>, x: T) -> Result<(), T> {
+    let res = cell.set(x);
+    if res.is_err() {
+        println!("OnceCell already initialized.");
+    }
+    res
+}
+
 /// Returns a static reference to a value or an override if the override exists.
 /// The references are required to be static to avoid memory leaks.
 pub fn static_ref_with_override<T>(ovd: Option<&'static T>, value: T) -> &'static T {
@@ -91,6 +103,15 @@ pub fn static_ref_with_override<T>(ovd: Option<&'static T>, value: T) -> &'stati
     }
 }
 
-pub fn get_from_once_cell<T>(cell: &OnceCell<T>) -> &T {
-    cell.get().expect("OnceCell not initialized.")
+pub fn compose_static_0_arc<S: 'static, T>(
+    f: fn() -> Arc<S>,
+    g: fn(&S) -> T,
+) -> &'static (dyn Fn() -> T + Send + Sync) {
+    Box::leak(Box::new(move || g(&f())))
+}
+
+pub fn static_closure_0_thread_safe<T>(
+    f: impl Fn() -> T + Send + Sync + 'static,
+) -> &'static (dyn Fn() -> T + Send + Sync) {
+    Box::leak(Box::new(f))
 }

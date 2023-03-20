@@ -5,6 +5,8 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
+use super::compose_static_0_arc;
+
 #[derive(Clone, Debug)]
 pub enum RefreshMode {
     NoRefresh,
@@ -71,15 +73,17 @@ impl<I: Clone> InnerMut<I> for RefCell<I> {
 
 pub struct Cfg<T, TX, IM>(IM, PhantomData<T>, PhantomData<TX>)
 where
+    T: 'static,
     TX: From<T> + Clone + core::fmt::Debug,
     IM: InnerMut<CfgRaw<T, TX>>;
 
 #[derive(Clone)]
 pub struct CfgRaw<T, TX>
 where
+    T: 'static,
     TX: From<T> + Clone + core::fmt::Debug,
 {
-    src: Arc<dyn 'static + Fn() -> T + Send + Sync>,
+    src: &'static dyn Fn() -> T,
     refresh_mode: RefreshMode,
     cache: Cache<TX>,
 }
@@ -87,7 +91,7 @@ where
 pub trait CfgImmut<T, TX: Clone> {
     fn get_cfg(&self) -> TX;
 
-    fn get_cfg_src(&self) -> Arc<dyn 'static + Fn() -> T + Send + Sync>;
+    fn get_cfg_src(&self) -> &'static dyn Fn() -> T;
 
     fn get_refresh_mode(&self) -> RefreshMode;
 }
@@ -109,13 +113,10 @@ impl<T, TX> CfgRaw<T, TX>
 where
     TX: From<T> + Clone + core::fmt::Debug,
 {
-    pub(crate) fn new(
-        src: impl 'static + Fn() -> T + Send + Sync,
-        refresh_mode: RefreshMode,
-    ) -> Self {
+    pub(crate) fn new(src: &'static dyn Fn() -> T, refresh_mode: RefreshMode) -> Self {
         let cfg = src();
         CfgRaw {
-            src: Arc::new(src),
+            src: src,
             refresh_mode,
             cache: Cache {
                 last_refresh: Instant::now(),
@@ -134,12 +135,12 @@ where
         self.cache = cache;
     }
 
-    pub(crate) fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode) -> Self
-    where
-        F: 'static + Fn() -> Arc<S> + Send + Sync,
-        G: 'static + Fn(&S) -> T + Send + Sync,
-    {
-        let src = move || g(&f());
+    pub(crate) fn new_with_cfg_adapter<S: 'static>(
+        f: fn() -> Arc<S>,
+        g: fn(&S) -> T,
+        refresh_mode: RefreshMode,
+    ) -> Self {
+        let src = compose_static_0_arc(f, g);
         Self::new(src, refresh_mode)
     }
 
@@ -175,7 +176,7 @@ where
         self.cache.value.clone()
     }
 
-    pub(crate) fn get_cfg_src(&self) -> Arc<dyn 'static + Fn() -> T + Send + Sync> {
+    pub(crate) fn get_cfg_src(&self) -> &'static dyn Fn() -> T {
         self.src.clone()
     }
 
@@ -210,27 +211,20 @@ where
         Cfg(IM::from(inner), PhantomData, PhantomData)
     }
 
-    pub fn new_f<F>(
-        src: F,
+    pub fn new_f(
+        src: &'static dyn Fn() -> T,
         refresh_mode: RefreshMode,
-        factory: impl Fn(F, RefreshMode) -> CfgRaw<T, TX>,
-    ) -> Self
-    where
-        F: 'static + Fn() -> T + Send + Sync,
-    {
+        factory: impl Fn(&'static dyn Fn() -> T, RefreshMode) -> CfgRaw<T, TX>,
+    ) -> Self {
         Self::new_priv(factory(src, refresh_mode))
     }
 
-    pub fn new_with_cfg_adapter_f<S, F, G>(
-        f: F,
-        g: G,
+    pub fn new_with_cfg_adapter_f<S>(
+        f: fn() -> Arc<S>,
+        g: fn(&S) -> T,
         refresh_mode: RefreshMode,
-        factory: impl Fn(F, G, RefreshMode) -> CfgRaw<T, TX>,
-    ) -> Self
-    where
-        F: 'static + Fn() -> Arc<S> + Send + Sync,
-        G: 'static + Fn(&S) -> T + Send + Sync,
-    {
+        factory: impl Fn(fn() -> Arc<S>, fn(&S) -> T, RefreshMode) -> CfgRaw<T, TX>,
+    ) -> Self {
         Self::new_priv(factory(f, g, refresh_mode))
     }
 }
@@ -259,7 +253,7 @@ where
         }
     }
 
-    fn get_cfg_src(&self) -> Arc<dyn 'static + Fn() -> T + Send + Sync> {
+    fn get_cfg_src(&self) -> &'static dyn Fn() -> T {
         let f = move |i: &CfgRaw<T, TX>| i.get_cfg_src();
         self.get_inner().with(f)
     }
@@ -299,15 +293,15 @@ where
     TX: From<T> + Clone + core::fmt::Debug,
     IM: InnerMut<CfgRaw<T, TX>>,
 {
-    pub fn new(src: impl 'static + Fn() -> T + Send + Sync, refresh_mode: RefreshMode) -> Self {
+    pub fn new(src: &'static dyn Fn() -> T, refresh_mode: RefreshMode) -> Self {
         Self::new_f(src, refresh_mode, CfgRaw::new)
     }
 
-    pub fn new_with_cfg_adapter<S, F, G>(f: F, g: G, refresh_mode: RefreshMode) -> Self
-    where
-        F: 'static + Fn() -> Arc<S> + Send + Sync,
-        G: 'static + Fn(&S) -> T + Send + Sync,
-    {
+    pub fn new_with_cfg_adapter<S: 'static>(
+        f: fn() -> Arc<S>,
+        g: fn(&S) -> T,
+        refresh_mode: RefreshMode,
+    ) -> Self {
         Self::new_with_cfg_adapter_f(f, g, refresh_mode, CfgRaw::new_with_cfg_adapter)
     }
 }
@@ -318,19 +312,15 @@ where
     TX: From<T> + Clone + core::fmt::Debug,
     IM: InnerMut<CfgRaw<T, TX>>,
 {
-    pub fn new_with_const_or_cfg_adapter<S, F, G>(
+    pub fn new_with_const_or_cfg_adapter<S: 'static>(
         k: Option<&'static T>,
-        f: F,
-        g: G,
+        f: fn() -> Arc<S>,
+        g: fn(&S) -> T,
         refresh_mode: RefreshMode,
-    ) -> Self
-    where
-        F: 'static + Fn() -> Arc<S> + Send + Sync,
-        G: 'static + Fn(&S) -> T + Send + Sync,
-    {
+    ) -> Self {
         match k {
             Some(k) => {
-                let src = move || k.clone();
+                let src = Box::leak(Box::new(move || k.clone()));
                 Self::new(src, refresh_mode)
             }
             None => Self::new_with_cfg_adapter(f, g, refresh_mode),

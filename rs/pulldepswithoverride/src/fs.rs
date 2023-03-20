@@ -1,4 +1,4 @@
-mod bar_a_bf;
+pub mod bar_a_bf;
 pub use bar_a_bf::*;
 
 mod bar_ac_bf;

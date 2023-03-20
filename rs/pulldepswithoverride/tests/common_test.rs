@@ -1,27 +1,27 @@
-use common::fs_data::BarBfCfgInfo;
-use common::fs_data::{FooAIn, FooASflCfgInfo};
-use common::fwk::{arc_pin_async_fn, RefreshMode};
-use pulldepswithoverride::fs::{
-    bar_a_bf, foo_a_sfl, FooASflDeps, BAR_A_BF_CFG, FOO_A_SFL_CFG_DEPS,
-};
+use common::fs_data::{BarABfCfgInfo, FooAIn, FooASflCfgInfo};
+use common::fwk::{static_closure_0_thread_safe, CfgOvd, RefreshMode};
+use pulldepswithoverride::fs::{foo_a_sfl, BAR_A_BF_CFG_OVERRIDE, FOO_A_SFL_CFG_OVERRIDE};
 use tokio;
 
 pub async fn common_test(
     foo_a_sfl_cfg_info: FooASflCfgInfo,
-    bar_bf_cfg_info: BarBfCfgInfo,
+    bar_a_bf_cfg_info: BarABfCfgInfo,
 ) -> Option<String> {
-    FOO_A_SFL_CFG_DEPS.with(|c| {
-        c.update_all(
-            move || foo_a_sfl_cfg_info.clone(),
-            RefreshMode::NoRefresh,
-            FooASflDeps {
-                bar_a_bf: arc_pin_async_fn(bar_a_bf),
-            },
-        )
-    });
+    let _ = CfgOvd::set_once_cell(
+        &FOO_A_SFL_CFG_OVERRIDE,
+        Some(static_closure_0_thread_safe(move || {
+            foo_a_sfl_cfg_info.clone()
+        })),
+        Some(RefreshMode::NoRefresh),
+    );
 
-    BAR_A_BF_CFG
-        .with(|c| c.update_all(move || bar_bf_cfg_info.clone(), RefreshMode::NoRefresh, ()));
+    let _ = CfgOvd::set_once_cell(
+        &BAR_A_BF_CFG_OVERRIDE,
+        Some(static_closure_0_thread_safe(move || {
+            bar_a_bf_cfg_info.clone()
+        })),
+        Some(RefreshMode::NoRefresh),
+    );
 
     let handle = tokio::spawn(async move { foo_a_sfl(FooAIn { sleep_millis: 0 }).await });
     let res = handle.await.ok().map(|x| x.res);

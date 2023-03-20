@@ -1,23 +1,37 @@
 use common::config::refresh_app_configuration;
-use common::fwk::RefreshMode;
-use pulldepswithoverride::fs::{foo_sfl, BAR_BF_CFG, FOO_SFL_CFG_DEPS};
-use std::{thread, time::Duration};
+use common::fwk::{CfgOvd, RefreshMode};
+use pulldepswithoverride::fs::{
+    foo_sfl, BAR_BF_CFG_OVERRIDE, FOO_SFL_CFG_OVERRIDE, FOO_SFL_DEPS_OVERRIDE,
+};
+use std::thread;
+use std::time::Duration;
 
 fn main() {
-    // Everything going on in one thread because the static cfg deps variables are thread-local.
-    let handle = thread::spawn(move || {
-        FOO_SFL_CFG_DEPS
-            .with(|c| c.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(60))));
-        BAR_BF_CFG
-            .with(|c| c.update_refresh_mode(RefreshMode::Refreshable(Duration::from_millis(60))));
+    let _ = CfgOvd::set_once_cell(
+        &FOO_SFL_CFG_OVERRIDE,
+        None,
+        Some(RefreshMode::Refreshable(Duration::from_millis(60))),
+    );
 
+    // Below can be deleted; included only to prove it compiles.
+    let _ = FOO_SFL_DEPS_OVERRIDE.set(pulldepswithoverride::fs::FooSflDeps {
+        bar_bf: pulldepswithoverride::fs::bar_bf,
+    });
+
+    let _ = CfgOvd::set_once_cell(
+        &BAR_BF_CFG_OVERRIDE,
+        None,
+        Some(RefreshMode::Refreshable(Duration::from_millis(60))),
+    );
+
+    let handle = thread::spawn(move || {
         let res = foo_sfl();
         println!("{}", res);
 
         thread::sleep(Duration::from_millis(30));
 
         refresh_app_configuration();
-        println!("App configuration refreshed -- there should be no difference in output.");
+        println!("App configuration refreshed -- output should be different.");
 
         let res = foo_sfl();
         println!("{}", res);
