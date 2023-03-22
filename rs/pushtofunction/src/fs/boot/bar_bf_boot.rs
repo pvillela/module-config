@@ -15,7 +15,7 @@ fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
 pub static BAR_BF_CFG_INFO_OVERRIDE: OnceCell<BarBfCfgInfo> = OnceCell::new();
 
 pub fn bar_bf_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> BarBfT {
-    let bar_bf_cfg_deps = BarBfCfgDeps::new_with_const_or_cfg_adapter(
+    let bar_bf_cfg_deps = BarBfCfgDeps::new_boxed_with_const_or_cfg_adapter(
         BAR_BF_CFG_INFO_OVERRIDE.get(),
         app_cfg,
         bar_bf_cfg_adapter,

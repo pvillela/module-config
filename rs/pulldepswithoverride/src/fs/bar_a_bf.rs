@@ -20,7 +20,7 @@ pub async fn bar_a_bf(sleep_millis: u64) -> String {
 
 thread_local! {
 pub static BAR_A_BF_CFG: BarABfCfg =
-    BarABfCfg::new_with_override(
+    BarABfCfg::new_boxed_with_cfg_adapter_and_override(
         BAR_A_BF_CFG_OVERRIDE.get(),
         get_app_configuration,
         bar_a_bf_cfg_adapter,

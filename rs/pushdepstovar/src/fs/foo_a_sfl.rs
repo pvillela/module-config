@@ -30,8 +30,8 @@ pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
 
 thread_local! {
 static FOO_A_SFL_CFG: FooASflCfg =
-    FooASflCfg::new_from_def(
-        FOO_A_SFL_CFG_DEF.get(),
+    FooASflCfg::new_from_once_cell_def(
+        &FOO_A_SFL_CFG_DEF,
     )
 }
 

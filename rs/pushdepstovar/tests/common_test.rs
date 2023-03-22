@@ -1,7 +1,5 @@
 use common::fs_data::{BarABfCfgInfo, FooAIn, FooASflCfgInfo};
-use common::fwk::{
-    arc_pin_async_fn, set_once_cell, static_closure_0_thread_safe, CfgDef, RefreshMode,
-};
+use common::fwk::{arc_pin_async_fn, set_once_cell, CfgDef, RefreshMode, Src};
 use pushdepstovar::fs::{
     bar_a_bf, foo_a_sfl, FooASflDeps, BAR_A_BF_CFG_DEF, FOO_A_SFL_CFG_DEF, FOO_A_SFL_DEPS,
 };
@@ -13,7 +11,7 @@ pub async fn common_test(
 ) -> Option<String> {
     let _ = CfgDef::set_once_cell_with_cfg_src(
         &FOO_A_SFL_CFG_DEF,
-        static_closure_0_thread_safe(move || foo_a_sfl_cfg_info.clone()),
+        Src::new_boxed(move || foo_a_sfl_cfg_info.clone()),
         RefreshMode::NoRefresh,
     );
 
@@ -26,7 +24,7 @@ pub async fn common_test(
 
     let _ = CfgDef::set_once_cell_with_cfg_src(
         &BAR_A_BF_CFG_DEF,
-        static_closure_0_thread_safe(move || bar_a_bf_cfg_info.clone()),
+        Src::new_boxed(move || bar_a_bf_cfg_info.clone()),
         RefreshMode::NoRefresh,
     );
 

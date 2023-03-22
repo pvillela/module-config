@@ -16,7 +16,7 @@ fn foo_aw_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooAwSflCfgInfo {
 pub static FOO_AW_SFL_CFG_INFO_OVERRIDE: OnceCell<FooAwSflCfgInfo> = OnceCell::new();
 
 pub fn foo_aw_sfl_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> FooAwSflT {
-    let foo_aw_sfl_cfg_deps = FooAwSflCfgDeps::new_with_const_or_cfg_adapter(
+    let foo_aw_sfl_cfg_deps = FooAwSflCfgDeps::new_boxed_with_const_or_cfg_adapter(
         FOO_AW_SFL_CFG_INFO_OVERRIDE.get(),
         app_cfg,
         foo_aw_sfl_cfg_adapter,

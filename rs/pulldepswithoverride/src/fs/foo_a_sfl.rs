@@ -43,7 +43,7 @@ pub static FOO_A_SFL_DEPS: Lazy<&FooASflDeps> = Lazy::new(|| {
 
 thread_local! {
 pub static FOO_A_SFL_CFG: FooASflCfg =
-    FooASflCfg::new_with_override(
+    FooASflCfg::new_boxed_with_cfg_adapter_and_override(
         FOO_A_SFL_CFG_OVERRIDE.get(),
         get_app_configuration,
         foo_a_sfl_cfg_adapter,

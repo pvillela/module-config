@@ -1,6 +1,6 @@
 use super::{
-    Cfg, CfgArcSwapArc, CfgArcSwapId, CfgArcSwapRc, CfgImmut, CfgRaw, CfgRefCellArc, CfgRefCellId,
-    CfgRefCellRc, InnerMut, RefreshMode, StaticFn0,
+    Cache, Cfg, CfgArcSwapArc, CfgArcSwapId, CfgArcSwapRc, CfgImmut, CfgRefCellArc, CfgRefCellId,
+    CfgRefCellRc, InnerMut, RefreshMode, Src,
 };
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -41,10 +41,10 @@ where
     }
 
     fn new_f(
-        src: StaticFn0<T>,
+        src: Src<T>,
         refresh_mode: RefreshMode,
         deps: U,
-        factory: impl Fn(StaticFn0<T>, RefreshMode) -> C,
+        factory: impl Fn(Src<T>, RefreshMode) -> C,
     ) -> Self {
         Self::new_priv(factory(src, refresh_mode), deps)
     }
@@ -57,6 +57,17 @@ where
         factory: impl Fn(fn() -> Arc<S>, fn(&S) -> T, RefreshMode) -> C,
     ) -> Self {
         Self::new_priv(factory(f, g, refresh_mode), deps)
+    }
+
+    pub fn new_with_const_or_cfg_adapter_f<S>(
+        k: Option<&'static T>,
+        f: fn() -> Arc<S>,
+        g: fn(&S) -> T,
+        refresh_mode: RefreshMode,
+        deps: U,
+        factory: impl Fn(Option<&'static T>, fn() -> Arc<S>, fn(&S) -> T, RefreshMode) -> C,
+    ) -> Self {
+        Self::new_priv(factory(k, f, g, refresh_mode), deps)
     }
 }
 
@@ -90,20 +101,29 @@ impl<T, TX, IM, U> CfgDepsStd<T, TX, IM, U>
 where
     T: Clone,
     TX: From<T> + Clone + core::fmt::Debug,
-    IM: InnerMut<CfgRaw<T, TX>>,
+    IM: InnerMut<Cache<T, TX>>,
     U: Clone,
 {
-    pub fn new(src: StaticFn0<T>, refresh_mode: RefreshMode, deps: U) -> Self {
+    pub fn new(src: Src<T>, refresh_mode: RefreshMode, deps: U) -> Self {
         Self::new_f(src, refresh_mode, deps, Cfg::new)
     }
 
-    pub fn new_with_cfg_adapter<S: 'static>(
+    pub fn new_ref_with_cfg_adapter<S: 'static>(
         f: fn() -> Arc<S>,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
         deps: U,
     ) -> Self {
-        Self::new_with_cfg_adapter_f(f, g, refresh_mode, deps, Cfg::new_with_cfg_adapter)
+        Self::new_with_cfg_adapter_f(f, g, refresh_mode, deps, Cfg::new_ref_with_cfg_adapter)
+    }
+
+    pub fn new_boxed_with_cfg_adapter<S: 'static>(
+        f: fn() -> Arc<S>,
+        g: fn(&S) -> T,
+        refresh_mode: RefreshMode,
+        deps: U,
+    ) -> Self {
+        Self::new_with_cfg_adapter_f(f, g, refresh_mode, deps, Cfg::new_boxed_with_cfg_adapter)
     }
 }
 
@@ -111,22 +131,40 @@ impl<T, TX, IM, U> CfgDepsStd<T, TX, IM, U>
 where
     T: 'static + Clone + Send + Sync,
     TX: From<T> + Clone + core::fmt::Debug,
-    IM: InnerMut<CfgRaw<T, TX>>,
+    IM: InnerMut<Cache<T, TX>>,
     U: Clone,
 {
-    pub fn new_with_const_or_cfg_adapter<S: 'static>(
+    pub fn new_ref_with_const_or_cfg_adapter<S: 'static>(
         k: Option<&'static T>,
         f: fn() -> Arc<S>,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
         deps: U,
     ) -> Self {
-        match k {
-            Some(k) => {
-                let src = Box::leak(Box::new(move || k.clone()));
-                Self::new(src, refresh_mode, deps)
-            }
-            None => Self::new_with_cfg_adapter(f, g, refresh_mode, deps),
-        }
+        Self::new_with_const_or_cfg_adapter_f(
+            k,
+            f,
+            g,
+            refresh_mode,
+            deps,
+            Cfg::new_ref_with_const_or_cfg_adapter,
+        )
+    }
+
+    pub fn new_boxed_with_const_or_cfg_adapter<S: 'static>(
+        k: Option<&'static T>,
+        f: fn() -> Arc<S>,
+        g: fn(&S) -> T,
+        refresh_mode: RefreshMode,
+        deps: U,
+    ) -> Self {
+        Self::new_with_const_or_cfg_adapter_f(
+            k,
+            f,
+            g,
+            refresh_mode,
+            deps,
+            Cfg::new_boxed_with_const_or_cfg_adapter,
+        )
     }
 }

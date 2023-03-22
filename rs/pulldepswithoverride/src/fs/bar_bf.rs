@@ -17,12 +17,11 @@ pub fn bar_bf() -> String {
 
 thread_local! {
 pub static BAR_BF_CFG: BarBfCfg =
-    BarBfCfg::new_with_override(
-        BAR_BF_CFG_OVERRIDE.get(),
+    BarBfCfg::new_boxed_with_cfg_adapter_and_override(BAR_BF_CFG_OVERRIDE.get(),
         get_app_configuration,
         bar_bf_cfg_adapter,
         RefreshMode::NoRefresh,
-    )
+)
 }
 
 pub static BAR_BF_CFG_OVERRIDE: OnceCell<BarBfCfgOvd> = OnceCell::new();

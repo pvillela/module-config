@@ -17,8 +17,8 @@ pub async fn bar_a_bf(sleep_millis: u64) -> String {
 
 thread_local! {
 pub static BAR_A_BF_CFG_TL: BarABfCfg =
-    BarABfCfg::new_from_def(
-        BAR_A_BF_CFG_DEF.get(),
+    BarABfCfg::new_from_once_cell_def(
+        &BAR_A_BF_CFG_DEF,
     )
 }
 

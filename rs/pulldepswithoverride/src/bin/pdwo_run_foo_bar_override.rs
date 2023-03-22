@@ -1,7 +1,7 @@
 use common::config::refresh_app_configuration;
 use common::fs_data::{BarBfCfgInfo, FooSflCfgInfo};
 use common::fs_util::bar_core;
-use common::fwk::{set_once_cell, static_closure_0_thread_safe, CfgOvd, RefreshMode};
+use common::fwk::{set_once_cell, CfgOvd, RefreshMode, Src};
 use pulldepswithoverride::fs::{
     foo_sfl, BAR_BF_CFG, BAR_BF_CFG_OVERRIDE, FOO_SFL_CFG_OVERRIDE, FOO_SFL_DEPS_OVERRIDE,
 };
@@ -17,7 +17,7 @@ fn bar_ovd_bf() -> String {
 fn main() {
     let _ = CfgOvd::set_once_cell(
         &FOO_SFL_CFG_OVERRIDE,
-        Some(static_closure_0_thread_safe(|| FooSflCfgInfo {
+        Some(Src::new_boxed(|| FooSflCfgInfo {
             a: "foo_override".to_owned(),
             b: 11,
         })),
@@ -31,7 +31,7 @@ fn main() {
 
     let _ = CfgOvd::set_once_cell(
         &BAR_BF_CFG_OVERRIDE,
-        Some(static_closure_0_thread_safe(|| BarBfCfgInfo {
+        Some(Src::new_boxed(|| BarBfCfgInfo {
             u: 33,
             v: "bar_override".to_owned(),
         })),

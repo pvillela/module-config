@@ -14,8 +14,8 @@ pub fn bar_bf() -> String {
 
 thread_local! {
 pub static BAR_BF_CFG_TL: BarBfCfg =
-    BarBfCfg::new_from_def(
-        BAR_BF_CFG_DEF.get(),
+    BarBfCfg::new_from_once_cell_def(
+        &BAR_BF_CFG_DEF,
     )
 }
 

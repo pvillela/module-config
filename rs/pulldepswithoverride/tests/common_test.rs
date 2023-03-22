@@ -1,5 +1,5 @@
 use common::fs_data::{BarABfCfgInfo, FooAIn, FooASflCfgInfo};
-use common::fwk::{static_closure_0_thread_safe, CfgOvd, RefreshMode};
+use common::fwk::{CfgOvd, RefreshMode, Src};
 use pulldepswithoverride::fs::{foo_a_sfl, BAR_A_BF_CFG_OVERRIDE, FOO_A_SFL_CFG_OVERRIDE};
 use tokio;
 
@@ -9,17 +9,13 @@ pub async fn common_test(
 ) -> Option<String> {
     let _ = CfgOvd::set_once_cell(
         &FOO_A_SFL_CFG_OVERRIDE,
-        Some(static_closure_0_thread_safe(move || {
-            foo_a_sfl_cfg_info.clone()
-        })),
+        Some(Src::new_boxed(move || foo_a_sfl_cfg_info.clone())),
         Some(RefreshMode::NoRefresh),
     );
 
     let _ = CfgOvd::set_once_cell(
         &BAR_A_BF_CFG_OVERRIDE,
-        Some(static_closure_0_thread_safe(move || {
-            bar_a_bf_cfg_info.clone()
-        })),
+        Some(Src::new_boxed(move || bar_a_bf_cfg_info.clone())),
         Some(RefreshMode::NoRefresh),
     );
 

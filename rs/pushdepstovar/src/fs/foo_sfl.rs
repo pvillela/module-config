@@ -22,8 +22,8 @@ pub fn foo_sfl() -> String {
 
 thread_local! {
 static FOO_SFL_CFG_TL: FooSflCfg =
-    FooSflCfg::new_from_def(
-        FOO_SFL_CFG_DEF.get(),
+    FooSflCfg::new_from_once_cell_def(
+        &FOO_SFL_CFG_DEF,
     )
 }
 

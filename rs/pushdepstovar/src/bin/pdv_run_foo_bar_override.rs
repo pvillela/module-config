@@ -1,7 +1,7 @@
 use common::config::refresh_app_configuration;
 use common::fs_data::{BarBfCfgInfo, FooSflCfgInfo};
 use common::fs_util::bar_core;
-use common::fwk::{set_once_cell, static_closure_0_thread_safe, CfgDef, RefreshMode};
+use common::fwk::{set_once_cell, CfgDef, RefreshMode, Src};
 use pushdepstovar::fs::{foo_sfl, BAR_BF_CFG_DEF, BAR_BF_CFG_TL, FOO_SFL_CFG_DEF, FOO_SFL_DEPS};
 use std::thread;
 
@@ -15,7 +15,7 @@ fn bar_ovd_bf() -> String {
 fn main() {
     let _ = CfgDef::set_once_cell_with_cfg_src(
         &FOO_SFL_CFG_DEF,
-        static_closure_0_thread_safe(|| FooSflCfgInfo {
+        Src::new_boxed(|| FooSflCfgInfo {
             a: "foo_override".to_owned(),
             b: 11,
         }),
@@ -29,7 +29,7 @@ fn main() {
 
     let _ = CfgDef::set_once_cell_with_cfg_src(
         &BAR_BF_CFG_DEF,
-        static_closure_0_thread_safe(|| BarBfCfgInfo {
+        Src::new_boxed(|| BarBfCfgInfo {
             u: 33,
             v: "bar_override".to_owned(),
         }),
