@@ -1,7 +1,7 @@
 use actix_web::{web, App, HttpServer};
 use common::{
     fs_data::{BarBfCfgInfo, FooSflCfgInfo},
-    fwk::RefreshMode,
+    fwk::{RefreshMode, Src},
     web::handler_of_web,
 };
 use pushtofunction::fs::{
@@ -21,7 +21,7 @@ async fn main() -> std::io::Result<()> {
         };
 
         let bar_aw_cfg_deps = BarAwBfCfgDeps::new(
-            move || bar_aw_bf_cfg_info.clone().into(),
+            Src::new_boxed(move || bar_aw_bf_cfg_info.clone()),
             RefreshMode::NoRefresh,
             (),
         );
@@ -29,7 +29,7 @@ async fn main() -> std::io::Result<()> {
         let bar_aw_bf = bar_aw_bf_c(bar_aw_cfg_deps);
 
         let foo_aw_cfg_deps = FooAwSflCfgDeps::new(
-            move || foo_aw_sfl_cfg_info.clone().into(),
+            Src::new_boxed(move || foo_aw_sfl_cfg_info.clone()),
             RefreshMode::NoRefresh,
             FooAwSflDeps { bar_aw_bf },
         );
@@ -40,6 +40,7 @@ async fn main() -> std::io::Result<()> {
         App::new().route("/", web::post().to(f))
     })
     .bind(("127.0.0.1", 8080))?
+    .workers(4) // default is the numbe of physical CPUs
     .run()
     .await
 }

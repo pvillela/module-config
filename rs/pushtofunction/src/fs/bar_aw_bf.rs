@@ -1,10 +1,10 @@
 use common::fs_data::BarABfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{arc_pin_async_fn_web, ArcPinFnWeb, CfgDepsRefCellId};
+use common::fwk::{arc_pin_async_fn_web, CfgDepsRefCellId, RcPinFnWeb};
 use std::time::Duration;
 use tokio::time::sleep;
 
-pub type BarAwBfT = ArcPinFnWeb<u64, String>;
+pub type BarAwBfT = RcPinFnWeb<u64, String>;
 
 pub type BarAwBfCfgDeps = CfgDepsRefCellId<BarABfCfgInfo, ()>;
 

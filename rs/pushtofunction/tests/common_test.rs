@@ -1,6 +1,6 @@
 use common::fs_data::BarBfCfgInfo;
 use common::fs_data::{FooAIn, FooSflCfgInfo};
-use common::fwk::RefreshMode;
+use common::fwk::{RefreshMode, Src};
 use pushtofunction::fs::{bar_a_bf_c, foo_a_sfl_c, BarABfCfgDeps, FooASflCfgDeps, FooASflDeps};
 use tokio;
 
@@ -9,7 +9,7 @@ pub async fn common_test(
     bar_bf_cfg_info: BarBfCfgInfo,
 ) -> Option<String> {
     let bar_cfg_deps = BarABfCfgDeps::new(
-        move || bar_bf_cfg_info.clone().into(),
+        Src::new_boxed(move || bar_bf_cfg_info.clone()),
         RefreshMode::NoRefresh,
         (),
     );
@@ -17,7 +17,7 @@ pub async fn common_test(
     let bar_a_bf = bar_a_bf_c(bar_cfg_deps);
 
     let foo_cfg_deps = FooASflCfgDeps::new(
-        move || foo_sfl_cfg_info.clone().into(),
+        Src::new_boxed(move || foo_sfl_cfg_info.clone()),
         RefreshMode::NoRefresh,
         FooASflDeps { bar_a_bf },
     );
