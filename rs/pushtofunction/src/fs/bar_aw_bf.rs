@@ -10,7 +10,7 @@ pub type BarAwBfCfgDeps = CfgDepsRefCellId<BarABfCfgInfo, ()>;
 
 pub fn bar_aw_bf_c(cfg_deps: BarAwBfCfgDeps) -> BarAwBfT {
     let f = move |sleep_millis: u64| {
-        let (cfg, _) = cfg_deps.get_cfg_deps();
+        let cfg = cfg_deps.get_cfg();
         async move {
             sleep(Duration::from_millis(sleep_millis)).await;
             let u = cfg.u;
