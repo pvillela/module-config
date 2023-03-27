@@ -1,9 +1,14 @@
-use common::fwk::{arc_pin_async_fn, CfgOvd, RefreshMode};
+use common::fs_data::{FooAIn, FooAOut};
+use common::fwk::{arc_pin_async_fn, ArcPinFn, CfgOvd, RefreshMode};
 use common::tokio_run::{run, RunIn};
 use pulldepswithoverride::fs::{
     foo_a_sfl, BAR_A_BF_CFG_OVERRIDE, FOO_A_SFL_CFG_OVERRIDE, FOO_A_SFL_DEPS_OVERRIDE,
 };
 use tokio;
+
+fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
+    arc_pin_async_fn(foo_a_sfl)
+}
 
 #[tokio::main]
 async fn main() {
@@ -20,7 +25,7 @@ async fn main() {
 
     println!("\n*** run -- total 0 ms sleep time, 10_000 concurrency, 100 repeats");
     run(RunIn {
-        foo_a_sfl: arc_pin_async_fn(foo_a_sfl),
+        make_foo_a_sfl,
         unit_time_millis: 0,
         app_cfg_first_refresh_units: 1,
         app_cfg_refresh_delta_units: 1,
@@ -34,7 +39,7 @@ async fn main() {
 
     println!("\n*** run -- total 80 ms sleep time, 10_000 concurrency, 100 repeats");
     run(RunIn {
-        foo_a_sfl: arc_pin_async_fn(foo_a_sfl),
+        make_foo_a_sfl,
         unit_time_millis: 10,
         app_cfg_first_refresh_units: 1,
         app_cfg_refresh_delta_units: 1,

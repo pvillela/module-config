@@ -7,7 +7,7 @@ use tokio;
 use tokio::time::sleep;
 
 pub struct RunIn {
-    pub foo_a_sfl: ArcPinFn<FooAIn, FooAOut>,
+    pub make_foo_a_sfl: fn() -> ArcPinFn<FooAIn, FooAOut>,
     pub unit_time_millis: u64,
     pub app_cfg_first_refresh_units: u64,
     pub app_cfg_refresh_delta_units: u64,
@@ -20,7 +20,7 @@ pub struct RunIn {
 
 pub async fn run(input: RunIn) {
     let RunIn {
-        foo_a_sfl,
+        make_foo_a_sfl,
         unit_time_millis,
         app_cfg_first_refresh_units,
         app_cfg_refresh_delta_units,
@@ -55,7 +55,7 @@ pub async fn run(input: RunIn) {
     });
 
     let run_concurrent = |i: usize| {
-        let foo_a_sfl = foo_a_sfl.clone();
+        let foo_a_sfl = make_foo_a_sfl();
         tokio::spawn(async move {
             let out = foo_a_sfl(FooAIn { sleep_millis: 0 }).await;
             let res = out.res.len();

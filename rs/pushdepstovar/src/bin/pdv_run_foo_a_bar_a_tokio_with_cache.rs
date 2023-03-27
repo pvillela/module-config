@@ -1,8 +1,13 @@
-use common::fwk::arc_pin_async_fn;
+use common::fs_data::{FooAIn, FooAOut};
+use common::fwk::{arc_pin_async_fn, ArcPinFn};
 use common::tokio_run::{run, RunIn};
 use pushdepstovar::fs::foo_a_sfl;
 use pushdepstovar::startup::init_a_refreshable;
 use tokio;
+
+fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
+    arc_pin_async_fn(foo_a_sfl)
+}
 
 #[tokio::main]
 async fn main() {
@@ -12,7 +17,7 @@ async fn main() {
 
     println!("\n*** run -- total 0 ms sleep time, 10_000 concurrency, 100 repeats");
     run(RunIn {
-        foo_a_sfl: arc_pin_async_fn(foo_a_sfl),
+        make_foo_a_sfl,
         unit_time_millis: 0,
         app_cfg_first_refresh_units: 1,
         app_cfg_refresh_delta_units: 1,
@@ -26,7 +31,7 @@ async fn main() {
 
     println!("\n*** run -- total 80 ms sleep time, 10_000 concurrency, 100 repeats");
     run(RunIn {
-        foo_a_sfl: arc_pin_async_fn(foo_a_sfl),
+        make_foo_a_sfl,
         unit_time_millis: 10,
         app_cfg_first_refresh_units: 1,
         app_cfg_refresh_delta_units: 1,
