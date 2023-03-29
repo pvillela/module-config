@@ -6,8 +6,9 @@ use std::sync::Arc;
 use once_cell::sync::OnceCell;
 
 /// Type of boxed and pinned wrapper of async functions.
-pub type ArcPinFn<S, T> =
-    Arc<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync>;
+pub type ArcPinFn<S, T> = Arc<
+    dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync + 'static,
+>;
 
 /// Boxes and pins an async function so it can be passed across theads.
 pub fn arc_pin_async_fn<S: 'static, T: Send + Sync, Fut>(
