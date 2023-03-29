@@ -1,19 +1,9 @@
-use axum::{
-    extract::{Extension, Path},
-    http::{Response, StatusCode},
-    response::IntoResponse,
-    routing::post,
-    Json, Router,
-};
+use axum::{routing::post, Json, Router};
 use common::{
     fs_data::{BarBfCfgInfo, FooAwIn, FooSflCfgInfo},
     fwk::{RefreshMode, Src},
-    web::handler_of_web,
 };
-use pushtofunction::fs::{
-    bar_a_bf_c, bar_aw_bf_c, foo_a_sfl_c, foo_aw_sfl_c, BarABfCfgDeps, BarAwBfCfgDeps,
-    FooASflCfgDeps, FooASflDeps, FooAwSflCfgDeps, FooAwSflDeps,
-};
+use pushtofunction::fs::{bar_a_bf_c, foo_a_sfl_c, BarABfCfgDeps, FooASflCfgDeps, FooASflDeps};
 
 #[tokio::main]
 async fn main() {
@@ -41,12 +31,11 @@ async fn main() {
     );
 
     let foo_a_sfl = foo_a_sfl_c(foo_a_cfg_deps);
-    // let arc_f = handler_of_web(foo_aw_sfl);
-    // let f = move |i| foo_a_sfl(i);
 
     let foo_a_sfl_hdlr = move |Json(payload): Json<FooAwIn>| async move {
         let res = foo_a_sfl(payload).await;
-        (StatusCode::CREATED, Json(res))
+        Json(res)
+        // (StatusCode::OK, Json(res))
     };
 
     let app = Router::new().route("/", post(foo_a_sfl_hdlr));
