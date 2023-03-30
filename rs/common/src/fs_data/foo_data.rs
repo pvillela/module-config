@@ -13,7 +13,7 @@ mod foo_data {
 
 mod foo_a_data {
     use super::FooSflCfgInfo;
-    use crate::web::common_respond_to;
+    use crate::web::actix_handler::common_respond_to;
     use actix_web::{body::BoxBody, HttpRequest, HttpResponse, Responder};
     use serde::{Deserialize, Serialize};
 

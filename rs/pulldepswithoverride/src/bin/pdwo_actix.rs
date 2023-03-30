@@ -1,5 +1,5 @@
 use actix_web::{web, App, HttpServer};
-use common::web::handler_of;
+use common::web::actix_handler::handler_of;
 use pulldepswithoverride::fs::foo_a_sfl;
 
 #[actix_web::main]

@@ -5,7 +5,7 @@ use actix_web::{body::BoxBody, http::header::ContentType, web, HttpResponse, Res
 use common::fs_data::{FooAIn, FooAOut};
 use futures::Future;
 
-// pub async fn foo_handler(info: web::Json<FooAIn>) -> FooAOut {
+// pub async fn foo_handler(info: actix::Json<FooAIn>) -> FooAOut {
 //     let input = info.into_inner();
 //     foo_a_sfl(input).await
 // }

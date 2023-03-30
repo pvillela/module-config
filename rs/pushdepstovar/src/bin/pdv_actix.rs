@@ -1,5 +1,5 @@
 use actix_web::{web, App, HttpServer};
-use common::web::handler_of;
+use common::web::actix_handler::handler_of;
 use pushdepstovar::{fs::foo_a_sfl, startup::init_a_refreshable};
 
 #[actix_web::main]

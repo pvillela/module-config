@@ -2,7 +2,7 @@ use actix_web::{web, App, HttpServer};
 use common::{
     fs_data::{BarBfCfgInfo, FooSflCfgInfo},
     fwk::{RefreshMode, Src},
-    web::handler_of_web,
+    web::actix_handler::handler_of_web,
 };
 use pushtofunction::fs::{
     bar_aw_bf_c, foo_aw_sfl_c, BarAwBfCfgDeps, FooAwSflCfgDeps, FooAwSflDeps,
