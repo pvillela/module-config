@@ -1,29 +1,14 @@
+use crate::fwk::{arc_pin_async_fn, ArcPinFn};
 use axum::Json;
-use futures::{Future, FutureExt};
+use futures::Future;
 use std::{pin::Pin, sync::Arc};
 
-pub fn handler_of<S, T, Fut>(
-    f: impl Fn(S) -> Fut + 'static + Send + Sync,
-) -> Arc<dyn Fn(Json<S>) -> Pin<Box<dyn Future<Output = Json<Json<T>>> + Send>>>
+pub fn handler_of<S, T>(
+    f: ArcPinFn<S, T>,
+) -> Arc<dyn Fn(Json<S>) -> Pin<Box<dyn Future<Output = Json<T>> + Send + Sync>> + Send + Sync>
 where
-    S: serde::Deserialize<'static>,
+    S: 'static + serde::Deserialize<'static>,
     T: 'static + Send + Sync,
-    Fut: 'static + Future<Output = Json<T>> + Send + Sync,
-{
-    let hdlr = move |Json(input): Json<S>| {
-        let fut = f(input).map(Json).boxed();
-        fut
-    };
-    Arc::new(hdlr)
-}
-
-pub fn handler_of1<S, T, Fut>(
-    f: impl Fn(S) -> Fut + 'static + Send + Sync,
-) -> Arc<dyn Fn(Json<S>) -> Pin<Box<dyn Future<Output = Json<Json<T>>> + Send>>>
-where
-    S: serde::Deserialize<'static>,
-    T: Send + Sync,
-    Fut: 'static + Future<Output = Json<T>> + Send + Sync,
 {
     let hdlr = move |Json(input): Json<S>| {
         let fut = f(input);
@@ -31,7 +16,7 @@ where
             let res = fut.await;
             Json(res)
         };
-        fut.boxed()
+        fut
     };
-    Arc::new(hdlr)
+    arc_pin_async_fn(hdlr)
 }

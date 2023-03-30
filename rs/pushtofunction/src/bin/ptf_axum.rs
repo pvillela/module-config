@@ -1,6 +1,6 @@
-use axum::{routing::post, Json, Router};
+use axum::{routing::post, Router};
 use common::{
-    fs_data::{BarBfCfgInfo, FooAwIn, FooSflCfgInfo},
+    fs_data::{BarBfCfgInfo, FooSflCfgInfo},
     fwk::{RefreshMode, Src},
     web::axum_handler,
 };
@@ -31,16 +31,15 @@ async fn main() {
         FooASflDeps { bar_a_bf },
     );
 
-    let foo_a_sfl = foo_a_sfl_c(foo_a_cfg_deps);
-    let arc_f = axum_handler::handler_of(foo_a_sfl);
-    let arc_f = handler_of_web(foo_aw_sfl);
-    let f = move |i| arc_f(i);
-
     // let foo_a_sfl_hdlr = move |Json(payload): Json<FooAwIn>| async move {
     //     let res = foo_a_sfl(payload).await;
     //     Json(res)
     //     // (StatusCode::OK, Json(res))
     // };
+
+    let foo_a_sfl = foo_a_sfl_c(foo_a_cfg_deps);
+    let arc_f = axum_handler::handler_of(foo_a_sfl);
+    let foo_a_sfl_hdlr = move |i| arc_f(i);
 
     let app = Router::new().route("/", post(foo_a_sfl_hdlr));
 
