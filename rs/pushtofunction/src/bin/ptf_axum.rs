@@ -38,8 +38,9 @@ async fn main() {
     // };
 
     let foo_a_sfl = foo_a_sfl_c(foo_a_cfg_deps);
-    let arc_f = axum_handler::handler_of(foo_a_sfl);
-    let foo_a_sfl_hdlr = move |i| arc_f(i);
+    // let arc_f = axum_handler::handler_of(foo_a_sfl);
+    // let foo_a_sfl_hdlr = move |i| arc_f(i);
+    let foo_a_sfl_hdlr = axum_handler::handler_impl_of(foo_a_sfl);
 
     let app = Router::new().route("/", post(foo_a_sfl_hdlr));
 
