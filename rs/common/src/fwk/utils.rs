@@ -9,6 +9,10 @@ use once_cell::sync::OnceCell;
 pub type ArcPinFn<S, T> =
     Arc<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync>;
 
+// The following type is not valid:
+// impl Fn(S) -> (impl Future<Output = T> + 'static + Send + Sync) + Send + Sync
+// See https://github.com/rust-lang/rust/issues/99697.
+
 /// Boxes and pins an async function so it can be passed across theads.
 pub fn arc_pin_async_fn<S: 'static, T: Send + Sync, Fut>(
     f: impl Fn(S) -> Fut + 'static + Send + Sync,
