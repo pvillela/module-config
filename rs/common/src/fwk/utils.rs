@@ -9,9 +9,29 @@ use once_cell::sync::OnceCell;
 pub type ArcPinFn<S, T> =
     Arc<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync>;
 
+/// Part 1 of the definition of a type alias for a closure that returns a boxed and pinned future.
+/// As type aliases for traits are not yet supported, we need to define a new trait and a
+/// blanket implementation for it.
+/// This is the trait definition.
+/// See https://users.rust-lang.org/t/why-cant-type-aliases-be-used-for-traits/10002/9.
+pub trait PinFn<S, T>:
+    Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync
+{
+}
+
 // The following type is not valid:
 // impl Fn(S) -> (impl Future<Output = T> + 'static + Send + Sync) + Send + Sync
 // See https://github.com/rust-lang/rust/issues/99697.
+
+/// Part 2 of the definition of a type alias for a closure that returns a boxed and pinned future.
+/// As type aliases for traits are not yet supported, we need to define a new trait and a
+/// blanket implementation for it.
+/// This is the blanket impl.
+/// See https://users.rust-lang.org/t/why-cant-type-aliases-be-used-for-traits/10002/9.
+impl<S, T, F> PinFn<S, T> for F where
+    F: Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync
+{
+}
 
 /// Boxes and pins an async function so it can be passed across theads.
 pub fn arc_pin_async_fn<S: 'static, T: Send + Sync, Fut>(
