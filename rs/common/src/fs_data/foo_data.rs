@@ -15,6 +15,8 @@ mod foo_a_data {
     use super::FooSflCfgInfo;
     use crate::web::actix_handler::common_respond_to;
     use actix_web::{body::BoxBody, HttpRequest, HttpResponse, Responder};
+    use axum;
+    use axum::response::{IntoResponse, Response};
     use serde::{Deserialize, Serialize};
 
     pub type FooASflCfgInfo = FooSflCfgInfo;
@@ -35,6 +37,12 @@ mod foo_a_data {
 
         fn respond_to(self, _req: &HttpRequest) -> HttpResponse<Self::Body> {
             common_respond_to(self)
+        }
+    }
+
+    impl IntoResponse for FooAOut {
+        fn into_response(self) -> Response {
+            axum::Json(self).into_response()
         }
     }
 }
