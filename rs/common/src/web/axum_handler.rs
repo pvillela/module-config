@@ -3,7 +3,7 @@ use axum::Json;
 use futures::{Future, FutureExt};
 use std::{pin::Pin, sync::Arc};
 
-pub fn handler_of<S, T>(
+pub fn handler_arc_of_arcpin<S, T>(
     f: ArcPinFn<S, T>,
 ) -> Arc<dyn Fn(Json<S>) -> Pin<Box<dyn Future<Output = Json<T>> + Send + Sync>> + Send + Sync>
 where
@@ -21,7 +21,7 @@ where
     arc_pin_async_fn(hdlr)
 }
 
-pub fn handler_impl_of<S, T>(
+pub fn handler_of_arcpin<S, T>(
     f: ArcPinFn<S, T>,
 ) -> impl Fn(Json<S>) -> Pin<Box<(dyn Future<Output = Json<T>> + Send + 'static)>>
        + Send

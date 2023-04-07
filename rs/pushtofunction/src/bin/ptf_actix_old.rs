@@ -2,7 +2,7 @@ use actix_web::{web, App, HttpServer};
 use common::{
     fs_data::{BarBfCfgInfo, FooSflCfgInfo},
     fwk::{RefreshMode, Src},
-    web::actix_handler::handler_of_rcpin,
+    web::actix_handler::handler_arc_of_rcpin,
 };
 use pushtofunction::fs::{
     bar_aw_bf_c, foo_aw_sfl_c, BarAwBfCfgDeps, FooAwSflCfgDeps, FooAwSflDeps,
@@ -35,7 +35,8 @@ async fn main() -> std::io::Result<()> {
         );
 
         let foo_aw_sfl = foo_aw_sfl_c(foo_aw_cfg_deps);
-        let f = handler_of_rcpin(foo_aw_sfl);
+        let arc_f = handler_arc_of_rcpin(foo_aw_sfl);
+        let f = move |i| arc_f(i);
         App::new().route("/", web::post().to(f))
     })
     .bind(("127.0.0.1", 8080))?
