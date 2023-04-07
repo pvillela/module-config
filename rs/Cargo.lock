@@ -951,6 +951,7 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "arc-swap",
+ "axum",
  "common",
  "futures",
  "once_cell",
