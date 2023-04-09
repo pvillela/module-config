@@ -120,6 +120,12 @@ pub fn set_once_cell<T>(cell: &OnceCell<T>, x: T) -> Result<(), T> {
     res
 }
 
+/// Returns a static reference to a value.
+/// The reference is required to be static to avoid memory leaks.
+pub fn static_ref<T>(value: T) -> &'static T {
+    Box::leak(Box::new(value))
+}
+
 /// Returns a static reference to a value or an override if the override exists.
 /// The references are required to be static to avoid memory leaks.
 pub fn static_ref_with_override<T>(ovd: Option<&'static T>, value: T) -> &'static T {

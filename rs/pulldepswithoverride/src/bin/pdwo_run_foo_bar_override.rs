@@ -3,7 +3,8 @@ use common::fs_data::{BarBfCfgInfo, FooSflCfgInfo};
 use common::fs_util::bar_core;
 use common::fwk::{set_once_cell, CfgOvd, RefreshMode, Src};
 use pulldepswithoverride::fs::{
-    foo_sfl, BAR_BF_CFG, BAR_BF_CFG_OVERRIDE, FOO_SFL_CFG_OVERRIDE, FOO_SFL_DEPS_OVERRIDE,
+    foo_sfl, foo_sfl_cfg_override, foo_sfl_deps_override, override_lazy, BAR_BF_CFG,
+    BAR_BF_CFG_OVERRIDE, FOO_SFL_CFG, FOO_SFL_CFG_OVERRIDE, FOO_SFL_DEPS, FOO_SFL_DEPS_OVERRIDE,
 };
 use std::thread;
 
@@ -24,19 +25,23 @@ fn main() {
         Some(RefreshMode::NoRefresh),
     );
 
-    let _ = set_once_cell(
-        &FOO_SFL_DEPS_OVERRIDE,
-        pulldepswithoverride::fs::FooSflDeps { bar_bf: bar_ovd_bf },
-    );
+    // let _ = set_once_cell(
+    //     &FOO_SFL_DEPS_OVERRIDE,
+    //     pulldepswithoverride::fs::FooSflDeps { bar_bf: bar_ovd_bf },
+    // );
 
-    let _ = CfgOvd::set_once_cell(
-        &BAR_BF_CFG_OVERRIDE,
-        Some(Src::new_boxed(|| BarBfCfgInfo {
-            u: 33,
-            v: "bar_override".to_owned(),
-        })),
-        Some(RefreshMode::NoRefresh),
-    );
+    override_lazy(&FOO_SFL_DEPS, foo_sfl_deps_override);
+
+    // let _ = CfgOvd::set_once_cell(
+    //     &BAR_BF_CFG_OVERRIDE,
+    //     Some(Src::new_boxed(|| BarBfCfgInfo {
+    //         u: 33,
+    //         v: "bar_override".to_owned(),
+    //     })),
+    //     Some(RefreshMode::NoRefresh),
+    // );
+
+    override_lazy(&FOO_SFL_CFG, foo_sfl_cfg_override);
 
     let handle = thread::spawn(move || foo_sfl());
     let res = handle.join().unwrap();
