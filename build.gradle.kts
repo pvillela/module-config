@@ -28,16 +28,16 @@ application {
     mainClass.set("MainKt")
 }
 
-sourceSets {
-    main {
-        java {
-            setSrcDirs(listOf("kt"))
-        }
-    }
+// sourceSets {
+//     main {
+//         java {
+//             setSrcDirs(listOf("kt"))
+//         }
+//     }
 
-    test {
-        java {
-            setSrcDirs(listOf("test"))
-        }
-    }
-}
+//     test {
+//         java {
+//             setSrcDirs(listOf("test"))
+//         }
+//     }
+// }

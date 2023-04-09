@@ -79,7 +79,7 @@ To promote a natural design workflow that starts with service flow modules and l
 
 [This repo](https://github.com/pvillela/module-config) demonstrates simple frameworks and patterns for the above configuration approaches, written in Kotlin, TypeScript, Go, and Rust (under the `kt`, `ts`, `go`, and `rs` directories, respectively).
 
-_Note: Unlike the `ts` , `go` , and `rs` directories, the project definition files for Kotlin code are not under the `kt` directory. That is because this code was created with IntelliJ IDEA, which at the time this code was created had a bug that required a project containing a Kotlin module to be a top-level Kotlin project._
+_Note:_ Unlike the `ts` , `go` , and `rs` directories, the Kotlin project (Gradle) definition files are not under the `kt` directory. That is because this code was created with IntelliJ IDEA, which at the time this code was created has a bug that requires a project containing a Kotlin module to be a top-level Kotlin project. `kt` is a symlink to the `src` directory. Kotlin code refactoring and other IDE actions should be done from the `src` directory, not from the `kt` link.
 
 Notice that the _push_ framework examples have a _pull_ aspect to them as what is pushed is a thunk function that returns the configuration data, not the configuration data itself. The reason for that is to provide the flexibility to support configuration properties that change dynamically at runtime. There is no significant performance penalty associated with the use a thunk instead of the data structure itself since the thunk can simply return a cached data structure by reference.
 

@@ -4,9 +4,9 @@
  * that can be found in the LICENSE file.
  */
 
-package pullwithpushoverride.fs
+package pullcfgwithoverride.fs
 
-import pullwithpushoverride.config.AppCfgInfo
+import pullcfgwithoverride.config.AppCfgInfo
 
 fun fooSflCfgAdapter(appCfg: AppCfgInfo): FooSflCfgInfo {
 	return FooSflCfgInfo(

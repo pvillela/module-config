@@ -1,6 +1,6 @@
-package pullwithpushoverride.config
+package pulldepswithoverride.config
 
-import pullwithpushoverride.fwk.ConfigurationException
+import pulldepswithoverride.fwk.ConfigurationException
 
 typealias CfgSrc<T> = () -> T
 

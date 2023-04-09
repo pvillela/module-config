@@ -4,12 +4,16 @@
  *  that can be found in the LICENSE file.
  */
 
-package pullwithpushoverride.run
+package pulldepswithoverride.run
 
-import pullwithpushoverride.fs.*
+import pulldepswithoverride.fs.*
 
 fun main() {
-	fooSflCfgSrc = { FooSflCfgInfo("foo") }
+	fooSflCfgSrc = { FooSflCfgInfo("Overridden fooSflCfgSrc") }
+
+	fooSflDeps = FooSflDeps(
+		barBf = { println("Overridden barBf") },
+	)
 
 	barBfCfgSrc = { BarBfCfgInfo(99) }
 

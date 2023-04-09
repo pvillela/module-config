@@ -4,10 +4,10 @@
  *  that can be found in the LICENSE file.
  */
 
-package pullwithpushoverride.fs
+package pullcfgwithoverride.fs
 
-import pullwithpushoverride.config.CfgSrc
-import pullwithpushoverride.config.makeCfgSrc
+import pullcfgwithoverride.config.CfgSrc
+import pullcfgwithoverride.config.makeCfgSrc
 
 data class BarBfCfgInfo(
 	val z: Int

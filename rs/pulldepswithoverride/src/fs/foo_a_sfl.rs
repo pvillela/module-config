@@ -9,6 +9,9 @@ use once_cell::sync::{Lazy, OnceCell};
 use std::time::Duration;
 use tokio::time::sleep;
 
+#[allow(unused)]
+use std::sync::Arc;
+
 type FooASflCfg = CfgRefCellRc<FooASflCfgInfo>;
 
 pub type FooASflCfgOvd = CfgOvd<FooASflCfgInfo>;
@@ -36,7 +39,8 @@ pub static FOO_A_SFL_DEPS: Lazy<&FooASflDeps> = Lazy::new(|| {
     static_ref_with_override(
         FOO_A_SFL_DEPS_OVERRIDE.get(),
         FooASflDeps {
-            bar_a_bf: arc_pin_async_fn(bar_a_bf),
+            // bar_a_bf: Arc::new(|_| todo!()), // do this before bar_a_bf exist
+            bar_a_bf: arc_pin_async_fn(bar_a_bf), // replace above with this after bar_a_bf has been created
         },
     )
 });
@@ -45,8 +49,8 @@ thread_local! {
 pub static FOO_A_SFL_CFG: FooASflCfg =
     FooASflCfg::new_boxed_with_cfg_adapter_and_override(
         FOO_A_SFL_CFG_OVERRIDE.get(),
-        get_app_configuration,
-        foo_a_sfl_cfg_adapter,
+        get_app_configuration, // use `|| todo!()` before get_app_configuration exists
+        foo_a_sfl_cfg_adapter, // use `|_| todo!()` before foo_a_sfl_cfg_adapter exists
         RefreshMode::NoRefresh,
     )
 }
@@ -54,6 +58,8 @@ pub static FOO_A_SFL_CFG: FooASflCfg =
 pub static FOO_A_SFL_CFG_OVERRIDE: OnceCell<FooASflCfgOvd> = OnceCell::new();
 pub static FOO_A_SFL_DEPS_OVERRIDE: OnceCell<FooASflDeps> = OnceCell::new();
 
+// This doesn't necessarily exist initially and may be added later, after the
+// app configuration source has been created.
 fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
     FooASflCfgInfo {
         a: app_cfg.x.clone(),

@@ -4,9 +4,9 @@
  *  that can be found in the LICENSE file.
  */
 
-package pullwithpushoverride.run
+package pullcfgwithoverride.run
 
-import pullwithpushoverride.fs.fooSfl
+import pullcfgwithoverride.fs.fooSfl
 
 fun main() {
 	fooSfl()

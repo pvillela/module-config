@@ -1,6 +1,6 @@
-package pullwithpushoverride.fs
+package pullcfgwithoverride.fs
 
-import pullwithpushoverride.config.makeCfgSrc
+import pullcfgwithoverride.config.makeCfgSrc
 
 data class BazCfgInfo(
 	val w: String

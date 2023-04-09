@@ -4,10 +4,14 @@
  *  that can be found in the LICENSE file.
  */
 
-package pullwithpushoverride.run
+package pullcfgwithoverride.run
 
-import pullwithpushoverride.fs.baz
+import pullcfgwithoverride.fs.*
 
 fun main() {
-	baz()
+	fooSflCfgSrc = { FooSflCfgInfo("foo") }
+
+	barBfCfgSrc = { BarBfCfgInfo(99) }
+
+	fooSfl()
 }

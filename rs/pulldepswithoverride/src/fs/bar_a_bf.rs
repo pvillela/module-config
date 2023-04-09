@@ -22,14 +22,16 @@ thread_local! {
 pub static BAR_A_BF_CFG: BarABfCfg =
     BarABfCfg::new_boxed_with_cfg_adapter_and_override(
         BAR_A_BF_CFG_OVERRIDE.get(),
-        get_app_configuration,
-        bar_a_bf_cfg_adapter,
+        get_app_configuration, // use `|| todo!()` before get_app_configuration exists
+        bar_a_bf_cfg_adapter, // use `|_| todo!()` before bar_a_bf_cfg_adapter exists
         RefreshMode::NoRefresh,
     )
 }
 
 pub static BAR_A_BF_CFG_OVERRIDE: OnceCell<BarABfCfgOvd> = OnceCell::new();
 
+// This doesn't necessarily exist initially and may be added later, after the
+// app configuration source has been created.
 fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarABfCfgInfo {
     BarABfCfgInfo {
         u: app_cfg.y,
