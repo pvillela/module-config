@@ -1,15 +1,13 @@
-use std::mem::replace;
-
 use super::bar_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::FooSflCfgInfo;
 use common::fs_util::foo_core;
 use common::fwk::{
-    static_ref, static_ref_with_override, CfgArcSwapArc, CfgOvd, CfgRefCellRc, RefreshMode, Src,
+    cfg_lazy_to_thread_local, static_ref, CfgArcSwapArc, CfgOvd, CfgRefCellRc, RefreshMode,
 };
 use once_cell::sync::{Lazy, OnceCell};
 
-type FooSflCfg = CfgArcSwapArc<FooSflCfgInfo>;
+pub type FooSflCfg = CfgArcSwapArc<FooSflCfgInfo>;
 
 pub type FooSflCfgOvd = CfgOvd<FooSflCfgInfo>;
 
@@ -18,7 +16,7 @@ pub struct FooSflDeps {
 }
 
 pub fn foo_sfl() -> String {
-    let cfg = &FOO_SFL_CFG.get_cfg();
+    let cfg = &FOO_SFL_CFG_TL.with(|c| c.get_cfg());
     let FooSflDeps { bar_bf } = &FOO_SFL_DEPS as &FooSflDeps;
     let a = cfg.a.clone();
     let b = cfg.b;
@@ -33,27 +31,6 @@ pub static FOO_SFL_DEPS: Lazy<&FooSflDeps> = Lazy::new(|| {
     })
 });
 
-pub fn override_lazy<T>(r: &Lazy<T>, ovd_fn: fn() -> T) {
-    unsafe {
-        let mr = r as *const Lazy<T> as *mut Lazy<T>;
-        *mr = Lazy::new(ovd_fn);
-    };
-}
-
-pub fn foo_sfl_deps_override() -> &'static FooSflDeps {
-    static_ref(FooSflDeps {
-        bar_bf: || "bar_bf from foo_sfl_deps_override".to_owned(),
-    })
-}
-
-pub fn foo_sfl_cfg_override() -> FooSflCfg {
-    let src = Src::Fn(|| FooSflCfgInfo {
-        a: "a from foo_sfl_cfg_override".to_owned(),
-        b: 4200,
-    });
-    FooSflCfg::new(src, RefreshMode::NoRefresh)
-}
-
 pub static FOO_SFL_CFG: Lazy<FooSflCfg> = Lazy::new(|| {
     FooSflCfg::new_boxed_with_cfg_adapter(
         get_app_configuration, // use `|| todo!()` before get_app_configuration exists
@@ -62,8 +39,9 @@ pub static FOO_SFL_CFG: Lazy<FooSflCfg> = Lazy::new(|| {
     )
 });
 
-pub static FOO_SFL_CFG_OVERRIDE: OnceCell<FooSflCfgOvd> = OnceCell::new();
-pub static FOO_SFL_DEPS_OVERRIDE: OnceCell<FooSflDeps> = OnceCell::new();
+thread_local! {
+    pub static FOO_SFL_CFG_TL: CfgRefCellRc<FooSflCfgInfo> = cfg_lazy_to_thread_local(&FOO_SFL_CFG);
+}
 
 // This doesn't necessarily exist initially and may be added later, after the
 // app configuration source has been created.
@@ -73,3 +51,7 @@ fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
         b: app_cfg.y,
     }
 }
+
+// TODO: remove statics below and fix impacted binaries
+pub static FOO_SFL_CFG_OVERRIDE: OnceCell<FooSflCfgOvd> = OnceCell::new();
+pub static FOO_SFL_DEPS_OVERRIDE: OnceCell<FooSflDeps> = OnceCell::new();

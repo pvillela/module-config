@@ -46,7 +46,7 @@ pub enum Src<T: 'static> {
 pub trait CfgImmut<T, TX: Clone> {
     fn get_cfg(&self) -> TX;
 
-    // fn get_cfg_src(&self) -> &'static (dyn Fn() -> T + Send + Sync);
+    fn get_src(&self) -> Src<T>;
 
     fn get_refresh_mode(&self) -> RefreshMode;
 }
@@ -331,6 +331,10 @@ where
 
     fn get_refresh_mode(&self) -> RefreshMode {
         self.refresh_mode.clone()
+    }
+
+    fn get_src(&self) -> Src<T> {
+        self.src.clone()
     }
 }
 

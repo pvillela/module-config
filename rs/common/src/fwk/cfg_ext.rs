@@ -1,5 +1,7 @@
-use super::{set_once_cell, Cache, Cfg, InnerMut, RefreshMode, Src};
-use once_cell::sync::OnceCell;
+use super::{
+    set_once_cell, Cache, Cfg, CfgArcSwapArc, CfgImmut, CfgRefCellRc, InnerMut, RefreshMode, Src,
+};
+use once_cell::sync::{Lazy, OnceCell};
 use std::sync::Arc;
 
 impl<T, TX, IM> Cfg<T, TX, IM>
@@ -162,4 +164,12 @@ where
     //         panic!("Configuration not initialized.")
     //     }
     // }
+}
+
+pub fn cfg_lazy_to_thread_local<T: Clone + core::fmt::Debug>(
+    cfg: &Lazy<CfgArcSwapArc<T>>,
+) -> CfgRefCellRc<T> {
+    let src = cfg.get_src();
+    let refresh_mode = cfg.get_refresh_mode();
+    CfgRefCellRc::new(src, refresh_mode)
 }

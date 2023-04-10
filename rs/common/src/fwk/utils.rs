@@ -3,7 +3,7 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::sync::Arc;
 
-use once_cell::sync::OnceCell;
+use once_cell::sync::{Lazy, OnceCell};
 
 /// Type of boxed and pinned wrapper of async functions.
 pub type ArcPinFn<S, T> =
@@ -152,3 +152,10 @@ pub fn static_closure_0_thread_safe<T>(
 pub type StaticFn<S, T> = &'static (dyn Fn(S) -> T + Send + Sync);
 
 pub type StaticFn0<T> = &'static (dyn Fn() -> T + Send + Sync);
+
+pub fn override_lazy<T>(r: &Lazy<T>, ovd_fn: fn() -> T) {
+    unsafe {
+        let mr = r as *const Lazy<T> as *mut Lazy<T>;
+        *mr = Lazy::new(ovd_fn);
+    };
+}
