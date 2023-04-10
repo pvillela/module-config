@@ -16,25 +16,27 @@ fn bar_ovd_bf() -> String {
 }
 
 fn main() {
-    test_support::override_lazy(&FOO_SFL_DEPS, || {
-        static_ref(FooSflDeps { bar_bf: bar_ovd_bf })
-    });
-
-    test_support::override_lazy(&FOO_SFL_CFG, || {
-        let src = Src::Fn(|| FooSflCfgInfo {
-            a: "a from foo_sfl_cfg_override".to_owned(),
-            b: 4200,
+    unsafe {
+        test_support::override_lazy(&FOO_SFL_DEPS, || {
+            static_ref(FooSflDeps { bar_bf: bar_ovd_bf })
         });
-        FooSflCfg::new(src, RefreshMode::NoRefresh)
-    });
 
-    test_support::override_lazy(&BAR_BF_CFG, || {
-        let src = Src::Fn(|| BarBfCfgInfo {
-            u: 1100,
-            v: "u from bar_bf_cfg_override".to_owned(),
+        test_support::override_lazy(&FOO_SFL_CFG, || {
+            let src = Src::Fn(|| FooSflCfgInfo {
+                a: "a from foo_sfl_cfg_override".to_owned(),
+                b: 4200,
+            });
+            FooSflCfg::new(src, RefreshMode::NoRefresh)
         });
-        BarBfCfg::new(src, RefreshMode::NoRefresh)
-    });
+
+        test_support::override_lazy(&BAR_BF_CFG, || {
+            let src = Src::Fn(|| BarBfCfgInfo {
+                u: 1100,
+                v: "u from bar_bf_cfg_override".to_owned(),
+            });
+            BarBfCfg::new(src, RefreshMode::NoRefresh)
+        });
+    }
 
     let handle = thread::spawn(move || foo_sfl());
     let res = handle.join().unwrap();

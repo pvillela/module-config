@@ -5,7 +5,7 @@ use common::fs_util::foo_core;
 use common::fwk::{
     cfg_lazy_to_thread_local, static_ref, CfgArcSwapArc, CfgOvd, CfgRefCellRc, RefreshMode,
 };
-use once_cell::sync::{Lazy, OnceCell};
+use once_cell::sync::Lazy;
 
 pub type FooSflCfg = CfgArcSwapArc<FooSflCfgInfo>;
 
@@ -45,13 +45,9 @@ thread_local! {
 
 // This doesn't necessarily exist initially and may be added later, after the
 // app configuration source has been created.
-fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
+pub fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
     FooSflCfgInfo {
         a: app_cfg.x.clone(),
         b: app_cfg.y,
     }
 }
-
-// TODO: remove statics below and fix impacted binaries
-pub static FOO_SFL_CFG_OVERRIDE: OnceCell<FooSflCfgOvd> = OnceCell::new();
-pub static FOO_SFL_DEPS_OVERRIDE: OnceCell<FooSflDeps> = OnceCell::new();

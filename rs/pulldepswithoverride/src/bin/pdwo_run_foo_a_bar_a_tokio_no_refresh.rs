@@ -1,8 +1,11 @@
+use common::config::get_app_configuration;
 use common::fs_data::{FooAIn, FooAOut};
-use common::fwk::{arc_pin_async_fn, ArcPinFn, CfgOvd, RefreshMode};
+use common::fwk::{arc_pin_async_fn, ArcPinFn, RefreshMode, Src};
+use common::test_support;
 use common::tokio_run::{run, RunIn};
 use pulldepswithoverride::fs::{
-    foo_a_sfl, BAR_A_BF_CFG_OVERRIDE, FOO_A_SFL_CFG_OVERRIDE, FOO_A_SFL_DEPS_OVERRIDE,
+    bar_a_bf_cfg_adapter, foo_a_sfl, foo_a_sfl_cfg_adapter, BarABfCfg, FooASflCfg, BAR_A_BF_CFG,
+    FOO_A_SFL_CFG,
 };
 use tokio;
 
@@ -12,16 +15,19 @@ fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
 
 #[tokio::main]
 async fn main() {
-    println!("===== pdwo_run_foo_a_bar_a_tokio_with_cache =====");
+    println!("===== pdwo_run_foo_a_bar_a_tokio_no_refresh =====");
 
-    let _ = CfgOvd::set_once_cell(&FOO_A_SFL_CFG_OVERRIDE, None, Some(RefreshMode::NoRefresh));
+    unsafe {
+        test_support::override_lazy(&FOO_A_SFL_CFG, || {
+            let src = Src::Fn(|| foo_a_sfl_cfg_adapter(&get_app_configuration()));
+            FooASflCfg::new(src, RefreshMode::NoRefresh)
+        });
 
-    // Below can be deleted; included only to prove it compiles.
-    let _ = FOO_A_SFL_DEPS_OVERRIDE.set(pulldepswithoverride::fs::FooASflDeps {
-        bar_a_bf: arc_pin_async_fn(pulldepswithoverride::fs::bar_a_bf),
-    });
-
-    let _ = CfgOvd::set_once_cell(&BAR_A_BF_CFG_OVERRIDE, None, Some(RefreshMode::NoRefresh));
+        test_support::override_lazy(&BAR_A_BF_CFG, || {
+            let src = Src::Fn(|| bar_a_bf_cfg_adapter(&get_app_configuration()));
+            BarABfCfg::new(src, RefreshMode::NoRefresh)
+        });
+    }
 
     println!("\n*** run -- total 0 ms sleep time, 10_000 concurrency, 100 repeats");
     run(RunIn {
