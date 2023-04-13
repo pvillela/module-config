@@ -1,8 +1,8 @@
 use super::{bar_bf_init_cached, bar_bf_init_refreshable};
-use crate::fs::{bar_bf, FooSflDeps, FOO_SFL_CFG_DEF, FOO_SFL_DEPS};
+use crate::fs::{bar_bf, FooSflCfg, FooSflDeps, FOO_SFL_CFG, FOO_SFL_DEPS};
 use common::config::AppCfgInfo;
 use common::fs_data::FooSflCfgInfo;
-use common::fwk::{set_once_cell, CfgDef, RefreshMode};
+use common::fwk::{set_once_cell, RefreshMode};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -14,8 +14,8 @@ fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
 }
 
 fn foo_sfl_adapt_cfg_src(origin: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) {
-    CfgDef::set_once_cell_with_cfg_adapter(
-        &FOO_SFL_CFG_DEF,
+    FooSflCfg::set_once_cell_with_cfg_adapter(
+        &FOO_SFL_CFG,
         origin,
         foo_sfl_cfg_adapter,
         refresh_mode,

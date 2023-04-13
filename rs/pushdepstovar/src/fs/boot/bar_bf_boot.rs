@@ -1,7 +1,7 @@
-use crate::fs::BAR_BF_CFG_DEF;
+use crate::fs::{BarBfCfg, BAR_BF_CFG};
 use common::config::AppCfgInfo;
 use common::fs_data::BarBfCfgInfo;
-use common::fwk::{CfgDef, RefreshMode};
+use common::fwk::RefreshMode;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -13,12 +13,7 @@ fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
 }
 
 fn bar_bf_adapt_cfg_src(origin: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) {
-    CfgDef::set_once_cell_with_cfg_adapter(
-        &BAR_BF_CFG_DEF,
-        origin,
-        bar_bf_cfg_adapter,
-        refresh_mode,
-    );
+    BarBfCfg::set_once_cell_with_cfg_adapter(&BAR_BF_CFG, origin, bar_bf_cfg_adapter, refresh_mode);
 }
 
 pub fn bar_bf_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>) {

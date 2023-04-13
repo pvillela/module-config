@@ -1,11 +1,11 @@
 use common::fs_data::BarABfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{CfgDef, CfgRefCellRc};
+use common::fwk::{cfg_once_cell_to_thread_local, CfgArcSwapArc, CfgRefCellRc};
 use once_cell::sync::OnceCell;
 use std::time::Duration;
 use tokio::time::sleep;
 
-type BarABfCfg = CfgRefCellRc<BarABfCfgInfo>;
+pub type BarABfCfg = CfgArcSwapArc<BarABfCfgInfo>;
 
 pub async fn bar_a_bf(sleep_millis: u64) -> String {
     sleep(Duration::from_millis(sleep_millis)).await;
@@ -16,10 +16,7 @@ pub async fn bar_a_bf(sleep_millis: u64) -> String {
 }
 
 thread_local! {
-pub static BAR_A_BF_CFG_TL: BarABfCfg =
-    BarABfCfg::new_from_once_cell_def(
-        &BAR_A_BF_CFG_DEF,
-    )
+    pub static BAR_A_BF_CFG_TL: CfgRefCellRc<BarABfCfgInfo> = cfg_once_cell_to_thread_local(&BAR_A_BF_CFG);
 }
 
-pub static BAR_A_BF_CFG_DEF: OnceCell<CfgDef<BarABfCfgInfo>> = OnceCell::new();
+pub static BAR_A_BF_CFG: OnceCell<BarABfCfg> = OnceCell::new();
