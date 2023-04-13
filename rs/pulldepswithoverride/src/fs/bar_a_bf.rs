@@ -1,38 +1,36 @@
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::BarABfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{CfgOvd, CfgRefCellRc, RefreshMode};
-use once_cell::sync::OnceCell;
+use common::fwk::{cfg_lazy_to_thread_local, CfgArcSwapArc, CfgRefCellRc, RefreshMode};
+use once_cell::sync::Lazy;
 use std::time::Duration;
 use tokio::time::sleep;
 
-type BarABfCfg = CfgRefCellRc<BarABfCfgInfo>;
-
-pub type BarABfCfgOvd = CfgOvd<BarABfCfgInfo>;
+pub type BarABfCfg = CfgArcSwapArc<BarABfCfgInfo>;
 
 pub async fn bar_a_bf(sleep_millis: u64) -> String {
     sleep(Duration::from_millis(sleep_millis)).await;
-    let cfg = BAR_A_BF_CFG.with(|c| c.get_cfg());
+    let cfg = BAR_A_BF_CFG_TL.with(|c| c.get_cfg());
     let u = cfg.u;
     let v = cfg.v.clone();
     bar_core(u, v)
 }
 
-thread_local! {
-pub static BAR_A_BF_CFG: BarABfCfg =
-    BarABfCfg::new_boxed_with_cfg_adapter_and_override(
-        BAR_A_BF_CFG_OVERRIDE.get(),
+pub static BAR_A_BF_CFG: Lazy<BarABfCfg> = Lazy::new(|| {
+    BarABfCfg::new_boxed_with_cfg_adapter(
         get_app_configuration, // use `|| todo!()` before get_app_configuration exists
-        bar_a_bf_cfg_adapter, // use `|_| todo!()` before bar_a_bf_cfg_adapter exists
+        bar_a_bf_cfg_adapter,  // use `|_| todo!()` before bar_bf_cfg_adapter exists
         RefreshMode::NoRefresh,
     )
-}
+});
 
-pub static BAR_A_BF_CFG_OVERRIDE: OnceCell<BarABfCfgOvd> = OnceCell::new();
+thread_local! {
+    pub static BAR_A_BF_CFG_TL: CfgRefCellRc<BarABfCfgInfo> = cfg_lazy_to_thread_local(&BAR_A_BF_CFG);
+}
 
 // This doesn't necessarily exist initially and may be added later, after the
 // app configuration source has been created.
-fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarABfCfgInfo {
+pub fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarABfCfgInfo {
     BarABfCfgInfo {
         u: app_cfg.y,
         v: app_cfg.x.clone(),

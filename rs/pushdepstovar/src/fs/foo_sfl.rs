@@ -1,11 +1,11 @@
 use common::{
     fs_data::FooSflCfgInfo,
     fs_util::foo_core,
-    fwk::{get_from_once_cell, CfgDef, CfgRefCellRc},
+    fwk::{cfg_once_cell_to_thread_local, get_from_once_cell, CfgArcSwapArc, CfgRefCellRc},
 };
 use once_cell::sync::OnceCell;
 
-pub type FooSflCfg = CfgRefCellRc<FooSflCfgInfo>;
+pub type FooSflCfg = CfgArcSwapArc<FooSflCfgInfo>;
 
 pub struct FooSflDeps {
     pub bar_bf: fn() -> String,
@@ -21,11 +21,8 @@ pub fn foo_sfl() -> String {
 }
 
 thread_local! {
-static FOO_SFL_CFG_TL: FooSflCfg =
-    FooSflCfg::new_from_once_cell_def(
-        &FOO_SFL_CFG_DEF,
-    )
+    pub static FOO_SFL_CFG_TL: CfgRefCellRc<FooSflCfgInfo> = cfg_once_cell_to_thread_local(&FOO_SFL_CFG);
 }
 
-pub static FOO_SFL_CFG_DEF: OnceCell<CfgDef<FooSflCfgInfo>> = OnceCell::new();
 pub static FOO_SFL_DEPS: OnceCell<FooSflDeps> = OnceCell::new();
+pub static FOO_SFL_CFG: OnceCell<FooSflCfg> = OnceCell::new();
