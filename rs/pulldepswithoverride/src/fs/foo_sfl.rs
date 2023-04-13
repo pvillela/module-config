@@ -2,14 +2,10 @@ use super::bar_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::FooSflCfgInfo;
 use common::fs_util::foo_core;
-use common::fwk::{
-    cfg_lazy_to_thread_local, static_ref, CfgArcSwapArc, CfgOvd, CfgRefCellRc, RefreshMode,
-};
+use common::fwk::{cfg_lazy_to_thread_local, static_ref, CfgArcSwapArc, CfgRefCellRc, RefreshMode};
 use once_cell::sync::Lazy;
 
 pub type FooSflCfg = CfgArcSwapArc<FooSflCfgInfo>;
-
-pub type FooSflCfgOvd = CfgOvd<FooSflCfgInfo>;
 
 pub struct FooSflDeps {
     pub bar_bf: fn() -> String,

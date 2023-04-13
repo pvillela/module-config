@@ -3,8 +3,8 @@ use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
 use common::fwk::{
-    arc_pin_async_fn, cfg_lazy_to_thread_local, static_ref, ArcPinFn, CfgArcSwapArc, CfgOvd,
-    CfgRefCellRc, RefreshMode,
+    arc_pin_async_fn, cfg_lazy_to_thread_local, static_ref, ArcPinFn, CfgArcSwapArc, CfgRefCellRc,
+    RefreshMode,
 };
 use once_cell::sync::Lazy;
 use std::time::Duration;
@@ -14,8 +14,6 @@ use tokio::time::sleep;
 use std::sync::Arc;
 
 pub type FooASflCfg = CfgArcSwapArc<FooASflCfgInfo>;
-
-pub type FooASflCfgOvd = CfgOvd<FooASflCfgInfo>;
 
 pub struct FooASflDeps {
     pub bar_a_bf: ArcPinFn<u64, String>,
