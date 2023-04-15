@@ -4,7 +4,7 @@ use pushdepstovar::{fs::foo_a_sfl, startup::init_a_refreshable};
 
 #[tokio::main]
 async fn main() {
-    init_a_refreshable();
+    init_a_refreshable(0);
 
     let foo_a_sfl_hdlr = handler_of(foo_a_sfl);
 

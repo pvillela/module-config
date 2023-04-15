@@ -13,30 +13,15 @@ fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
 async fn main() {
     println!("===== ptf_run_foo_a_bar_a_tokio_no_cache =====");
 
-    println!("\n*** run -- total 0 ms sleep time, 10_000 concurrency, 100 repeats");
     run(RunIn {
         make_foo_a_sfl,
-        unit_time_millis: 0,
-        app_cfg_first_refresh_units: 1,
-        app_cfg_refresh_delta_units: 1,
-        app_cfg_refresh_count: 0,
-        batch_initial_sleep_units: 0,
-        batch_gap_sleep_units: 4,
-        concurrency: 10_000,
-        repeats: 100,
-    })
-    .await;
-
-    println!("\n*** run -- total 80 ms sleep time, 10_000 concurrency, 100 repeats");
-    run(RunIn {
-        make_foo_a_sfl,
-        unit_time_millis: 10,
-        app_cfg_first_refresh_units: 1,
-        app_cfg_refresh_delta_units: 1,
+        unit_time_millis: 1,
+        app_cfg_first_refresh_units: 10,
+        app_cfg_refresh_delta_units: 10,
         app_cfg_refresh_count: 10,
-        batch_initial_sleep_units: 0,
-        batch_gap_sleep_units: 4,
-        concurrency: 10_000,
+        per_call_sleep_units: 1,
+        increment_to_print: 33,
+        concurrency: 1_000,
         repeats: 100,
     })
     .await;

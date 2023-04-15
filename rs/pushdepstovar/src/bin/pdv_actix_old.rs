@@ -4,7 +4,7 @@ use pushdepstovar::{fs::foo_a_sfl, startup::init_a_refreshable};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    init_a_refreshable();
+    init_a_refreshable(0);
 
     HttpServer::new(move || {
         let arc_f = handler_arc_of(foo_a_sfl);

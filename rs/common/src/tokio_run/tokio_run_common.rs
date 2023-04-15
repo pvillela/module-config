@@ -12,8 +12,8 @@ pub struct RunIn {
     pub app_cfg_first_refresh_units: u64,
     pub app_cfg_refresh_delta_units: u64,
     pub app_cfg_refresh_count: u64,
-    pub batch_initial_sleep_units: u64,
-    pub batch_gap_sleep_units: u64,
+    pub per_call_sleep_units: u64,
+    pub increment_to_print: usize,
     pub concurrency: usize,
     pub repeats: usize,
 }
@@ -25,11 +25,18 @@ pub async fn run(input: RunIn) {
         app_cfg_first_refresh_units,
         app_cfg_refresh_delta_units,
         app_cfg_refresh_count,
-        batch_initial_sleep_units,
-        batch_gap_sleep_units,
+        per_call_sleep_units,
+        increment_to_print,
         concurrency,
         repeats,
     } = input;
+
+    println!(
+        "\n*** run -- {} ms sleep per call, {} concurrency, {} repeats",
+        per_call_sleep_units * unit_time_millis,
+        concurrency,
+        repeats
+    );
 
     let start_time = Instant::now();
     println!("Started at {:?}", start_time);
@@ -57,40 +64,27 @@ pub async fn run(input: RunIn) {
     let run_concurrent = |i: usize| {
         let foo_a_sfl = make_foo_a_sfl();
         tokio::spawn(async move {
-            let out = foo_a_sfl(FooAIn { sleep_millis: 0 }).await;
-            let res = out.res.len();
-            if i == 0 {
-                println!(
-                    "foo_a executed at {:?} elapsed, res={}, out={:?}",
-                    start_time.elapsed(),
-                    res,
-                    out
-                );
-            }
-            for _ in 0..repeats - 1 {
-                foo_a_sfl(FooAIn { sleep_millis: 0 }).await;
+            let mut res: usize = 0;
+            for j in 0..repeats - 1 {
+                let out = foo_a_sfl(FooAIn {
+                    sleep_millis: per_call_sleep_units * unit_time_millis,
+                })
+                .await;
+                res = out.res.len();
+                if i == 0 && j % increment_to_print == 0 {
+                    println!(
+                        "foo_a executed at {:?} elapsed, res={}, out={:?}",
+                        start_time.elapsed(),
+                        res,
+                        out
+                    );
+                }
             }
             res
         })
     };
 
-    sleep(Duration::from_millis(
-        batch_initial_sleep_units * unit_time_millis,
-    ))
-    .await;
     let handles1 = (0..concurrency).map(run_concurrent).collect::<Vec<_>>();
-
-    sleep(Duration::from_millis(
-        (batch_initial_sleep_units + batch_gap_sleep_units) * unit_time_millis,
-    ))
-    .await;
-    let handles2 = (0..concurrency).map(run_concurrent).collect::<Vec<_>>();
-
-    sleep(Duration::from_millis(
-        (batch_initial_sleep_units + 2 * batch_gap_sleep_units) * unit_time_millis,
-    ))
-    .await;
-    let handles3 = (0..concurrency).map(run_concurrent).collect::<Vec<_>>();
 
     let _ = handle_r
         .await
@@ -103,32 +97,12 @@ pub async fn run(input: RunIn) {
         .map(|x| x.as_ref().ok().expect("Failure in first batch of tasks."))
         .sum();
 
-    let res2: usize = join_all(handles2)
-        .await
-        .iter()
-        .map(|x| x.as_ref().ok().expect("Failure in second batch of tasks."))
-        .sum();
-
-    let res3: usize = join_all(handles3)
-        .await
-        .iter()
-        .map(|x| x.as_ref().ok().expect("Failure in third batch of tasks."))
-        .sum();
-
-    let averages = (
-        (res1 as f64) / (concurrency as f64),
-        (res2 as f64) / (concurrency as f64),
-        (res3 as f64) / (concurrency as f64),
-    );
+    let average = (res1 as f64) / (concurrency as f64);
 
     println!(
-        "Ended at {:?}, with execution counts counts={:?}, averages={:?}",
+        "Ended at {:?}, with count={:?}, average={:?}",
         start_time.elapsed(),
-        (
-            concurrency * repeats,
-            concurrency * repeats,
-            concurrency * repeats
-        ),
-        averages
+        concurrency * repeats,
+        average
     );
 }

@@ -4,7 +4,7 @@ use pushdepstovar::startup::init_refreshable;
 use std::thread;
 
 fn main() {
-    init_refreshable();
+    init_refreshable(0);
 
     let handle = thread::spawn(move || foo_sfl());
     let res = handle.join().unwrap();

@@ -16,10 +16,10 @@ fn bar_bf_adapt_cfg_src(origin: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMo
     BarBfCfg::set_once_cell_with_cfg_adapter(&BAR_BF_CFG, origin, bar_bf_cfg_adapter, refresh_mode);
 }
 
-pub fn bar_bf_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
+pub fn bar_bf_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>, refresh_millis: u64) {
     bar_bf_adapt_cfg_src(
         app_cfg_src,
-        RefreshMode::Refreshable(Duration::from_millis(0)),
+        RefreshMode::Refreshable(Duration::from_millis(refresh_millis)),
     );
 }
 

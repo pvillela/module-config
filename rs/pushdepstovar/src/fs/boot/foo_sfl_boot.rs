@@ -22,13 +22,13 @@ fn foo_sfl_adapt_cfg_src(origin: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshM
     );
 }
 
-pub fn foo_sfl_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
+pub fn foo_sfl_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>, refresh_millis: u64) {
     // A stereotype should initialize its dependencies.
     foo_sfl_adapt_cfg_src(
         app_cfg_src,
-        RefreshMode::Refreshable(Duration::from_millis(0)),
+        RefreshMode::Refreshable(Duration::from_millis(refresh_millis)),
     );
-    bar_bf_init_refreshable(app_cfg_src);
+    bar_bf_init_refreshable(app_cfg_src, refresh_millis);
     let _ = set_once_cell(&FOO_SFL_DEPS, FooSflDeps { bar_bf });
 }
 

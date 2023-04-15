@@ -242,6 +242,7 @@ where
     }
 
     pub fn new(src: Src<T>, refresh_mode: RefreshMode) -> Self {
+        println!("Cfg::new with refresh_mode={:?}", refresh_mode);
         let cache = Cache::new_with_src(&src);
         Self::new_priv(src, refresh_mode, cache)
     }
@@ -294,6 +295,10 @@ where
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
     ) -> Self {
+        // println!(
+        //     "Cfg::new_boxed_with_const_or_cfg_adapter with refresh_mode={:?}",
+        //     refresh_mode
+        // );
         match k {
             Some(k) => {
                 let src = Src::new_boxed(move || k.clone());
