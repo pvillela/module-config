@@ -1,6 +1,6 @@
-use crate::fwk::get_initialized_option;
 use common::fs_data::BarIBfCfgInfo;
 use common::fs_util::bar_core;
+use common::fwk::get_initialized_option;
 
 pub fn bar_i_bf() -> String {
     let cfg = get_my_cfg();

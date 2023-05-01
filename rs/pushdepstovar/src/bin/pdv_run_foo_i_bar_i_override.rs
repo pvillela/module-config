@@ -1,8 +1,8 @@
 use common::config::refresh_app_configuration;
 use common::fs_data::{BarIBfCfgInfo, FooISflCfgInfo};
 use common::fs_util::bar_core;
+use common::fwk::init_option;
 use pushdepstovar::fs::{foo_i_sfl, FooISflDeps, FOO_I_SFL_CFG, FOO_I_SFL_DEPS};
-use pushdepstovar::fwk::init_option;
 use std::thread;
 
 fn bar_i_ovd_bf() -> String {

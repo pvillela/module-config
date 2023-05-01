@@ -1,7 +1,7 @@
 use crate::fs::BAR_I_BF_CFG;
-use crate::fwk::init_option;
 use common::config::AppCfgInfo;
 use common::fs_data::BarIBfCfgInfo;
+use common::fwk::init_option;
 use std::sync::Arc;
 
 fn bar_i_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarIBfCfgInfo {

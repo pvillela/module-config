@@ -1,6 +1,4 @@
-use common::{fs_data::FooISflCfgInfo, fs_util::foo_core};
-
-use crate::fwk::get_initialized_option;
+use common::{fs_data::FooISflCfgInfo, fs_util::foo_core, fwk::get_initialized_option};
 
 pub struct FooISflDeps {
     pub bar_i_bf: fn() -> String,
