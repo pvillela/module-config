@@ -6,10 +6,10 @@ pub struct FooISflDeps {
 
 pub fn foo_i_sfl() -> String {
     let cfg = get_my_cfg();
-    let FooISflDeps { bar_i_bf: bar_bf } = get_my_deps();
+    let FooISflDeps { bar_i_bf } = get_my_deps();
     let a = cfg.a.clone();
     let b = cfg.b;
-    let bar_res = bar_bf();
+    let bar_res = bar_i_bf();
     foo_core(a, b, bar_res)
 }
 
