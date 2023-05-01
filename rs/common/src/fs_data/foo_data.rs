@@ -2,6 +2,7 @@ pub use foo_a_data::*;
 pub use foo_an_data::*;
 pub use foo_aw_data::*;
 pub use foo_data::*;
+pub use foo_i_data::*;
 
 mod foo_data {
     #[derive(Debug, Clone)]
@@ -9,6 +10,12 @@ mod foo_data {
         pub a: String,
         pub b: i32,
     }
+}
+
+mod foo_i_data {
+    use super::FooSflCfgInfo;
+
+    pub type FooISflCfgInfo = FooSflCfgInfo;
 }
 
 mod foo_a_data {
