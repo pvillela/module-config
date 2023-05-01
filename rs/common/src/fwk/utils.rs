@@ -155,13 +155,17 @@ pub type StaticFn0<T> = &'static (dyn Fn() -> T + Send + Sync);
 
 /// Gets the value from an Option<T> and returns a reference to T.
 /// Panics if the source value is None.
-pub fn get_initialized_option<T>(info: &Option<T>) -> &T {
-    info.as_ref().expect("Option not initialized")
+/// This function is used to retrieve values from static mutable variables.
+pub fn get_initialized_option<T: Sync>(info_src: &Option<T>) -> &T {
+    info_src.as_ref().expect("Option not initialized")
 }
 
 /// Initializes value if it is None, no-op otherwise.
-pub fn init_option<T>(info: T, cfg: &mut Option<T>) {
-    if cfg.is_none() {
-        *cfg = Some(info);
+/// This function is used to set the values of static mutable variables.
+/// It should only be called by the main thread during application initialization, before
+/// any access to the variable.
+pub fn init_option<T: Sync>(target: &mut Option<T>, info: T) {
+    if target.is_none() {
+        *target = Some(info);
     }
 }

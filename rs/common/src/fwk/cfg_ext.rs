@@ -1,6 +1,6 @@
 use super::{
-    get_from_once_cell, Cache, Cfg, CfgArcSwapArc, CfgImmut, CfgRefCellRc, InnerMut, RefreshMode,
-    Src,
+    get_from_once_cell, get_initialized_option, Cache, Cfg, CfgArcSwapArc, CfgImmut, CfgRefCellRc,
+    InnerMut, RefreshMode, Src,
 };
 use once_cell::sync::{Lazy, OnceCell};
 use std::sync::Arc;
@@ -53,6 +53,18 @@ pub fn cfg_once_cell_to_thread_local<T: Clone + core::fmt::Debug>(
     cfg: &OnceCell<CfgArcSwapArc<T>>,
 ) -> CfgRefCellRc<T> {
     let cfg = get_from_once_cell(cfg);
+    let src = cfg.get_src();
+    let refresh_mode = cfg.get_refresh_mode();
+    CfgRefCellRc::new(src, refresh_mode)
+}
+
+pub fn cfg_global_to_thread_local<T, TX, IM>(cfg: &Option<Cfg<T, TX, IM>>) -> CfgRefCellRc<T>
+where
+    T: Clone + Send + Sync + core::fmt::Debug,
+    TX: From<T> + Clone + Sync + core::fmt::Debug,
+    IM: InnerMut<Cache<T, TX>> + Sync,
+{
+    let cfg = get_initialized_option(cfg);
     let src = cfg.get_src();
     let refresh_mode = cfg.get_refresh_mode();
     CfgRefCellRc::new(src, refresh_mode)

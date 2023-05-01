@@ -15,7 +15,7 @@ fn foo_i_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooISflCfgInfo {
 pub fn foo_i_sfl_init(origin: fn() -> Arc<AppCfgInfo>) {
     bar_i_bf_init(origin);
     unsafe {
-        init_option(foo_i_sfl_cfg_adapter(&origin()), &mut FOO_I_SFL_CFG);
-        init_option(FooISflDeps { bar_i_bf }, &mut FOO_I_SFL_DEPS);
+        init_option(&mut FOO_I_SFL_CFG, foo_i_sfl_cfg_adapter(&origin()));
+        init_option(&mut FOO_I_SFL_DEPS, FooISflDeps { bar_i_bf });
     }
 }

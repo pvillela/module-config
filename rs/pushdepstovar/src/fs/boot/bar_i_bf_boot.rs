@@ -13,6 +13,6 @@ fn bar_i_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarIBfCfgInfo {
 
 pub fn bar_i_bf_init(origin: fn() -> Arc<AppCfgInfo>) {
     unsafe {
-        init_option(bar_i_bf_cfg_adapter(&origin()), &mut BAR_I_BF_CFG);
+        init_option(&mut BAR_I_BF_CFG, bar_i_bf_cfg_adapter(&origin()));
     }
 }

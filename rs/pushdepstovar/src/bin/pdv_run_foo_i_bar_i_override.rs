@@ -18,17 +18,17 @@ fn bar_i_ovd_bf() -> String {
 fn main() {
     unsafe {
         init_option(
+            &mut FOO_I_SFL_CFG,
             FooISflCfgInfo {
                 a: "foo_i_override_cfg_info".to_owned(),
                 b: 11,
             },
-            &mut FOO_I_SFL_CFG,
         );
         init_option(
+            &mut FOO_I_SFL_DEPS,
             FooISflDeps {
                 bar_i_bf: bar_i_ovd_bf,
             },
-            &mut FOO_I_SFL_DEPS,
         );
     }
 
