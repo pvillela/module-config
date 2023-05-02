@@ -2,10 +2,9 @@ use common::{
     fs_data::{FooAIn, FooAOut, FooASflCfgInfo},
     fs_util::foo_core,
     fwk::{
-        cfg_once_cell_to_thread_local, get_from_once_cell, ArcPinFn, CfgArcSwapArc, CfgRefCellRc,
+        cfg_global_to_thread_local, get_initialized_option, ArcPinFn, CfgArcSwapArc, CfgRefCellRc,
     },
 };
-use once_cell::sync::OnceCell;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -17,8 +16,12 @@ pub struct FooASflDeps {
 
 pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     let FooAIn { sleep_millis } = input;
-    let FooASflDeps { bar_a_bf } = get_from_once_cell(&FOO_A_SFL_DEPS);
+    let FooASflDeps { bar_a_bf } = get_my_deps();
     sleep(Duration::from_millis(sleep_millis)).await;
+
+    // This is to demonstrate calling get_my_cfg() as an alternative to using the thread-local..
+    let _ = get_my_cfg().get_cfg();
+
     let (a, b) = {
         let cfg = FOO_A_SFL_CFG_TL.with(|c| c.get_cfg());
         let a = cfg.a.clone();
@@ -31,8 +34,17 @@ pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
 }
 
 thread_local! {
-    pub static FOO_A_SFL_CFG_TL: CfgRefCellRc<FooASflCfgInfo> = cfg_once_cell_to_thread_local(&FOO_A_SFL_CFG);
+    pub static FOO_A_SFL_CFG_TL: CfgRefCellRc<FooASflCfgInfo> = unsafe {cfg_global_to_thread_local(&FOO_A_SFL_CFG)};
 }
 
-pub static FOO_A_SFL_CFG: OnceCell<FooASflCfg> = OnceCell::new();
-pub static FOO_A_SFL_DEPS: OnceCell<FooASflDeps> = OnceCell::new();
+pub static mut FOO_A_SFL_DEPS: Option<FooASflDeps> = None;
+
+pub static mut FOO_A_SFL_CFG: Option<FooASflCfg> = None;
+
+fn get_my_cfg() -> &'static FooASflCfg {
+    unsafe { get_initialized_option(&FOO_A_SFL_CFG) }
+}
+
+fn get_my_deps() -> &'static FooASflDeps {
+    unsafe { get_initialized_option(&FOO_A_SFL_DEPS) }
+}

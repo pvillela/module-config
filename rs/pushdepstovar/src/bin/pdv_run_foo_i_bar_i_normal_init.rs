@@ -4,6 +4,7 @@ use pushdepstovar::startup::init_i;
 use std::thread;
 
 fn main() {
+    println!("Running with immutable configuration.");
     init_i();
 
     let handle = thread::spawn(move || foo_i_sfl());
@@ -11,7 +12,7 @@ fn main() {
     println!("{}", res);
 
     refresh_app_configuration();
-    println!("App configuration refreshed -- output should be different.");
+    println!("App configuration refreshed -- output should be identical.");
 
     let handle = thread::spawn(move || foo_i_sfl());
     let res = handle.join().unwrap();

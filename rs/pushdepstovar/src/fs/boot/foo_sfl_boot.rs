@@ -1,8 +1,8 @@
-use super::{bar_bf_init_cached, bar_bf_init_refreshable};
+use super::bar_bf_init;
 use crate::fs::{bar_bf, FooSflCfg, FooSflDeps, FOO_SFL_CFG, FOO_SFL_DEPS};
 use common::config::AppCfgInfo;
 use common::fs_data::FooSflCfgInfo;
-use common::fwk::{set_once_cell, RefreshMode};
+use common::fwk::{init_option, RefreshMode};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -13,28 +13,25 @@ fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
     }
 }
 
-fn foo_sfl_adapt_cfg_src(origin: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) {
-    FooSflCfg::set_once_cell_with_cfg_adapter(
-        &FOO_SFL_CFG,
-        origin,
-        foo_sfl_cfg_adapter,
-        refresh_mode,
-    );
+pub fn foo_sfl_init(origin: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) {
+    // A stereotype should initialize its dependencies.
+    bar_bf_init(origin, refresh_mode.clone());
+    unsafe {
+        init_option(
+            &mut FOO_SFL_CFG,
+            FooSflCfg::new_boxed_with_cfg_adapter(origin, foo_sfl_cfg_adapter, refresh_mode),
+        );
+        init_option(&mut FOO_SFL_DEPS, FooSflDeps { bar_bf });
+    }
 }
 
 pub fn foo_sfl_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>, refresh_millis: u64) {
-    // A stereotype should initialize its dependencies.
-    foo_sfl_adapt_cfg_src(
+    foo_sfl_init(
         app_cfg_src,
         RefreshMode::Refreshable(Duration::from_millis(refresh_millis)),
     );
-    bar_bf_init_refreshable(app_cfg_src, refresh_millis);
-    let _ = set_once_cell(&FOO_SFL_DEPS, FooSflDeps { bar_bf });
 }
 
 pub fn foo_sfl_init_no_refresh(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
-    foo_sfl_adapt_cfg_src(app_cfg_src, RefreshMode::NoRefresh);
-    // A stereotype should initialize its dependencies.
-    bar_bf_init_cached(app_cfg_src);
-    let _ = set_once_cell(&FOO_SFL_DEPS, FooSflDeps { bar_bf });
+    foo_sfl_init(app_cfg_src, RefreshMode::NoRefresh);
 }
