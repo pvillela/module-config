@@ -6,14 +6,16 @@ use std::thread;
 fn main() {
     init_refreshable(0);
 
-    let handle = thread::spawn(move || foo_sfl());
-    let res = handle.join().unwrap();
-    println!("{}", res);
+    let handle = thread::spawn(move || {
+        let res = foo_sfl();
+        println!("{}", res);
 
-    refresh_app_configuration();
-    println!("App configuration refreshed -- output should be different.");
+        thread::sleep(std::time::Duration::from_millis(30));
+        refresh_app_configuration();
+        println!("App configuration refreshed -- output should be different.");
 
-    let handle = thread::spawn(move || foo_sfl());
-    let res = handle.join().unwrap();
-    println!("{}", res);
+        let res = foo_sfl();
+        println!("{}", res);
+    });
+    let _ = handle.join().unwrap();
 }
