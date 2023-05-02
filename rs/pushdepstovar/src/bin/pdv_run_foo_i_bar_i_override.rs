@@ -16,6 +16,8 @@ fn bar_i_ovd_bf() -> String {
 }
 
 fn main() {
+    println!("Running with immutable overridden configuration.");
+
     unsafe {
         init_option(
             &mut FOO_I_SFL_CFG,

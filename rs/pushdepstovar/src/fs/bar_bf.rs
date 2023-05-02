@@ -1,13 +1,16 @@
 use common::fs_data::BarBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{cfg_global_to_thread_local, CfgArcSwapArc, CfgRefCellRc};
+use common::fwk::{
+    cfg_global_to_thread_local, get_initialized_option, CfgArcSwapArc, CfgRefCellRc,
+};
 
 pub type BarBfCfg = CfgArcSwapArc<BarBfCfgInfo>;
 
 pub fn bar_bf() -> String {
+    // This is to demonstrate calling get_my_cfg() as an alternative to using the thread-local..
+    let _ = get_my_cfg().get_cfg();
+
     let cfg = BAR_BF_CFG_TL.with(|c| c.get_cfg());
-    // Below is an alternative to the above, using the global config directly.
-    // let cfg = unsafe { get_initialized_option(&BAR_BF_CFG) }.get_cfg();
     let u = cfg.u;
     let v = cfg.v.clone();
     bar_core(u, v)
@@ -18,3 +21,7 @@ thread_local! {
 }
 
 pub static mut BAR_BF_CFG: Option<BarBfCfg> = None;
+
+fn get_my_cfg() -> &'static BarBfCfg {
+    unsafe { get_initialized_option(&BAR_BF_CFG) }
+}

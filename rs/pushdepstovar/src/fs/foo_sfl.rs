@@ -11,7 +11,7 @@ pub struct FooSflDeps {
 }
 
 pub fn foo_sfl() -> String {
-    // This is to demonstrate calling get_my_cfg() as an alternative to the following line.
+    // This is to demonstrate calling get_my_cfg() as an alternative to using the thread-local..
     let _ = get_my_cfg().get_cfg();
 
     let cfg = FOO_SFL_CFG_TL.with(|c| c.get_cfg());

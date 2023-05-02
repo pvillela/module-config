@@ -28,6 +28,6 @@ pub fn bar_bf_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>, refresh_mil
     );
 }
 
-pub fn bar_bf_init_cached(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
+pub fn bar_bf_init_no_refresh(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
     bar_bf_init(app_cfg_src, RefreshMode::NoRefresh);
 }
