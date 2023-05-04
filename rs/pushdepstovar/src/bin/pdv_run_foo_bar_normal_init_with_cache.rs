@@ -1,10 +1,15 @@
-use common::config::refresh_app_configuration;
-use pushdepstovar::fs::foo_sfl;
-use pushdepstovar::startup::init_refreshable;
-use std::thread;
+use common::{
+    config::{get_app_configuration, refresh_app_configuration},
+    fwk::RefreshMode,
+};
+use pushdepstovar::fs::boot::get_foo_sfl;
+use std::{thread, time::Duration};
 
 fn main() {
-    init_refreshable(60);
+    let foo_sfl = get_foo_sfl(
+        get_app_configuration,
+        RefreshMode::Refreshable(Duration::from_millis(50)),
+    );
 
     let handle = thread::spawn(move || {
         let res = foo_sfl();
