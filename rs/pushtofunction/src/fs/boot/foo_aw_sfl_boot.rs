@@ -3,7 +3,6 @@ use crate::fs::{foo_aw_sfl_c, FooAwSflCfgDeps, FooAwSflDeps, FooAwSflT};
 use common::config::AppCfgInfo;
 use common::fs_data::FooAwSflCfgInfo;
 use common::fwk::RefreshMode;
-use once_cell::sync::OnceCell;
 use std::sync::Arc;
 
 fn foo_aw_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooAwSflCfgInfo {
@@ -13,11 +12,8 @@ fn foo_aw_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooAwSflCfgInfo {
     }
 }
 
-pub static FOO_AW_SFL_CFG_INFO_OVERRIDE: OnceCell<FooAwSflCfgInfo> = OnceCell::new();
-
 pub fn foo_aw_sfl_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> FooAwSflT {
-    let foo_aw_sfl_cfg_deps = FooAwSflCfgDeps::new_boxed_with_const_or_cfg_adapter(
-        FOO_AW_SFL_CFG_INFO_OVERRIDE.get(),
+    let foo_aw_sfl_cfg_deps = FooAwSflCfgDeps::new_boxed_with_cfg_adapter(
         app_cfg,
         foo_aw_sfl_cfg_adapter,
         refresh_mode.clone(),
