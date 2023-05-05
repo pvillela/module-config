@@ -1,4 +1,4 @@
-use crate::fs::{foo_sfl_c, FooSflCfgDeps, FooSflDeps, FooSflT};
+use crate::fs::{foo_sfl_c, FooSflCfg, FooSflDeps, FooSflT};
 use common::config::AppCfgInfo;
 use common::fs_data::FooSflCfgInfo;
 use common::fwk::RefreshMode;
@@ -14,13 +14,10 @@ fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
 }
 
 pub fn foo_sfl_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> FooSflT {
-    let foo_sfl_cfg_deps = FooSflCfgDeps::new_boxed_with_cfg_adapter(
-        app_cfg,
-        foo_sfl_cfg_adapter,
-        refresh_mode.clone(),
-        FooSflDeps {
-            bar_bf: bar_bf_boot(app_cfg, refresh_mode),
-        },
-    );
-    foo_sfl_c(foo_sfl_cfg_deps)
+    let cfg =
+        FooSflCfg::new_boxed_with_cfg_adapter(app_cfg, foo_sfl_cfg_adapter, refresh_mode.clone());
+    let deps = FooSflDeps {
+        bar_bf: bar_bf_boot(app_cfg, refresh_mode),
+    };
+    foo_sfl_c(cfg, deps)
 }
