@@ -1,16 +1,16 @@
 use common::fs_data::BarABfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{arc_pin_async_fn_web, CfgDepsRefCellId, RcPinFnWeb};
+use common::fwk::{arc_pin_async_fn_web, CfgRefCellId, RcPinFnWeb};
 use std::time::Duration;
 use tokio::time::sleep;
 
 pub type BarAwBfT = RcPinFnWeb<u64, String>;
 
-pub type BarAwBfCfgDeps = CfgDepsRefCellId<BarABfCfgInfo, ()>;
+pub type BarAwBfCfg = CfgRefCellId<BarABfCfgInfo>;
 
-pub fn bar_aw_bf_c(cfg_deps: BarAwBfCfgDeps) -> BarAwBfT {
+pub fn bar_aw_bf_c(cfg: BarAwBfCfg) -> BarAwBfT {
     let f = move |sleep_millis: u64| {
-        let cfg = cfg_deps.get_cfg();
+        let cfg = cfg.get_cfg();
         async move {
             sleep(Duration::from_millis(sleep_millis)).await;
             let u = cfg.u;

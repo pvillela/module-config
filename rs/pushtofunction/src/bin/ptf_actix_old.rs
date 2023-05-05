@@ -4,9 +4,7 @@ use common::{
     fwk::{RefreshMode, Src},
     web::actix_handler::handler_arc_of_rcpin,
 };
-use pushtofunction::fs::{
-    bar_aw_bf_c, foo_aw_sfl_c, BarAwBfCfgDeps, FooAwSflCfgDeps, FooAwSflDeps,
-};
+use pushtofunction::fs::{bar_aw_bf_c, foo_aw_sfl_c, BarAwBfCfg, FooAwSflCfg, FooAwSflDeps};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -20,21 +18,21 @@ async fn main() -> std::io::Result<()> {
             v: "bar_a_test1".to_owned(),
         };
 
-        let bar_aw_cfg_deps = BarAwBfCfgDeps::new(
+        let bar_aw_cfg = BarAwBfCfg::new(
             Src::new_boxed(move || bar_aw_bf_cfg_info.clone()),
             RefreshMode::NoRefresh,
-            (),
         );
 
-        let bar_aw_bf = bar_aw_bf_c(bar_aw_cfg_deps);
+        let bar_aw_bf = bar_aw_bf_c(bar_aw_cfg);
 
-        let foo_aw_cfg_deps = FooAwSflCfgDeps::new(
+        let foo_aw_cfg = FooAwSflCfg::new(
             Src::new_boxed(move || foo_aw_sfl_cfg_info.clone()),
             RefreshMode::NoRefresh,
-            FooAwSflDeps { bar_aw_bf },
         );
 
-        let foo_aw_sfl = foo_aw_sfl_c(foo_aw_cfg_deps);
+        let foo_aw_deps = FooAwSflDeps { bar_aw_bf };
+
+        let foo_aw_sfl = foo_aw_sfl_c(foo_aw_cfg, foo_aw_deps);
         let arc_f = handler_arc_of_rcpin(foo_aw_sfl);
         let f = move |i| arc_f(i);
         App::new().route("/", web::post().to(f))
