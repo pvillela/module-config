@@ -1,22 +1,22 @@
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{arc_pin_async_fn, ArcPinFn, CfgDepsArcSwapArc};
+use common::fwk::{arc_pin_async_fn, ArcPinFn, CfgArcSwapArc};
 use std::time::Duration;
 use tokio::time::sleep;
 
 pub type FooASflT = ArcPinFn<FooAIn, FooAOut>;
 
-pub type FooASflCfgDeps = CfgDepsArcSwapArc<FooASflCfgInfo, FooASflDeps>;
+pub type FooASflCfg = CfgArcSwapArc<FooASflCfgInfo>;
 
 #[derive(Clone)]
 pub struct FooASflDeps {
     pub bar_a_bf: ArcPinFn<u64, String>,
 }
 
-pub fn foo_a_sfl_c(cfg_deps: FooASflCfgDeps) -> FooASflT {
+pub fn foo_a_sfl_c(cfg: FooASflCfg, deps: FooASflDeps) -> FooASflT {
     let f = move |input: FooAIn| {
-        let c = cfg_deps.get_cfg();
-        let d = cfg_deps.get_deps();
+        let c = cfg.get_cfg();
+        let d = deps.clone();
         async move {
             let FooAIn { sleep_millis } = input;
             sleep(Duration::from_millis(sleep_millis)).await;

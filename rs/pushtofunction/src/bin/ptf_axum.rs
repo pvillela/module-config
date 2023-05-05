@@ -4,7 +4,7 @@ use common::{
     fwk::{RefreshMode, Src},
     web::axum_handler::handler_of_arcpin,
 };
-use pushtofunction::fs::{bar_a_bf_c, foo_a_sfl_c, BarABfCfgDeps, FooASflCfgDeps, FooASflDeps};
+use pushtofunction::fs::{bar_a_bf_c, foo_a_sfl_c, BarABfCfg, FooASflCfg, FooASflDeps};
 
 #[tokio::main]
 async fn main() {
@@ -17,19 +17,19 @@ async fn main() {
         v: "bar_a_test1".to_owned(),
     };
 
-    let bar_a_cfg_deps = BarABfCfgDeps::new(
+    let bar_a_cfg = BarABfCfg::new(
         Src::new_boxed(move || bar_a_bf_cfg_info.clone()),
         RefreshMode::NoRefresh,
-        (),
     );
 
-    let bar_a_bf = bar_a_bf_c(bar_a_cfg_deps);
+    let bar_a_bf = bar_a_bf_c(bar_a_cfg);
 
-    let foo_a_cfg_deps = FooASflCfgDeps::new(
+    let foo_a_cfg = FooASflCfg::new(
         Src::new_boxed(move || foo_a_sfl_cfg_info.clone()),
         RefreshMode::NoRefresh,
-        FooASflDeps { bar_a_bf },
     );
+
+    let foo_a_deps = FooASflDeps { bar_a_bf };
 
     // let foo_a_sfl_hdlr = move |Json(payload): Json<FooAwIn>| async move {
     //     let res = foo_a_sfl(payload).await;
@@ -37,7 +37,7 @@ async fn main() {
     //     // (StatusCode::OK, Json(res))
     // };
 
-    let foo_a_sfl = foo_a_sfl_c(foo_a_cfg_deps);
+    let foo_a_sfl = foo_a_sfl_c(foo_a_cfg, foo_a_deps);
     let foo_a_sfl_hdlr = handler_of_arcpin(foo_a_sfl);
 
     let app = Router::new().route("/", post(foo_a_sfl_hdlr));
