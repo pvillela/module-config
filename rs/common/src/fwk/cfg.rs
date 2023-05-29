@@ -143,7 +143,7 @@ impl<T> Src<T> {
     pub(crate) fn clone(&self) -> Self {
         match self {
             Self::Fn(src) => Self::Fn(src.clone()),
-            Self::Ref(src) => Self::Ref(src.clone()),
+            Self::Ref(src) => Self::Ref((*src).clone()),
             Self::Boxed(src) => Self::Boxed(src.clone()),
         }
     }
