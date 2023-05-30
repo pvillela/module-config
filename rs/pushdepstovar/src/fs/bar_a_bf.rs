@@ -1,14 +1,16 @@
 use common::fs_data::BarABfCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::{
-    cfg_global_to_thread_local, get_initialized_option, CfgArcSwapArc, CfgRefCellRc,
+    cfg_global_to_thread_local, get_initialized_option, CfgArcSwapArc, CfgRefCellRc, Pinfn,
 };
 use std::time::Duration;
 use tokio::time::sleep;
 
 pub type BarABfCfg = CfgArcSwapArc<BarABfCfgInfo>;
 
-pub async fn bar_a_bf(sleep_millis: u64) -> String {
+pub type BarABfT = Pinfn<u64, String>;
+
+pub(in crate::fs) async fn bar_a_bf(sleep_millis: u64) -> String {
     sleep(Duration::from_millis(sleep_millis)).await;
 
     // This is to demonstrate calling get_my_cfg() as an alternative to using the thread-local..

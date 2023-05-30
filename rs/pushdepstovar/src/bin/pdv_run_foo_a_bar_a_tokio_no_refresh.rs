@@ -1,19 +1,19 @@
+use common::config::get_app_configuration;
 use common::fs_data::{FooAIn, FooAOut};
-use common::fwk::{arc_pin_async_fn, ArcPinFn};
+use common::fwk::{ArcPinFn, RefreshMode};
 use common::tokio_run::{run, RunIn};
-use pushdepstovar::fs::foo_a_sfl;
-use pushdepstovar::startup::init_a_no_refresh;
+use pushdepstovar::fs::boot::get_foo_a_sfl;
+use std::sync::Arc;
 use tokio;
 
 fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
-    arc_pin_async_fn(foo_a_sfl)
+    let foo_a_sfl = get_foo_a_sfl(get_app_configuration, RefreshMode::NoRefresh);
+    Arc::new(foo_a_sfl)
 }
 
 #[tokio::main]
 async fn main() {
     println!("===== pdv_run_foo_a_bar_a_tokio_no_refresh =====");
-
-    init_a_no_refresh();
 
     run(RunIn {
         make_foo_a_sfl,

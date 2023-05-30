@@ -8,7 +8,7 @@ pub type BarBfCfg = CfgArcSwapArc<BarBfCfgInfo>;
 
 pub type BarBfT = fn() -> String;
 
-pub(crate) fn bar_bf() -> String {
+pub(in crate::fs) fn bar_bf() -> String {
     // This is to demonstrate calling get_my_cfg() as an alternative to using the thread-local..
     let _ = get_my_cfg().get_cfg();
 

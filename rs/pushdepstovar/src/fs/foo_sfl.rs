@@ -12,7 +12,7 @@ pub struct FooSflDeps {
     pub bar_bf: fn() -> String,
 }
 
-pub(crate) fn foo_sfl() -> String {
+pub(in crate::fs) fn foo_sfl() -> String {
     // This is to demonstrate calling get_my_cfg() as an alternative to using the thread-local..
     let _ = get_my_cfg().get_cfg();
 

@@ -1,10 +1,11 @@
-use super::bar_a_bf_init;
-use crate::fs::{bar_a_bf, FooASflCfg, FooASflDeps, FOO_A_SFL_CFG, FOO_A_SFL_DEPS};
+use crate::fs::{foo_a_sfl, FooASflCfg, FooASflDeps, FooASflT, FOO_A_SFL_CFG, FOO_A_SFL_DEPS};
 use common::config::AppCfgInfo;
 use common::fs_data::FooASflCfgInfo;
-use common::fwk::{arc_pin_async_fn, init_option, RefreshMode};
+use common::fwk::{init_option, RefreshMode};
+use common::pin_async_fn;
 use std::sync::Arc;
-use std::time::Duration;
+
+use super::get_bar_a_bf;
 
 fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
     FooASflCfgInfo {
@@ -13,30 +14,20 @@ fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
     }
 }
 
-pub fn foo_a_sfl_init(origin: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) {
-    // A stereotype should initialize its dependencies.
-    bar_a_bf_init(origin, refresh_mode.clone());
+pub fn get_foo_a_sfl_raw(cfg: FooASflCfg, deps: FooASflDeps) -> FooASflT {
     unsafe {
-        init_option(
-            &mut FOO_A_SFL_CFG,
-            FooASflCfg::new_boxed_with_cfg_adapter(origin, foo_a_sfl_cfg_adapter, refresh_mode),
-        );
-        init_option(
-            &mut FOO_A_SFL_DEPS,
-            FooASflDeps {
-                bar_a_bf: arc_pin_async_fn(bar_a_bf),
-            },
-        );
+        init_option(&mut FOO_A_SFL_CFG, cfg);
+        init_option(&mut FOO_A_SFL_DEPS, deps);
     }
+    pin_async_fn!(foo_a_sfl)
 }
 
-pub fn foo_a_sfl_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>, refresh_millis: u64) {
-    foo_a_sfl_init(
-        app_cfg_src,
-        RefreshMode::Refreshable(Duration::from_millis(refresh_millis)),
-    );
-}
-
-pub fn foo_a_sfl_init_no_refresh(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
-    foo_a_sfl_init(app_cfg_src, RefreshMode::NoRefresh);
+pub fn get_foo_a_sfl(app_cfg_src: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> FooASflT {
+    // A stereotype should initialize its dependencies.
+    let bar_a_bf = get_bar_a_bf(app_cfg_src, refresh_mode.clone());
+    let deps = FooASflDeps { bar_a_bf };
+    get_foo_a_sfl_raw(
+        FooASflCfg::new_boxed_with_cfg_adapter(app_cfg_src, foo_a_sfl_cfg_adapter, refresh_mode),
+        deps,
+    )
 }

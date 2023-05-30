@@ -1,20 +1,20 @@
 use common::{
     fs_data::{FooAIn, FooAOut, FooASflCfgInfo},
     fs_util::foo_core,
-    fwk::{
-        cfg_global_to_thread_local, get_initialized_option, ArcPinFn, CfgArcSwapArc, CfgRefCellRc,
-    },
+    fwk::{cfg_global_to_thread_local, get_initialized_option, CfgArcSwapArc, CfgRefCellRc, Pinfn},
 };
 use std::time::Duration;
 use tokio::time::sleep;
 
 pub type FooASflCfg = CfgArcSwapArc<FooASflCfgInfo>;
 
+pub type FooASflT = Pinfn<FooAIn, FooAOut>;
+
 pub struct FooASflDeps {
-    pub bar_a_bf: ArcPinFn<u64, String>,
+    pub bar_a_bf: Pinfn<u64, String>,
 }
 
-pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
+pub(in crate::fs) async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     let FooAIn { sleep_millis } = input;
     let FooASflDeps { bar_a_bf } = get_my_deps();
     sleep(Duration::from_millis(sleep_millis)).await;

@@ -1,9 +1,9 @@
-use crate::fs::{BarABfCfg, BAR_A_BF_CFG};
+use crate::fs::{bar_a_bf, BarABfCfg, BarABfT, BAR_A_BF_CFG};
 use common::config::AppCfgInfo;
 use common::fs_data::BarABfCfgInfo;
 use common::fwk::{init_option, RefreshMode};
+use common::pin_async_fn;
 use std::sync::Arc;
-use std::time::Duration;
 
 fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarABfCfgInfo {
     BarABfCfgInfo {
@@ -12,22 +12,17 @@ fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarABfCfgInfo {
     }
 }
 
-pub fn bar_a_bf_init(origin: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) {
+pub fn get_bar_a_bf_raw(cfg: BarABfCfg) -> BarABfT {
     unsafe {
-        init_option(
-            &mut BAR_A_BF_CFG,
-            BarABfCfg::new_boxed_with_cfg_adapter(origin, bar_a_bf_cfg_adapter, refresh_mode),
-        );
+        init_option(&mut BAR_A_BF_CFG, cfg);
     }
+    pin_async_fn!(bar_a_bf)
 }
 
-pub fn bar_a_bf_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>, refresh_millis: u64) {
-    bar_a_bf_init(
+pub fn get_bar_a_bf(app_cfg_src: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> BarABfT {
+    get_bar_a_bf_raw(BarABfCfg::new_boxed_with_cfg_adapter(
         app_cfg_src,
-        RefreshMode::Refreshable(Duration::from_millis(refresh_millis)),
-    );
-}
-
-pub fn bar_a_bf_init_no_refresh(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
-    bar_a_bf_init(app_cfg_src, RefreshMode::NoRefresh);
+        bar_a_bf_cfg_adapter,
+        refresh_mode,
+    ))
 }
