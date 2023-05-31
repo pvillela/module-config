@@ -1,7 +1,7 @@
 use crate::fs::{bar_bf, BarBfCfg, BarBfT, BAR_BF_CFG};
 use common::config::AppCfgInfo;
 use common::fs_data::BarBfCfgInfo;
-use common::fwk::{init_option, RefreshMode};
+use common::fwk::{set_once_cell, RefreshMode};
 use std::sync::Arc;
 
 fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
@@ -12,9 +12,7 @@ fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
 }
 
 pub fn get_bar_bf_raw(cfg: BarBfCfg) -> BarBfT {
-    unsafe {
-        init_option(&mut BAR_BF_CFG, cfg);
-    }
+    let _ = set_once_cell(&BAR_BF_CFG, cfg);
     bar_bf
 }
 

@@ -2,7 +2,7 @@ use super::get_bar_bf;
 use crate::fs::{foo_sfl, FooSflCfg, FooSflDeps, FooSflT, FOO_SFL_CFG, FOO_SFL_DEPS};
 use common::config::AppCfgInfo;
 use common::fs_data::FooSflCfgInfo;
-use common::fwk::{init_option, RefreshMode};
+use common::fwk::{set_once_cell, RefreshMode};
 use std::sync::Arc;
 
 fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
@@ -13,10 +13,8 @@ fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
 }
 
 pub fn get_foo_sfl_raw(cfg: FooSflCfg, deps: FooSflDeps) -> FooSflT {
-    unsafe {
-        init_option(&mut FOO_SFL_CFG, cfg);
-        init_option(&mut FOO_SFL_DEPS, deps);
-    }
+    let _ = set_once_cell(&FOO_SFL_CFG, cfg);
+    let _ = set_once_cell(&FOO_SFL_DEPS, deps);
     foo_sfl
 }
 

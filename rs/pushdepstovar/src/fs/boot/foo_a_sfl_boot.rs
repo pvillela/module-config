@@ -1,7 +1,7 @@
 use crate::fs::{foo_a_sfl, FooASflCfg, FooASflDeps, FooASflT, FOO_A_SFL_CFG, FOO_A_SFL_DEPS};
 use common::config::AppCfgInfo;
 use common::fs_data::FooASflCfgInfo;
-use common::fwk::{init_option, RefreshMode};
+use common::fwk::{set_once_cell, RefreshMode};
 use common::pin_async_fn;
 use std::sync::Arc;
 
@@ -15,10 +15,8 @@ fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
 }
 
 pub fn get_foo_a_sfl_raw(cfg: FooASflCfg, deps: FooASflDeps) -> FooASflT {
-    unsafe {
-        init_option(&mut FOO_A_SFL_CFG, cfg);
-        init_option(&mut FOO_A_SFL_DEPS, deps);
-    }
+    let _ = set_once_cell(&FOO_A_SFL_CFG, cfg);
+    let _ = set_once_cell(&FOO_A_SFL_DEPS, deps);
     pin_async_fn!(foo_a_sfl)
 }
 

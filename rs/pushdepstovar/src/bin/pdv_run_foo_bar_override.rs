@@ -1,7 +1,7 @@
 use common::config::refresh_app_configuration;
 use common::fs_data::{BarBfCfgInfo, FooSflCfgInfo};
 use common::fs_util::bar_core;
-use common::fwk::{init_option, RefreshMode, Src};
+use common::fwk::{set_once_cell, RefreshMode, Src};
 use pushdepstovar::fs::boot::get_foo_sfl_raw;
 use pushdepstovar::fs::{BarBfCfg, FooSflCfg, FooSflDeps, BAR_BF_CFG, BAR_BF_CFG_TL};
 use std::thread;
@@ -22,7 +22,7 @@ fn main() {
         RefreshMode::NoRefresh,
     );
 
-    unsafe { init_option(&mut BAR_BF_CFG, bar_cfg) }
+    let _ = set_once_cell(&BAR_BF_CFG, bar_cfg);
 
     let foo_cfg = FooSflCfg::new(
         Src::new_boxed(|| FooSflCfgInfo {
