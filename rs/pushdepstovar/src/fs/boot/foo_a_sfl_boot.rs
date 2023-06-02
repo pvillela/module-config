@@ -1,11 +1,9 @@
-use crate::fs::foo_a_sfl::get_foo_a_sfl_raw;
-use crate::fs::{FooASflCfg, FooASflDeps, FooASflT};
+use super::get_bar_a_bf_with_app_cfg;
+use crate::fs::{get_foo_a_sfl_raw, FooASflCfg, FooASflDeps, FooASflT};
 use common::config::AppCfgInfo;
 use common::fs_data::FooASflCfgInfo;
 use common::fwk::RefreshMode;
 use std::sync::Arc;
-
-use super::get_bar_a_bf_with_app_cfg;
 
 fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
     FooASflCfgInfo {

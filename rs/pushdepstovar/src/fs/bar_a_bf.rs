@@ -29,7 +29,7 @@ thread_local! {
     pub static BAR_A_BF_CFG_TL: CfgRefCellRc<BarABfCfgInfo> = cfg_once_cell_to_thread_local(&BAR_A_BF_CFG);
 }
 
-pub static BAR_A_BF_CFG: OnceCell<BarABfCfg> = OnceCell::new();
+static BAR_A_BF_CFG: OnceCell<BarABfCfg> = OnceCell::new();
 
 pub fn get_bar_a_bf_raw(cfg: BarABfCfg) -> BarABfT {
     let _ = set_once_cell(&BAR_A_BF_CFG, cfg);

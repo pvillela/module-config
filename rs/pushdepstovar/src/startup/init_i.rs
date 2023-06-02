@@ -1,10 +1,8 @@
-use crate::fs::boot::foo_i_sfl_init;
 use common::config::get_app_configuration;
 
-/// Initialize service flows, let stereotypes initialize their dependencies.
-pub fn init_i() {
-    println!("init_i() has been called");
-    let c = get_app_configuration;
+use crate::fs::{boot::get_foo_i_sfl_with_app_cfg, FooISflT};
 
-    foo_i_sfl_init(c);
+/// Initialize service flows, let stereotypes initialize their dependencies.
+pub fn get_foo_i_sfl() -> FooISflT {
+    get_foo_i_sfl_with_app_cfg(&get_app_configuration())
 }

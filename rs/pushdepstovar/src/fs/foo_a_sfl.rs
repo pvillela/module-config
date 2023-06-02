@@ -42,9 +42,9 @@ thread_local! {
     pub static FOO_A_SFL_CFG_TL: CfgRefCellRc<FooASflCfgInfo> = cfg_once_cell_to_thread_local(&FOO_A_SFL_CFG);
 }
 
-pub static FOO_A_SFL_DEPS: OnceCell<FooASflDeps> = OnceCell::new();
+static FOO_A_SFL_DEPS: OnceCell<FooASflDeps> = OnceCell::new();
 
-pub static FOO_A_SFL_CFG: OnceCell<FooASflCfg> = OnceCell::new();
+static FOO_A_SFL_CFG: OnceCell<FooASflCfg> = OnceCell::new();
 
 pub fn get_foo_a_sfl_raw(cfg: FooASflCfg, deps: FooASflDeps) -> FooASflT {
     let _ = set_once_cell(&FOO_A_SFL_CFG, cfg);

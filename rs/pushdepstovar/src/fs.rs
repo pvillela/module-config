@@ -8,7 +8,7 @@ mod bar_i_bf;
 use bar_i_bf::*;
 
 mod bar_bf;
-pub use bar_bf::*;
+use bar_bf::*;
 
 pub mod boot;
 

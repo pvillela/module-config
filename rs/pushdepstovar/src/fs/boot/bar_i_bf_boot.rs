@@ -1,8 +1,6 @@
-use crate::fs::BAR_I_BF_CFG;
+use crate::fs::{get_bar_i_bf_raw, BarIBfT};
 use common::config::AppCfgInfo;
 use common::fs_data::BarIBfCfgInfo;
-use common::fwk::set_once_cell;
-use std::sync::Arc;
 
 fn bar_i_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarIBfCfgInfo {
     BarIBfCfgInfo {
@@ -11,6 +9,6 @@ fn bar_i_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarIBfCfgInfo {
     }
 }
 
-pub fn bar_i_bf_init(origin: fn() -> Arc<AppCfgInfo>) {
-    let _ = set_once_cell(&BAR_I_BF_CFG, bar_i_bf_cfg_adapter(&origin()));
+pub fn get_bar_i_bf_with_app_cfg(app_cfg: &AppCfgInfo) -> BarIBfT {
+    get_bar_i_bf_raw(bar_i_bf_cfg_adapter(app_cfg))
 }

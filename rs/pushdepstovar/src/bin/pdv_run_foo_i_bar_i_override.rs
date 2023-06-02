@@ -1,8 +1,7 @@
 use common::config::refresh_app_configuration;
 use common::fs_data::{BarIBfCfgInfo, FooISflCfgInfo};
 use common::fs_util::bar_core;
-use common::fwk::set_once_cell;
-use pushdepstovar::fs::{foo_i_sfl, FooISflDeps, FOO_I_SFL_CFG, FOO_I_SFL_DEPS};
+use pushdepstovar::fs::{get_foo_i_sfl_raw, FooISflDeps};
 use std::thread;
 
 fn bar_i_ovd_bf() -> String {
@@ -18,19 +17,16 @@ fn bar_i_ovd_bf() -> String {
 fn main() {
     println!("Running with immutable overridden configuration.");
 
-    let _ = set_once_cell(
-        &FOO_I_SFL_CFG,
-        FooISflCfgInfo {
-            a: "foo_i_override_cfg_info".to_owned(),
-            b: 11,
-        },
-    );
-    let _ = set_once_cell(
-        &FOO_I_SFL_DEPS,
-        FooISflDeps {
-            bar_i_bf: bar_i_ovd_bf,
-        },
-    );
+    let foo_cfg = FooISflCfgInfo {
+        a: "foo_i_override_cfg_info".to_owned(),
+        b: 11,
+    };
+
+    let foo_deps = FooISflDeps {
+        bar_i_bf: bar_i_ovd_bf,
+    };
+
+    let foo_i_sfl = get_foo_i_sfl_raw(foo_cfg, foo_deps);
 
     let handle = thread::spawn(move || foo_i_sfl());
     let res = handle.join().unwrap();

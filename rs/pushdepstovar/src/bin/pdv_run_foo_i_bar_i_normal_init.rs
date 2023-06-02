@@ -1,11 +1,10 @@
 use common::config::refresh_app_configuration;
-use pushdepstovar::fs::foo_i_sfl;
-use pushdepstovar::startup::init_i;
+use pushdepstovar::startup::get_foo_i_sfl;
 use std::thread;
 
 fn main() {
     println!("Running with immutable configuration.");
-    init_i();
+    let foo_i_sfl = get_foo_i_sfl();
 
     let handle = thread::spawn(move || foo_i_sfl());
     let res = handle.join().unwrap();

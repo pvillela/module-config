@@ -1,5 +1,4 @@
-use crate::fs::bar_a_bf::get_bar_a_bf_raw;
-use crate::fs::{BarABfCfg, BarABfT};
+use crate::fs::{get_bar_a_bf_raw, BarABfCfg, BarABfT};
 use common::config::AppCfgInfo;
 use common::fs_data::BarABfCfgInfo;
 use common::fwk::RefreshMode;
