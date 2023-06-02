@@ -1,13 +1,15 @@
 use common::fs_data::BarBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{cfg_once_cell_to_thread_local, get_from_once_cell, CfgArcSwapArc, CfgRefCellRc};
+use common::fwk::{
+    cfg_once_cell_to_thread_local, get_from_once_cell, set_once_cell, CfgArcSwapArc, CfgRefCellRc,
+};
 use once_cell::sync::OnceCell;
 
 pub type BarBfCfg = CfgArcSwapArc<BarBfCfgInfo>;
 
 pub type BarBfT = fn() -> String;
 
-pub(in crate::fs) fn bar_bf() -> String {
+fn bar_bf() -> String {
     // This is to demonstrate use of global config instead of thread-local.
     let _ = get_from_once_cell(&BAR_BF_CFG).get_cfg();
 
@@ -22,3 +24,8 @@ thread_local! {
 }
 
 pub static BAR_BF_CFG: OnceCell<BarBfCfg> = OnceCell::new();
+
+pub fn get_bar_bf_raw(cfg: BarBfCfg) -> BarBfT {
+    let _ = set_once_cell(&BAR_BF_CFG, cfg);
+    bar_bf
+}

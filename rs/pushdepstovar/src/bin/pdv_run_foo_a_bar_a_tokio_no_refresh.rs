@@ -1,13 +1,12 @@
-use common::config::get_app_configuration;
 use common::fs_data::{FooAIn, FooAOut};
-use common::fwk::{ArcPinFn, RefreshMode};
+use common::fwk::ArcPinFn;
 use common::tokio_run::{run, RunIn};
-use pushdepstovar::fs::boot::get_foo_a_sfl;
+use pushdepstovar::startup::get_foo_a_sfl_no_refresh;
 use std::sync::Arc;
 use tokio;
 
 fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
-    let foo_a_sfl = get_foo_a_sfl(get_app_configuration, RefreshMode::NoRefresh);
+    let foo_a_sfl = get_foo_a_sfl_no_refresh();
     Arc::new(foo_a_sfl)
 }
 

@@ -1,8 +1,8 @@
-use crate::fs::{bar_a_bf, BarABfCfg, BarABfT, BAR_A_BF_CFG};
+use crate::fs::bar_a_bf::get_bar_a_bf_raw;
+use crate::fs::{BarABfCfg, BarABfT};
 use common::config::AppCfgInfo;
 use common::fs_data::BarABfCfgInfo;
-use common::fwk::{set_once_cell, RefreshMode};
-use common::pin_async_fn;
+use common::fwk::RefreshMode;
 use std::sync::Arc;
 
 fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarABfCfgInfo {
@@ -12,12 +12,10 @@ fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarABfCfgInfo {
     }
 }
 
-pub fn get_bar_a_bf_raw(cfg: BarABfCfg) -> BarABfT {
-    let _ = set_once_cell(&BAR_A_BF_CFG, cfg);
-    pin_async_fn!(bar_a_bf)
-}
-
-pub fn get_bar_a_bf(app_cfg_src: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> BarABfT {
+pub fn get_bar_a_bf_with_app_cfg(
+    app_cfg_src: fn() -> Arc<AppCfgInfo>,
+    refresh_mode: RefreshMode,
+) -> BarABfT {
     get_bar_a_bf_raw(BarABfCfg::new_boxed_with_cfg_adapter(
         app_cfg_src,
         bar_a_bf_cfg_adapter,

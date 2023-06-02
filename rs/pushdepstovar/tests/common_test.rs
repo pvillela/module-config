@@ -1,6 +1,6 @@
 use common::fs_data::{BarABfCfgInfo, FooAIn, FooASflCfgInfo};
 use common::fwk::{RefreshMode, Src};
-use pushdepstovar::fs::boot::{get_bar_a_bf_raw, get_foo_a_sfl_raw};
+use pushdepstovar::fs::{get_bar_a_bf_raw, get_foo_a_sfl_raw};
 use pushdepstovar::fs::{BarABfCfg, FooASflCfg, FooASflDeps};
 use tokio;
 

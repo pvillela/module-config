@@ -1,15 +1,9 @@
-use common::{
-    config::{get_app_configuration, refresh_app_configuration},
-    fwk::RefreshMode,
-};
-use pushdepstovar::fs::boot::get_foo_sfl_with_app_cfg;
-use std::{thread, time::Duration};
+use common::config::refresh_app_configuration;
+use pushdepstovar::startup::get_foo_sfl_no_refresh;
+use std::thread;
 
 fn main() {
-    let foo_sfl = get_foo_sfl_with_app_cfg(
-        get_app_configuration,
-        RefreshMode::Refreshable(Duration::from_millis(50)),
-    );
+    let foo_sfl = get_foo_sfl_no_refresh();
 
     let handle = thread::spawn(move || {
         let res = foo_sfl();
@@ -24,7 +18,7 @@ fn main() {
 
         thread::sleep(std::time::Duration::from_millis(30));
         refresh_app_configuration();
-        println!("App configuration refreshed -- output should be different.");
+        println!("App configuration refreshed -- there should be no difference in output.");
 
         let res = foo_sfl();
         println!("{}", res);

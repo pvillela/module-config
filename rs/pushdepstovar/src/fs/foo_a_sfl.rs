@@ -1,7 +1,11 @@
 use common::{
     fs_data::{FooAIn, FooAOut, FooASflCfgInfo},
     fs_util::foo_core,
-    fwk::{cfg_once_cell_to_thread_local, get_from_once_cell, CfgArcSwapArc, CfgRefCellRc, Pinfn},
+    fwk::{
+        cfg_once_cell_to_thread_local, get_from_once_cell, set_once_cell, CfgArcSwapArc,
+        CfgRefCellRc, Pinfn,
+    },
+    pin_async_fn,
 };
 use once_cell::sync::OnceCell;
 use std::time::Duration;
@@ -15,7 +19,7 @@ pub struct FooASflDeps {
     pub bar_a_bf: Pinfn<u64, String>,
 }
 
-pub(in crate::fs) async fn foo_a_sfl(input: FooAIn) -> FooAOut {
+async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     let FooAIn { sleep_millis } = input;
     let FooASflDeps { bar_a_bf } = get_from_once_cell(&FOO_A_SFL_DEPS);
     sleep(Duration::from_millis(sleep_millis)).await;
@@ -41,3 +45,9 @@ thread_local! {
 pub static FOO_A_SFL_DEPS: OnceCell<FooASflDeps> = OnceCell::new();
 
 pub static FOO_A_SFL_CFG: OnceCell<FooASflCfg> = OnceCell::new();
+
+pub fn get_foo_a_sfl_raw(cfg: FooASflCfg, deps: FooASflDeps) -> FooASflT {
+    let _ = set_once_cell(&FOO_A_SFL_CFG, cfg);
+    let _ = set_once_cell(&FOO_A_SFL_DEPS, deps);
+    pin_async_fn!(foo_a_sfl)
+}

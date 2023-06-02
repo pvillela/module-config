@@ -1,14 +1,10 @@
 use actix_web::{web, App, HttpServer};
-use common::{config::get_app_configuration, fwk::RefreshMode, web::actix_handler::handler_arc_of};
-use pushdepstovar::fs::boot::get_foo_a_sfl;
-use std::time::Duration;
+use common::web::actix_handler::handler_arc_of;
+use pushdepstovar::startup::get_foo_a_sfl_no_refresh;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let foo_a_sfl = get_foo_a_sfl(
-        get_app_configuration,
-        RefreshMode::Refreshable(Duration::from_millis(0)),
-    );
+    let foo_a_sfl = get_foo_a_sfl_no_refresh();
 
     HttpServer::new(move || {
         let arc_f = handler_arc_of(foo_a_sfl);
