@@ -8,13 +8,28 @@ use pulldepswithoverride::fs::{
     FOO_A_SFL_CFG,
 };
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::thread;
 use std::time::Duration;
 use tokio;
 
 static READY: AtomicBool = AtomicBool::new(false);
 
+fn ensure_happens_before(ready: &AtomicBool, max_tries: usize, each_sleep_millis: u64) {
+    if !ready.load(Ordering::Acquire) {
+        for i in 0.. {
+            if i >= max_tries {
+                panic!("Atomic never ready.")
+            }
+            thread::sleep(Duration::from_millis(each_sleep_millis));
+            if ready.load(Ordering::Acquire) {
+                break;
+            }
+        }
+    }
+}
+
 fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
-    assert!(READY.load(Ordering::Acquire));
+    ensure_happens_before(&READY, 100, 1);
     arc_pin_async_fn(foo_a_sfl)
 }
 
