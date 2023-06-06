@@ -16,6 +16,9 @@ fn bar_ovd_bf() -> String {
 }
 
 fn main() {
+    // Safety: This is being done in main thread BEFORE access to statics that happens after
+    // the two `spawn`s below.
+    // See https://learning.oreilly.com/library/view/rust-atomics-and/9781098119430/ch03.html#:-:text=Spawning
     unsafe {
         test_support::override_lazy(&FOO_SFL_DEPS, || {
             static_ref(FooSflDeps { bar_bf: bar_ovd_bf })

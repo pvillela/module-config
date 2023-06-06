@@ -7,10 +7,14 @@ use pulldepswithoverride::fs::{
     bar_a_bf_cfg_adapter, foo_a_sfl, foo_a_sfl_cfg_adapter, BarABfCfg, FooASflCfg, BAR_A_BF_CFG,
     FOO_A_SFL_CFG,
 };
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 use tokio;
 
+static READY: AtomicBool = AtomicBool::new(false);
+
 fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
+    assert!(READY.load(Ordering::Acquire));
     arc_pin_async_fn(foo_a_sfl)
 }
 
@@ -20,6 +24,9 @@ async fn main() {
 
     const CACHE_TTL: Duration = Duration::from_millis(200);
 
+    // Safety: This HAPPENS BEFORE statics are accessed because `make_foo_a_sfl` is called before
+    // statics are accessed and thre is a happens before relationship established between the
+    // Release at the end of this block and the Acquire in `make_foo_a_sfl`.
     unsafe {
         test_support::override_lazy(&FOO_A_SFL_CFG, || {
             let src = Src::Fn(|| foo_a_sfl_cfg_adapter(&get_app_configuration()));
@@ -30,6 +37,8 @@ async fn main() {
             let src = Src::Fn(|| bar_a_bf_cfg_adapter(&get_app_configuration()));
             BarABfCfg::new(src, RefreshMode::Refreshable(CACHE_TTL))
         });
+
+        READY.store(true, Ordering::Release);
     }
 
     run(RunIn {

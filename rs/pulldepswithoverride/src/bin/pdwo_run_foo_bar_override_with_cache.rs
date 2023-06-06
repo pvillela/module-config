@@ -8,6 +8,9 @@ use std::thread;
 use std::time::Duration;
 
 fn main() {
+    // Safety: This is being done in main thread BEFORE access to statics that happens after
+    // the `spawn` below.
+    // See https://learning.oreilly.com/library/view/rust-atomics-and/9781098119430/ch03.html#:-:text=Spawning
     unsafe {
         test_support::override_lazy(&FOO_SFL_CFG, || {
             let src = Src::Fn(|| foo_sfl_cfg_adapter(&get_app_configuration()));
