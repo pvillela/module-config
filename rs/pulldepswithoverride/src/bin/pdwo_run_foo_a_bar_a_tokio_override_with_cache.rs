@@ -8,28 +8,26 @@ use pulldepswithoverride::fs::{
     FOO_A_SFL_CFG,
 };
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::thread;
 use std::time::Duration;
 use tokio;
 
 static READY: AtomicBool = AtomicBool::new(false);
 
-fn ensure_happens_before(ready: &AtomicBool, max_tries: usize, each_sleep_millis: u64) {
-    if !ready.load(Ordering::Acquire) {
-        for i in 0.. {
-            if i >= max_tries {
-                panic!("Atomic never ready.")
-            }
-            thread::sleep(Duration::from_millis(each_sleep_millis));
-            if ready.load(Ordering::Acquire) {
-                break;
-            }
-        }
+fn ensure_happens_before(gate: &AtomicBool) {
+    // Fast path
+    if gate.load(Ordering::Acquire) {
+        return;
+    }
+
+    // Slow path
+    let ready = gate.compare_exchange(true, true, Ordering::Acquire, Ordering::Relaxed);
+    if ready.is_err() {
+        panic!("Access to uninitialized static.")
     }
 }
 
 fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
-    ensure_happens_before(&READY, 100, 1);
+    ensure_happens_before(&READY);
     arc_pin_async_fn(foo_a_sfl)
 }
 
