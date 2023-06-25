@@ -3,9 +3,9 @@ use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
 use common::fwk::{
-    arc_pin_async_fn, cfg_lazy_to_thread_local, static_ref, ArcPinFn, CfgArcSwapArc, CfgRefCellRc,
-    RefreshMode,
+    cfg_lazy_to_thread_local, static_ref, CfgArcSwapArc, CfgRefCellRc, Pinfn, RefreshMode,
 };
+use common::pin_async_fn;
 use once_cell::sync::Lazy;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -16,7 +16,7 @@ use std::sync::Arc;
 pub type FooASflCfg = CfgArcSwapArc<FooASflCfgInfo>;
 
 pub struct FooASflDeps {
-    pub bar_a_bf: ArcPinFn<u64, String>,
+    pub bar_a_bf: Pinfn<u64, String>,
 }
 
 pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
@@ -37,7 +37,7 @@ pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
 pub static FOO_A_SFL_DEPS: Lazy<&FooASflDeps> = Lazy::new(|| {
     static_ref(FooASflDeps {
         // bar_bf: || todo!(), // do this before bar_bf exists
-        bar_a_bf: arc_pin_async_fn(bar_a_bf), // replace above with this after bar_bf has been created
+        bar_a_bf: pin_async_fn!(bar_a_bf), // replace above with this after bar_bf has been created
     })
 });
 
