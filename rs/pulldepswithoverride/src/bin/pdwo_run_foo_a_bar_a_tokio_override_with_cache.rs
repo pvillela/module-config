@@ -11,6 +11,12 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 use tokio;
 
+// Note: The HAPPENS BEFORE logic in this file can be avoided if the `#[tokio::main]` macro is not used.
+// See https://docs.rs/tokio/latest/tokio/attr.main.html for how to use a normal `main` function with
+// Tokio. In that case, the test initialization logic can be placed before the call to
+// `tokio::runtime::Builder::new_multi_thread()` and that ensures that the initialization logic takes
+// place before any thread `spawn`s, guaranteeing HAPPENS BEFORE semantics.
+
 static READY: AtomicBool = AtomicBool::new(false);
 
 fn ensure_happens_before(gate: &AtomicBool) {
