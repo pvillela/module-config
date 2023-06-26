@@ -2,8 +2,8 @@ use common::fs_data::BarAiBfCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::{get_from_once_cell, set_once_cell, Pinfn};
 use common::pin_async_fn;
-use once_cell::sync::OnceCell;
 use std::rc::Rc;
+use std::sync::OnceLock;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -25,7 +25,7 @@ thread_local! {
     pub static BAR_AI_BF_CFG_TL: Rc<BarAiBfCfgInfo> = Rc::new(get_from_once_cell(&BAR_AI_BF_CFG).clone());
 }
 
-static BAR_AI_BF_CFG: OnceCell<BarAiBfCfgInfo> = OnceCell::new();
+static BAR_AI_BF_CFG: OnceLock<BarAiBfCfgInfo> = OnceLock::new();
 
 pub fn get_bar_ai_bf_raw(cfg: BarAiBfCfgInfo) -> BarAiBfT {
     let _ = set_once_cell(&BAR_AI_BF_CFG, cfg);

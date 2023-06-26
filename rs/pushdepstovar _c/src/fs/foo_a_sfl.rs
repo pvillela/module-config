@@ -1,6 +1,6 @@
 use crate::fwk::{BoxPinFn, CfgDeps};
-use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
+use std::sync::OnceLock;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -25,7 +25,7 @@ pub struct FooAOut {
     pub res: String,
 }
 
-pub static FOO_A_SFL_CFG_DEPS: OnceCell<CfgDeps<FooASflCfgInfo, FooASflDeps>> = OnceCell::new();
+pub static FOO_A_SFL_CFG_DEPS: OnceLock<CfgDeps<FooASflCfgInfo, FooASflDeps>> = OnceLock::new();
 
 pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     let FooAIn { sleep_millis } = input;

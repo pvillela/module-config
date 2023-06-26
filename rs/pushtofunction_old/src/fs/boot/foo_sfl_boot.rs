@@ -1,8 +1,7 @@
 use crate::config::AppCfgInfo;
 use crate::fs::{foo_sfl_c, FooSflCfgInfo, FooSflCfgSrc, FooSflT};
 use crate::fwk::const_or_adapt_by_ref;
-use once_cell::sync::OnceCell;
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 
 use super::bar_bf_boot;
 
@@ -13,7 +12,7 @@ fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
     }
 }
 
-pub static FOO_SFL_CFG_INFO_OVERRIDE: OnceCell<FooSflCfgInfo> = OnceCell::new();
+pub static FOO_SFL_CFG_INFO_OVERRIDE: OnceLock<FooSflCfgInfo> = OnceLock::new();
 
 pub fn foo_sfl_boot(app_cfg: fn() -> Arc<AppCfgInfo>) -> FooSflT {
     let get = const_or_adapt_by_ref(

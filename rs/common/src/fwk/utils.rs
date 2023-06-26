@@ -3,7 +3,7 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::sync::Arc;
 
-use once_cell::sync::OnceCell;
+use std::sync::OnceLock;
 
 /// Type of boxed and pinned wrapper of async functions.
 pub type ArcPinFn<S, T> =
@@ -108,17 +108,17 @@ pub fn nil_app_cfg<T>() -> Arc<T> {
     todo!("Configuration source not provided.")
 }
 
-pub fn get_from_once_cell<T>(cell: &OnceCell<T>) -> &T {
-    cell.get().expect("OnceCell not initialized.")
+pub fn get_from_once_cell<T>(cell: &OnceLock<T>) -> &T {
+    cell.get().expect("OnceLock not initialized.")
 }
 
-/// Sets a OnceCell and prints a message if the cell was already initialized.
+/// Sets a OnceLock and prints a message if the cell was already initialized.
 /// Handling the result if optional if the caller doesn't want to take action in
 /// case the cell was already initialized.
-pub fn set_once_cell<T>(cell: &OnceCell<T>, x: T) -> Result<(), T> {
+pub fn set_once_cell<T>(cell: &OnceLock<T>, x: T) -> Result<(), T> {
     let res = cell.set(x);
     if res.is_err() {
-        println!("OnceCell already initialized.");
+        println!("OnceLock already initialized.");
     }
     res
 }

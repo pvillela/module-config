@@ -1,5 +1,5 @@
 use crate::fwk::CfgDeps;
-use once_cell::sync::OnceCell;
+use std::sync::OnceLock;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -9,7 +9,7 @@ pub struct BarABfCfgInfo {
     pub v: String,
 }
 
-pub static BAR_A_BF_CFG_DEPS: OnceCell<CfgDeps<BarABfCfgInfo, ()>> = OnceCell::new();
+pub static BAR_A_BF_CFG_DEPS: OnceLock<CfgDeps<BarABfCfgInfo, ()>> = OnceLock::new();
 
 pub async fn bar_a_bf(sleep_millis: u64) -> String {
     sleep(Duration::from_millis(sleep_millis)).await;

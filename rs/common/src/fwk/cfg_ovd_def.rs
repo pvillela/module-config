@@ -1,6 +1,6 @@
 use super::{set_once_cell, Cache, Cfg, InnerMut, RefreshMode, Src};
-use once_cell::sync::OnceCell;
 use std::sync::Arc;
+use std::sync::OnceLock;
 
 pub struct CfgOvd<T: 'static> {
     cfg_src: Option<Src<T>>,
@@ -9,7 +9,7 @@ pub struct CfgOvd<T: 'static> {
 
 impl<T> CfgOvd<T> {
     pub fn set_once_cell(
-        cell: &OnceCell<CfgOvd<T>>,
+        cell: &OnceLock<CfgOvd<T>>,
         cfg_src: Option<Src<T>>,
         refresh_mode: Option<RefreshMode>,
     ) -> Result<(), Self> {
@@ -46,7 +46,7 @@ impl<T> CfgDef<T> {
     }
 
     pub fn set_once_cell_with_cfg_src(
-        cell: &OnceCell<Self>,
+        cell: &OnceLock<Self>,
         cfg_src: Src<T>,
         refresh_mode: RefreshMode,
     ) {
@@ -54,7 +54,7 @@ impl<T> CfgDef<T> {
     }
 
     pub fn set_once_cell_with_cfg_adapter<S: 'static>(
-        cell: &OnceCell<Self>,
+        cell: &OnceLock<Self>,
         f: fn() -> Arc<S>,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
@@ -69,11 +69,11 @@ where
     TX: From<T> + Clone + core::fmt::Debug,
     IM: InnerMut<Cache<T, TX>>,
 {
-    pub fn new_from_once_cell_def(cell: &OnceCell<CfgDef<T>>) -> Self {
+    pub fn new_from_once_cell_def(cell: &OnceLock<CfgDef<T>>) -> Self {
         let CfgDef {
             cfg_src,
             refresh_mode,
-        } = cell.get().expect("OnceCell not initialized");
+        } = cell.get().expect("OnceLock not initialized");
         Self::new(cfg_src.clone(), refresh_mode.clone())
     }
 

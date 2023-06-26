@@ -1,6 +1,6 @@
 use crate::fs::bar_bf::bar_bf;
 use crate::fwk::CfgSrc;
-use once_cell::sync::OnceCell;
+use std::sync::OnceLock;
 
 #[derive(Debug, Clone)]
 pub struct FooSflCfgInfo {
@@ -8,7 +8,7 @@ pub struct FooSflCfgInfo {
     pub b: i32,
 }
 
-pub static FOO_SFL_CFG_SRC: OnceCell<CfgSrc<FooSflCfgInfo>> = OnceCell::new();
+pub static FOO_SFL_CFG_SRC: OnceLock<CfgSrc<FooSflCfgInfo>> = OnceLock::new();
 
 pub fn foo_sfl() -> String {
     let cfg = CfgSrc::get_from_static(&FOO_SFL_CFG_SRC);

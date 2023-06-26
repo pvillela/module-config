@@ -1,8 +1,8 @@
 use arc_swap::ArcSwap;
 use core::panic;
-use once_cell::sync::OnceCell;
 use std::ops::Deref;
 use std::sync::Arc;
+use std::sync::OnceLock;
 use std::time::{Duration, SystemTime};
 
 use super::type_name;
@@ -35,7 +35,7 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
         self.src.as_ref()()
     }
 
-    pub fn get(mod_cfg_src: &OnceCell<CfgDeps<T, U>>) -> (Arc<T>, &U) {
+    pub fn get(mod_cfg_src: &OnceLock<CfgDeps<T, U>>) -> (Arc<T>, &U) {
         let cfg_deps = mod_cfg_src
             .get()
             .expect("module config source static not initialized");
@@ -48,12 +48,12 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
     /// structure.
     /// Calls against a mod_cfg_deps after the first call result in a panic.
     pub fn set(
-        mod_cfg_deps: &OnceCell<CfgDeps<T, U>>,
+        mod_cfg_deps: &OnceLock<CfgDeps<T, U>>,
         cfg_src_fn: impl 'static + Fn() -> Arc<T> + Send + Sync,
         deps: U,
     ) {
         if let Err(_) = mod_cfg_deps.set(CfgDeps::new(cfg_src_fn, deps)) {
-            panic!("OnceCell already initialized");
+            panic!("OnceLock already initialized");
         };
     }
 
@@ -62,7 +62,7 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
     /// Calls against a mod_cfg_deps after the first call do not modify the mod_cfg_deps but
     /// log a message.
     pub fn set_with_cfg_adapter<S, F, G>(
-        mod_cfg_deps: &OnceCell<CfgDeps<T, U>>,
+        mod_cfg_deps: &OnceLock<CfgDeps<T, U>>,
         f: F,
         g: G,
         refresh_mode: RefreshMode,
@@ -99,13 +99,13 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
         }) {
             Ok(_) => {
                 println!(
-                    "OnceCell {:p} initialized with deps {}",
+                    "OnceLock {:p} initialized with deps {}",
                     mod_cfg_deps, deps_str,
                 )
             }
             Err(_) => {
                 println!(
-                    "Attempt to reinitialize OnceCell {:p} with deps {}",
+                    "Attempt to reinitialize OnceLock {:p} with deps {}",
                     mod_cfg_deps, deps_str,
                 );
             }

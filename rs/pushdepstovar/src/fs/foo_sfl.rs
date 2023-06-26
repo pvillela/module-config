@@ -6,7 +6,7 @@ use common::{
         CfgRefCellRc,
     },
 };
-use once_cell::sync::OnceCell;
+use std::sync::OnceLock;
 
 pub type FooSflCfg = CfgArcSwapArc<FooSflCfgInfo>;
 
@@ -32,9 +32,9 @@ thread_local! {
     pub static FOO_SFL_CFG_TL: CfgRefCellRc<FooSflCfgInfo> = cfg_once_cell_to_thread_local(&FOO_SFL_CFG);
 }
 
-static FOO_SFL_DEPS: OnceCell<FooSflDeps> = OnceCell::new();
+static FOO_SFL_DEPS: OnceLock<FooSflDeps> = OnceLock::new();
 
-static FOO_SFL_CFG: OnceCell<FooSflCfg> = OnceCell::new();
+static FOO_SFL_CFG: OnceLock<FooSflCfg> = OnceLock::new();
 
 pub fn get_foo_sfl_raw(cfg: FooSflCfg, deps: FooSflDeps) -> FooSflT {
     let _ = set_once_cell(&FOO_SFL_CFG, cfg);

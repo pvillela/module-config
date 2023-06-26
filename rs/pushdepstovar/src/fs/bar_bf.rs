@@ -3,7 +3,7 @@ use common::fs_util::bar_core;
 use common::fwk::{
     cfg_once_cell_to_thread_local, get_from_once_cell, set_once_cell, CfgArcSwapArc, CfgRefCellRc,
 };
-use once_cell::sync::OnceCell;
+use std::sync::OnceLock;
 
 pub type BarBfCfg = CfgArcSwapArc<BarBfCfgInfo>;
 
@@ -23,7 +23,7 @@ thread_local! {
     pub static BAR_BF_CFG_TL: CfgRefCellRc<BarBfCfgInfo> = cfg_once_cell_to_thread_local(&BAR_BF_CFG);
 }
 
-static BAR_BF_CFG: OnceCell<BarBfCfg> = OnceCell::new();
+static BAR_BF_CFG: OnceLock<BarBfCfg> = OnceLock::new();
 
 pub fn get_bar_bf_raw(cfg: BarBfCfg) -> BarBfT {
     let _ = set_once_cell(&BAR_BF_CFG, cfg);

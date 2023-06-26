@@ -1,5 +1,5 @@
-use once_cell::sync::OnceCell;
 use std::sync::Arc;
+use std::sync::OnceLock;
 use std::time::{Duration, Instant};
 
 use super::type_name;
@@ -54,7 +54,7 @@ impl<T: 'static + Clone + Send + Sync, U: 'static + Clone> CfgDeps<T, U> {
         self.src.get()
     }
 
-    pub fn get(mod_cfg_deps: &OnceCell<CfgDeps<T, U>>) -> (Arc<T>, U) {
+    pub fn get(mod_cfg_deps: &OnceLock<CfgDeps<T, U>>) -> (Arc<T>, U) {
         let cfg_deps = mod_cfg_deps
             .get()
             .expect("module CfgDeps static not initialized");
@@ -69,7 +69,7 @@ impl<T: 'static + Clone + Send + Sync, U: 'static + Clone> CfgDeps<T, U> {
     /// Calls against a mod_cfg_deps after the first call do not modify the mod_cfg_deps but
     /// log a message.
     pub fn set(
-        mod_cfg_deps: &OnceCell<CfgDeps<T, U>>,
+        mod_cfg_deps: &OnceLock<CfgDeps<T, U>>,
         cfg_src_fn: fn() -> Arc<T>,
         refresh_mode: RefreshMode,
         deps: U,
@@ -79,13 +79,13 @@ impl<T: 'static + Clone + Send + Sync, U: 'static + Clone> CfgDeps<T, U> {
         match mod_cfg_deps.set(CfgDeps::new(CfgSrc::new(cfg_src_fn, refresh_mode), deps)) {
             Ok(_) => {
                 println!(
-                    "OnceCell {:p} initialized with deps {}",
+                    "OnceLock {:p} initialized with deps {}",
                     mod_cfg_deps, deps_str,
                 )
             }
             Err(_) => {
                 println!(
-                    "Attempt to reinitialize OnceCell {:p} with deps {}",
+                    "Attempt to reinitialize OnceLock {:p} with deps {}",
                     mod_cfg_deps, deps_str,
                 );
             }

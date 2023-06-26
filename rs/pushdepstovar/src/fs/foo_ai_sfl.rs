@@ -4,7 +4,7 @@ use common::{
     fwk::{get_from_once_cell, set_once_cell, Pinfn},
     pin_async_fn,
 };
-use once_cell::sync::OnceCell;
+use std::sync::OnceLock;
 use std::{rc::Rc, time::Duration};
 use tokio::time::sleep;
 
@@ -39,9 +39,9 @@ thread_local! {
     pub static FOO_AI_SFL_CFG_TL: Rc<FooAiSflCfgInfo> = Rc::new(get_from_once_cell(&FOO_AI_SFL_CFG).clone());
 }
 
-static FOO_AI_SFL_DEPS: OnceCell<FooAiSflDeps> = OnceCell::new();
+static FOO_AI_SFL_DEPS: OnceLock<FooAiSflDeps> = OnceLock::new();
 
-static FOO_AI_SFL_CFG: OnceCell<FooAiSflCfgInfo> = OnceCell::new();
+static FOO_AI_SFL_CFG: OnceLock<FooAiSflCfgInfo> = OnceLock::new();
 
 pub fn get_foo_ai_sfl_raw(cfg: FooAiSflCfgInfo, deps: FooAiSflDeps) -> FooAiSflT {
     let _ = set_once_cell(&FOO_AI_SFL_CFG, cfg);

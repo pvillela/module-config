@@ -3,7 +3,7 @@ use common::{
     fs_util::foo_core,
     fwk::{get_from_once_cell, set_once_cell},
 };
-use once_cell::sync::OnceCell;
+use std::sync::OnceLock;
 
 pub type FooISflT = fn() -> String;
 
@@ -20,9 +20,9 @@ fn foo_i_sfl() -> String {
     foo_core(a, b, bar_res)
 }
 
-static FOO_I_SFL_DEPS: OnceCell<FooISflDeps> = OnceCell::new();
+static FOO_I_SFL_DEPS: OnceLock<FooISflDeps> = OnceLock::new();
 
-static FOO_I_SFL_CFG: OnceCell<FooISflCfgInfo> = OnceCell::new();
+static FOO_I_SFL_CFG: OnceLock<FooISflCfgInfo> = OnceLock::new();
 
 pub fn get_foo_i_sfl_raw(cfg: FooISflCfgInfo, deps: FooISflDeps) -> FooISflT {
     let _ = set_once_cell(&FOO_I_SFL_CFG, cfg);
