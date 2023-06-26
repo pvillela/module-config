@@ -1,6 +1,6 @@
-mod common;
+mod common_tests;
 
-use common::common_test;
+use common_tests::common_test;
 use pushdepstovar_o::fs::{BarABfCfgInfo, FooASflCfgInfo};
 use tokio;
 

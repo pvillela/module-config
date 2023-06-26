@@ -1,5 +1,5 @@
+use common::config::refresh_app_configuration;
 use futures::future::join_all;
-use pushcfgtovar::config::refresh_app_configuration;
 use pushcfgtovar::fs::foo_sfl;
 use pushcfgtovar::startup::init_no_cache;
 use std::time::Duration;

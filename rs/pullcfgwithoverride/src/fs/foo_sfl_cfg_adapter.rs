@@ -1,5 +1,5 @@
 use super::FooSflCfgInfo;
-use crate::config::AppCfgInfo;
+use common::config::AppCfgInfo;
 
 pub fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
     FooSflCfgInfo {

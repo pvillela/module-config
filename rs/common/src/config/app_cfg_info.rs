@@ -1,8 +1,7 @@
-use arc_swap::ArcSwap;
-use once_cell::sync::Lazy;
+use arc_swap::{ArcSwap, ArcSwapAny};
 use std::sync::{
     atomic::{AtomicU32, Ordering},
-    Arc,
+    Arc, OnceLock,
 };
 
 #[derive(Debug, Clone)]
@@ -12,8 +11,7 @@ pub struct AppCfgInfo {
     pub z: bool,
 }
 
-static APP_CONFIGURATION: Lazy<ArcSwap<AppCfgInfo>> =
-    Lazy::new(|| ArcSwap::from_pointee(initial_app_configuration()));
+static APP_CONFIGURATION: OnceLock<ArcSwap<AppCfgInfo>> = OnceLock::new();
 
 static REFRESH_COUNT: AtomicU32 = AtomicU32::new(0);
 
@@ -26,16 +24,22 @@ fn initial_app_configuration() -> AppCfgInfo {
     }
 }
 
+fn get_app_config_arcswap() -> &'static ArcSwapAny<Arc<AppCfgInfo>> {
+    APP_CONFIGURATION.get_or_init(|| ArcSwap::from_pointee(initial_app_configuration()))
+}
+
 // Simulates initialization of APP_CONFIGURATION
 pub fn initialize_app_configuration() {
     REFRESH_COUNT.store(0, Ordering::Relaxed);
-    APP_CONFIGURATION.store(Arc::new(initial_app_configuration()));
+    let cfg_as = get_app_config_arcswap();
+    cfg_as.store(Arc::new(initial_app_configuration()));
 }
 
 // Simulates refresh of APP_CONFIGURATION
 pub fn refresh_app_configuration() {
     let count = REFRESH_COUNT.fetch_add(1, Ordering::Relaxed);
-    APP_CONFIGURATION.store(Arc::new(AppCfgInfo {
+    let cfg_as = get_app_config_arcswap();
+    cfg_as.store(Arc::new(AppCfgInfo {
         x: format!("refreshed-{}", count),
         y: 1042,
         z: true,
@@ -44,5 +48,6 @@ pub fn refresh_app_configuration() {
 
 pub fn get_app_configuration() -> Arc<AppCfgInfo> {
     // println!("get_app_configuration has been called");
-    APP_CONFIGURATION.load().clone()
+    let cfg_as = get_app_config_arcswap();
+    cfg_as.load().clone()
 }

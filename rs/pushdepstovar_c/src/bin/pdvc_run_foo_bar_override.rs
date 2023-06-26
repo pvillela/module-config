@@ -1,4 +1,4 @@
-use pushdepstovar_c::config::refresh_app_configuration;
+use common::config::refresh_app_configuration;
 use pushdepstovar_c::fs::{
     bar_bf, foo_sfl, BarBfCfgInfo, FooSflCfgInfo, FooSflDeps, BAR_BF_CFG_DEPS, FOO_SFL_CFG_DEPS,
 };

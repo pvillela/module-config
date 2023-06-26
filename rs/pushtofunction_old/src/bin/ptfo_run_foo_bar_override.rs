@@ -1,4 +1,4 @@
-use pushtofunction_old::config::{get_app_configuration, refresh_app_configuration};
+use common::config::{get_app_configuration, refresh_app_configuration};
 use pushtofunction_old::fs::boot::{
     foo_sfl_boot, BAR_BF_CFG_INFO_OVERRIDE, FOO_SFL_CFG_INFO_OVERRIDE,
 };

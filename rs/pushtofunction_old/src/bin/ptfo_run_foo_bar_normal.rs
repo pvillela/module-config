@@ -1,4 +1,4 @@
-use pushtofunction_old::config::refresh_app_configuration;
+use common::config::refresh_app_configuration;
 use pushtofunction_old::startup::{make_foo_sfl, make_foo_sfl1};
 use std::thread;
 

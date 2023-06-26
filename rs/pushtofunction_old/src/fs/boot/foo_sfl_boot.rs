@@ -1,6 +1,6 @@
-use crate::config::AppCfgInfo;
 use crate::fs::{foo_sfl_c, FooSflCfgInfo, FooSflCfgSrc, FooSflT};
 use crate::fwk::const_or_adapt_by_ref;
+use common::config::AppCfgInfo;
 use std::sync::{Arc, OnceLock};
 
 use super::bar_bf_boot;

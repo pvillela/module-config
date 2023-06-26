@@ -1,6 +1,6 @@
-use crate::config::AppCfgInfo;
 use crate::fs::bar_bf::{bar_bf_c, BarBfCfgInfo, BarBfCfgSrc, BarBfT};
 use crate::fwk::const_or_adapt_by_ref;
+use common::config::AppCfgInfo;
 use std::sync::{Arc, OnceLock};
 
 fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {

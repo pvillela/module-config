@@ -1,4 +1,4 @@
-use pushdepstovar_c::config::refresh_app_configuration;
+use common::config::refresh_app_configuration;
 use pushdepstovar_c::fs::foo_sfl;
 use pushdepstovar_c::startup::init_no_refresh;
 use std::thread;

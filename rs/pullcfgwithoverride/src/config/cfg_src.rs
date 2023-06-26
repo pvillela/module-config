@@ -1,5 +1,5 @@
-use crate::config::{get_app_configuration, AppCfgInfo};
 use arc_swap::ArcSwap;
+use common::config::{get_app_configuration, AppCfgInfo};
 use std::sync::Arc;
 
 pub struct CfgSrc<T: 'static> {

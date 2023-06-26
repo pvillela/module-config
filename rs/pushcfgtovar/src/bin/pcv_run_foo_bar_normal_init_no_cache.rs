@@ -1,4 +1,4 @@
-use pushcfgtovar::config::refresh_app_configuration;
+use common::config::refresh_app_configuration;
 use pushcfgtovar::fs::foo_sfl;
 use pushcfgtovar::startup::init_no_cache;
 use std::thread;

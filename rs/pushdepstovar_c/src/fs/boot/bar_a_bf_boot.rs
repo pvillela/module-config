@@ -1,6 +1,6 @@
-use crate::config::AppCfgInfo;
 use crate::fs::{BarABfCfgInfo, BAR_A_BF_CFG_DEPS};
 use crate::fwk::{CfgDeps, RefreshMode};
+use common::config::AppCfgInfo;
 use std::sync::Arc;
 use std::time::Duration;
 

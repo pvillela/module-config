@@ -1,6 +1,6 @@
-use crate::config::AppCfgInfo;
 use crate::fs::{BarBfCfgInfo, BAR_BF_CFG_SRC};
 use crate::fwk::{adapt_by_ref, RefreshMode};
+use common::config::AppCfgInfo;
 use std::sync::Arc;
 
 fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {

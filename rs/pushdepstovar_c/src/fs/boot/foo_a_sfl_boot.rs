@@ -1,8 +1,8 @@
 use super::{bar_a_bf_init_no_refresh, bar_a_bf_init_refreshable};
-use crate::config::AppCfgInfo;
 use crate::fs::{bar_a_bf, FooASflCfgInfo, FooASflDeps, FOO_A_SFL_CFG_DEPS};
 use crate::fwk::box_pin_async_fn;
 use crate::fwk::{CfgDeps, RefreshMode};
+use common::config::AppCfgInfo;
 use std::sync::Arc;
 use std::time::Duration;
 

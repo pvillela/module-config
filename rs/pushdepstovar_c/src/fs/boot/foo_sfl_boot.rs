@@ -1,7 +1,7 @@
 use super::{bar_bf_init_cached, bar_bf_init_refreshable};
-use crate::config::AppCfgInfo;
 use crate::fs::{bar_bf, FooSflCfgInfo, FooSflDeps, FOO_SFL_CFG_DEPS};
 use crate::fwk::{CfgDeps, RefreshMode};
+use common::config::AppCfgInfo;
 use std::sync::Arc;
 use std::time::Duration;
 

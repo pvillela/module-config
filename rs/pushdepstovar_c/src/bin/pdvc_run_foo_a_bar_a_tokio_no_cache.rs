@@ -1,5 +1,5 @@
+use common::config::refresh_app_configuration;
 use futures::future::join_all;
-use pushdepstovar_c::config::refresh_app_configuration;
 use pushdepstovar_c::fs::foo_a_sfl;
 use pushdepstovar_c::fs::FooAIn;
 use pushdepstovar_c::startup::init_a_refreshable;

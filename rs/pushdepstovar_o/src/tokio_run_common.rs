@@ -1,6 +1,6 @@
-use crate::config::refresh_app_configuration;
 use crate::fs::foo_a_sfl;
 use crate::fs::FooAIn;
+use common::config::refresh_app_configuration;
 use futures::future::join_all;
 use std::time::Duration;
 use std::time::Instant;

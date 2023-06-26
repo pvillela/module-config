@@ -1,6 +1,6 @@
-use crate::config::AppCfgInfo;
 use crate::fs::foo_sfl::{FooSflCfgInfo, FOO_SFL_CFG_SRC};
 use crate::fwk::{adapt_by_ref, RefreshMode};
+use common::config::AppCfgInfo;
 use std::sync::Arc;
 
 pub fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
