@@ -25,7 +25,7 @@ pub fn foo_i_sfl() -> String {
     foo_core(a, b, bar_res)
 }
 
-static FOO_I_SFL_CFG: OnceLock<FooISflCfgInfo> = OnceLock::new();
+pub static FOO_I_SFL_CFG: OnceLock<FooISflCfgInfo> = OnceLock::new();
 
 fn get_cfg() -> &'static FooISflCfgInfo {
     FOO_I_SFL_CFG.get_or_init(|| foo_i_sfl_cfg_adapter(&get_app_configuration()))
@@ -35,7 +35,7 @@ thread_local! {
     pub static FOO_I_SFL_CFG_TL: Rc<FooISflCfgInfo> = Rc::new(get_cfg().clone());
 }
 
-static FOO_I_SFL_DEPS: OnceLock<FooISflDeps> = OnceLock::new();
+pub static FOO_I_SFL_DEPS: OnceLock<FooISflDeps> = OnceLock::new();
 
 fn get_deps() -> &'static FooISflDeps {
     FOO_I_SFL_DEPS.get_or_init(|| {

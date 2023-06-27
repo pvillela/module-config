@@ -21,7 +21,7 @@ pub async fn bar_ai_bf(sleep_millis: u64) -> String {
     bar_core(u, v)
 }
 
-static BAR_AI_BF_CFG: OnceLock<BarAiBfCfgInfo> = OnceLock::new();
+pub static BAR_AI_BF_CFG: OnceLock<BarAiBfCfgInfo> = OnceLock::new();
 
 fn get_cfg() -> &'static BarAiBfCfgInfo {
     BAR_AI_BF_CFG.get_or_init(|| bar_ai_bf_cfg_adapter(&get_app_configuration()))

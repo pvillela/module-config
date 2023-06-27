@@ -38,7 +38,7 @@ pub async fn foo_ai_sfl(input: FooAiIn) -> FooAiOut {
     FooAiOut { res }
 }
 
-static FOO_AI_SFL_CFG: OnceLock<FooAiSflCfgInfo> = OnceLock::new();
+pub static FOO_AI_SFL_CFG: OnceLock<FooAiSflCfgInfo> = OnceLock::new();
 
 fn get_cfg() -> &'static FooAiSflCfgInfo {
     FOO_AI_SFL_CFG.get_or_init(|| foo_ai_sfl_cfg_adapter(&get_app_configuration()))
@@ -48,7 +48,7 @@ thread_local! {
     pub static FOO_AI_SFL_CFG_TL: Rc<FooAiSflCfgInfo> = Rc::new(get_cfg().clone());
 }
 
-static FOO_AI_SFL_DEPS: OnceLock<FooAiSflDeps> = OnceLock::new();
+pub static FOO_AI_SFL_DEPS: OnceLock<FooAiSflDeps> = OnceLock::new();
 
 fn get_deps() -> &'static FooAiSflDeps {
     FOO_AI_SFL_DEPS.get_or_init(|| {

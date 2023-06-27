@@ -16,7 +16,7 @@ pub fn bar_i_bf() -> String {
     bar_core(u, v)
 }
 
-static BAR_I_BF_CFG: OnceLock<BarIBfCfgInfo> = OnceLock::new();
+pub static BAR_I_BF_CFG: OnceLock<BarIBfCfgInfo> = OnceLock::new();
 
 fn get_cfg() -> &'static BarIBfCfgInfo {
     BAR_I_BF_CFG.get_or_init(|| bar_i_bf_cfg_adapter(&get_app_configuration()))
