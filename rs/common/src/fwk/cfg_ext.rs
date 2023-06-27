@@ -1,5 +1,5 @@
 use super::{
-    get_from_once_cell, get_initialized_option, Cache, Cfg, CfgArcSwapArc, CfgImmut, CfgRefCellRc,
+    get_from_once_lock, get_initialized_option, Cache, Cfg, CfgArcSwapArc, CfgImmut, CfgRefCellRc,
     InnerMut, RefreshMode, Src,
 };
 use once_cell::sync::Lazy;
@@ -41,6 +41,17 @@ where
     }
 }
 
+pub fn cfg_to_thread_local<T, TX, IM>(cfg: &Cfg<T, TX, IM>) -> CfgRefCellRc<T>
+where
+    T: Clone + core::fmt::Debug,
+    TX: From<T> + Clone + core::fmt::Debug,
+    IM: InnerMut<Cache<T, TX>>,
+{
+    let src = cfg.get_src();
+    let refresh_mode = cfg.get_refresh_mode();
+    CfgRefCellRc::new(src, refresh_mode)
+}
+
 pub fn cfg_lazy_to_thread_local<T: Clone + core::fmt::Debug>(
     cfg: &Lazy<CfgArcSwapArc<T>>,
 ) -> CfgRefCellRc<T> {
@@ -49,10 +60,10 @@ pub fn cfg_lazy_to_thread_local<T: Clone + core::fmt::Debug>(
     CfgRefCellRc::new(src, refresh_mode)
 }
 
-pub fn cfg_once_cell_to_thread_local<T: Clone + core::fmt::Debug>(
+pub fn cfg_once_lock_to_thread_local<T: Clone + core::fmt::Debug>(
     cfg: &OnceLock<CfgArcSwapArc<T>>,
 ) -> CfgRefCellRc<T> {
-    let cfg = get_from_once_cell(cfg);
+    let cfg = get_from_once_lock(cfg);
     let src = cfg.get_src();
     let refresh_mode = cfg.get_refresh_mode();
     CfgRefCellRc::new(src, refresh_mode)

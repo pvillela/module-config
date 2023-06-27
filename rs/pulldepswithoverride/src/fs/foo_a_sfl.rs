@@ -2,16 +2,11 @@ use super::bar_a_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{
-    cfg_lazy_to_thread_local, static_ref, CfgArcSwapArc, CfgRefCellRc, Pinfn, RefreshMode,
-};
+use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgRefCellRc, Pinfn, RefreshMode};
 use common::pin_async_fn;
-use once_cell::sync::Lazy;
+use std::sync::OnceLock;
 use std::time::Duration;
 use tokio::time::sleep;
-
-#[allow(unused)]
-use std::sync::Arc;
 
 pub type FooASflCfg = CfgArcSwapArc<FooASflCfgInfo>;
 
@@ -21,7 +16,11 @@ pub struct FooASflDeps {
 
 pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     let FooAIn { sleep_millis } = input;
-    let FooASflDeps { bar_a_bf: bar } = &FOO_A_SFL_DEPS as &FooASflDeps;
+    let FooASflDeps { bar_a_bf: bar } = get_deps();
+
+    // This is to demonstrate use of global config instea of thread-local.
+    let _cfg = get_cfg().get_cfg();
+
     let (a, b) = {
         let cfg = FOO_A_SFL_CFG_TL.with(|c| c.get_cfg());
         let a = cfg.a.clone();
@@ -34,23 +33,31 @@ pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     FooAOut { res }
 }
 
-pub static FOO_A_SFL_DEPS: Lazy<&FooASflDeps> = Lazy::new(|| {
-    static_ref(FooASflDeps {
-        // bar_bf: || todo!(), // do this before bar_bf exists
-        bar_a_bf: pin_async_fn!(bar_a_bf), // replace above with this after bar_bf has been created
-    })
-});
+pub static FOO_A_SFL_CFG: OnceLock<FooASflCfg> = OnceLock::new();
 
-pub static FOO_A_SFL_CFG: Lazy<FooASflCfg> = Lazy::new(|| {
-    FooASflCfg::new_boxed_with_cfg_adapter(
-        get_app_configuration, // use `|| todo!()` before get_app_configuration exists
-        foo_a_sfl_cfg_adapter, // use `|_| todo!()` before foo_sfl_cfg_adapter exists
-        RefreshMode::NoRefresh,
-    )
-});
+fn get_cfg() -> &'static FooASflCfg {
+    FOO_A_SFL_CFG.get_or_init(|| {
+        FooASflCfg::new_boxed_with_cfg_adapter(
+            get_app_configuration, // use `|| todo!()` before get_app_configuration exists
+            foo_a_sfl_cfg_adapter, // use `|_| todo!()` before foo_a_sfl_cfg_adapter exists
+            RefreshMode::NoRefresh,
+        )
+    })
+}
 
 thread_local! {
-    pub static FOO_A_SFL_CFG_TL: CfgRefCellRc<FooASflCfgInfo> = cfg_lazy_to_thread_local(&FOO_A_SFL_CFG);
+    pub static FOO_A_SFL_CFG_TL: CfgRefCellRc<FooASflCfgInfo> = cfg_to_thread_local(get_cfg());
+}
+
+pub static FOO_A_SFL_DEPS: OnceLock<FooASflDeps> = OnceLock::new();
+
+fn get_deps() -> &'static FooASflDeps {
+    FOO_A_SFL_DEPS.get_or_init(|| {
+        FooASflDeps {
+            // bar_a_bf: || todo!(), // do this before bar_a_bf exists
+            bar_a_bf: pin_async_fn!(bar_a_bf), // replace above with this after bar_a_bf has been created
+        }
+    })
 }
 
 // This doesn't necessarily exist initially and may be added later, after the

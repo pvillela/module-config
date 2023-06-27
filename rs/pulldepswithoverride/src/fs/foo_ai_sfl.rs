@@ -1,12 +1,15 @@
 use common::{
+    config::{get_app_configuration, AppCfgInfo},
     fs_data::{FooAiIn, FooAiOut, FooAiSflCfgInfo},
     fs_util::foo_core,
-    fwk::{get_from_once_lock, set_once_lock, Pinfn},
+    fwk::Pinfn,
     pin_async_fn,
 };
 use std::sync::OnceLock;
 use std::{rc::Rc, time::Duration};
 use tokio::time::sleep;
+
+use super::bar_ai_bf;
 
 pub type FooAiSflT = Pinfn<FooAiIn, FooAiOut>;
 
@@ -14,7 +17,7 @@ pub struct FooAiSflDeps {
     pub bar_ai_bf: Pinfn<u64, String>,
 }
 
-async fn foo_ai_sfl(input: FooAiIn) -> FooAiOut {
+pub async fn foo_ai_sfl(input: FooAiIn) -> FooAiOut {
     let FooAiIn { sleep_millis } = input;
     let FooAiSflDeps {
         bar_ai_bf: bar_a_bf,
@@ -38,7 +41,7 @@ async fn foo_ai_sfl(input: FooAiIn) -> FooAiOut {
 static FOO_AI_SFL_CFG: OnceLock<FooAiSflCfgInfo> = OnceLock::new();
 
 fn get_cfg() -> &'static FooAiSflCfgInfo {
-    get_from_once_lock(&FOO_AI_SFL_CFG)
+    FOO_AI_SFL_CFG.get_or_init(|| foo_ai_sfl_cfg_adapter(&get_app_configuration()))
 }
 
 thread_local! {
@@ -48,11 +51,19 @@ thread_local! {
 static FOO_AI_SFL_DEPS: OnceLock<FooAiSflDeps> = OnceLock::new();
 
 fn get_deps() -> &'static FooAiSflDeps {
-    get_from_once_lock(&FOO_AI_SFL_DEPS)
+    FOO_AI_SFL_DEPS.get_or_init(|| {
+        FooAiSflDeps {
+            // bar_ai_bf: || todo!(), // do this before bar_ai_bf exists
+            bar_ai_bf: pin_async_fn!(bar_ai_bf), // replace above with this after bar_ai_bf has been created
+        }
+    })
 }
 
-pub fn get_foo_ai_sfl_raw(cfg: FooAiSflCfgInfo, deps: FooAiSflDeps) -> FooAiSflT {
-    let _ = set_once_lock(&FOO_AI_SFL_CFG, cfg);
-    let _ = set_once_lock(&FOO_AI_SFL_DEPS, deps);
-    pin_async_fn!(foo_ai_sfl)
+// This doesn't necessarily exist initially and may be added later, after the
+// app configuration source has been created.
+pub fn foo_ai_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooAiSflCfgInfo {
+    FooAiSflCfgInfo {
+        a: app_cfg.x.clone(),
+        b: app_cfg.y,
+    }
 }

@@ -1,4 +1,4 @@
-use super::{set_once_cell, Cache, Cfg, InnerMut, RefreshMode, Src};
+use super::{set_once_lock, Cache, Cfg, InnerMut, RefreshMode, Src};
 use std::sync::Arc;
 use std::sync::OnceLock;
 
@@ -13,7 +13,7 @@ impl<T> CfgOvd<T> {
         cfg_src: Option<Src<T>>,
         refresh_mode: Option<RefreshMode>,
     ) -> Result<(), Self> {
-        set_once_cell(
+        set_once_lock(
             cell,
             CfgOvd {
                 cfg_src,
@@ -50,7 +50,7 @@ impl<T> CfgDef<T> {
         cfg_src: Src<T>,
         refresh_mode: RefreshMode,
     ) {
-        let _ = set_once_cell(cell, Self::new(cfg_src, refresh_mode));
+        let _ = set_once_lock(cell, Self::new(cfg_src, refresh_mode));
     }
 
     pub fn set_once_cell_with_cfg_adapter<S: 'static>(
@@ -59,7 +59,7 @@ impl<T> CfgDef<T> {
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
     ) {
-        let _ = set_once_cell(cell, Self::new_ref_with_cfg_adapter(f, g, refresh_mode));
+        let _ = set_once_lock(cell, Self::new_ref_with_cfg_adapter(f, g, refresh_mode));
     }
 }
 

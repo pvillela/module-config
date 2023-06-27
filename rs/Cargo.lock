@@ -930,7 +930,6 @@ dependencies = [
  "axum",
  "common",
  "futures",
- "once_cell",
  "serde",
  "serde_json",
  "tokio",
@@ -943,7 +942,6 @@ dependencies = [
  "arc-swap",
  "common",
  "futures",
- "once_cell",
  "tokio",
 ]
 
@@ -956,7 +954,6 @@ dependencies = [
  "axum",
  "common",
  "futures",
- "once_cell",
  "serde",
  "serde_json",
  "tokio",
@@ -970,7 +967,6 @@ dependencies = [
  "arc-swap",
  "common",
  "futures",
- "once_cell",
  "serde",
  "serde_json",
  "tokio",
@@ -984,7 +980,6 @@ dependencies = [
  "arc-swap",
  "common",
  "futures",
- "once_cell",
  "serde",
  "serde_json",
  "tokio",
@@ -999,7 +994,6 @@ dependencies = [
  "axum",
  "common",
  "futures",
- "once_cell",
  "serde",
  "serde_json",
  "tokio",
@@ -1011,7 +1005,6 @@ version = "0.1.0"
 dependencies = [
  "arc-swap",
  "common",
- "once_cell",
 ]
 
 [[package]]

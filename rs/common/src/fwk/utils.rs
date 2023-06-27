@@ -108,14 +108,14 @@ pub fn nil_app_cfg<T>() -> Arc<T> {
     todo!("Configuration source not provided.")
 }
 
-pub fn get_from_once_cell<T>(cell: &OnceLock<T>) -> &T {
+pub fn get_from_once_lock<T>(cell: &OnceLock<T>) -> &T {
     cell.get().expect("OnceLock not initialized.")
 }
 
 /// Sets a OnceLock and prints a message if the cell was already initialized.
 /// Handling the result if optional if the caller doesn't want to take action in
 /// case the cell was already initialized.
-pub fn set_once_cell<T>(cell: &OnceLock<T>, x: T) -> Result<(), T> {
+pub fn set_once_lock<T>(cell: &OnceLock<T>, x: T) -> Result<(), T> {
     let res = cell.set(x);
     if res.is_err() {
         println!("OnceLock already initialized.");

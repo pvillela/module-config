@@ -1,8 +1,7 @@
 use common::config::refresh_app_configuration;
 use common::fs_data::{BarBfCfgInfo, FooSflCfgInfo};
 use common::fs_util::bar_core;
-use common::fwk::{static_ref, RefreshMode, Src};
-use common::test_support;
+use common::fwk::{RefreshMode, Src};
 use pulldepswithoverride::fs::{
     foo_sfl, BarBfCfg, FooSflCfg, FooSflDeps, BAR_BF_CFG, BAR_BF_CFG_TL, FOO_SFL_CFG, FOO_SFL_DEPS,
 };
@@ -16,30 +15,27 @@ fn bar_ovd_bf() -> String {
 }
 
 fn main() {
-    // Safety: This is being done in main thread BEFORE access to statics that happens after
-    // the two `spawn`s below.
-    // See https://learning.oreilly.com/library/view/rust-atomics-and/9781098119430/ch03.html#:-:text=Spawning
-    unsafe {
-        test_support::override_lazy(&FOO_SFL_DEPS, || {
-            static_ref(FooSflDeps { bar_bf: bar_ovd_bf })
-        });
-
-        test_support::override_lazy(&FOO_SFL_CFG, || {
+    assert!(FOO_SFL_CFG
+        .set({
             let src = Src::Fn(|| FooSflCfgInfo {
                 a: "a from foo_sfl_cfg_override".to_owned(),
                 b: 4200,
             });
             FooSflCfg::new(src, RefreshMode::NoRefresh)
-        });
+        })
+        .is_ok());
 
-        test_support::override_lazy(&BAR_BF_CFG, || {
+    assert!(FOO_SFL_DEPS.set(FooSflDeps { bar_bf: bar_ovd_bf }).is_ok());
+
+    assert!(BAR_BF_CFG
+        .set({
             let src = Src::Fn(|| BarBfCfgInfo {
                 u: 1100,
                 v: "u from bar_bf_cfg_override".to_owned(),
             });
             BarBfCfg::new(src, RefreshMode::NoRefresh)
-        });
-    }
+        })
+        .is_ok());
 
     let handle = thread::spawn(move || foo_sfl());
     let res = handle.join().unwrap();

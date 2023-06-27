@@ -1,9 +1,11 @@
 use common::{
+    config::{get_app_configuration, AppCfgInfo},
     fs_data::FooISflCfgInfo,
     fs_util::foo_core,
-    fwk::{get_from_once_lock, set_once_lock},
 };
 use std::{rc::Rc, sync::OnceLock};
+
+use super::bar_i_bf;
 
 pub type FooISflT = fn() -> String;
 
@@ -11,7 +13,7 @@ pub struct FooISflDeps {
     pub bar_i_bf: fn() -> String,
 }
 
-fn foo_i_sfl() -> String {
+pub fn foo_i_sfl() -> String {
     // This is to demonstrate using the global config instead of thread-local.
     let _cfg = get_cfg();
 
@@ -26,7 +28,7 @@ fn foo_i_sfl() -> String {
 static FOO_I_SFL_CFG: OnceLock<FooISflCfgInfo> = OnceLock::new();
 
 fn get_cfg() -> &'static FooISflCfgInfo {
-    get_from_once_lock(&FOO_I_SFL_CFG)
+    FOO_I_SFL_CFG.get_or_init(|| foo_i_sfl_cfg_adapter(&get_app_configuration()))
 }
 
 thread_local! {
@@ -36,11 +38,19 @@ thread_local! {
 static FOO_I_SFL_DEPS: OnceLock<FooISflDeps> = OnceLock::new();
 
 fn get_deps() -> &'static FooISflDeps {
-    get_from_once_lock(&FOO_I_SFL_DEPS)
+    FOO_I_SFL_DEPS.get_or_init(|| {
+        FooISflDeps {
+            // bar_i_bf: || todo!(), // do this before bar_i_bf exists
+            bar_i_bf, // replace above with this after bar_i_bf has been created
+        }
+    })
 }
 
-pub fn get_foo_i_sfl_raw(cfg: FooISflCfgInfo, deps: FooISflDeps) -> FooISflT {
-    let _ = set_once_lock(&FOO_I_SFL_CFG, cfg);
-    let _ = set_once_lock(&FOO_I_SFL_DEPS, deps);
-    foo_i_sfl
+// This doesn't necessarily exist initially and may be added later, after the
+// app configuration source has been created.
+pub fn foo_i_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooISflCfgInfo {
+    FooISflCfgInfo {
+        a: app_cfg.x.clone(),
+        b: app_cfg.y,
+    }
 }

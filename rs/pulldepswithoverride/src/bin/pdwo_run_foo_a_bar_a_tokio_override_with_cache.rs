@@ -1,39 +1,15 @@
 use common::config::get_app_configuration;
 use common::fs_data::{FooAIn, FooAOut};
 use common::fwk::{arc_pin_async_fn, ArcPinFn, RefreshMode, Src};
-use common::test_support;
 use common::tokio_run::{run, RunIn};
 use pulldepswithoverride::fs::{
     bar_a_bf_cfg_adapter, foo_a_sfl, foo_a_sfl_cfg_adapter, BarABfCfg, FooASflCfg, BAR_A_BF_CFG,
     FOO_A_SFL_CFG,
 };
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 use tokio;
 
-// Note: The HAPPENS BEFORE logic in this file can be avoided if the `#[tokio::main]` macro is not used.
-// See https://docs.rs/tokio/latest/tokio/attr.main.html for how to use a normal `main` function with
-// Tokio. In that case, the test initialization logic can be placed before the call to
-// `tokio::runtime::Builder::new_multi_thread()` and that ensures that the initialization logic takes
-// place before any thread `spawn`s, guaranteeing HAPPENS BEFORE semantics.
-
-static READY: AtomicBool = AtomicBool::new(false);
-
-fn ensure_happens_before(gate: &AtomicBool) {
-    // Fast path
-    if gate.load(Ordering::Acquire) {
-        return;
-    }
-
-    // Slow path
-    let ready = gate.compare_exchange(true, true, Ordering::Acquire, Ordering::Relaxed);
-    if ready.is_err() {
-        panic!("Access to uninitialized static.")
-    }
-}
-
 fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
-    ensure_happens_before(&READY);
     arc_pin_async_fn(foo_a_sfl)
 }
 
@@ -43,22 +19,19 @@ async fn main() {
 
     const CACHE_TTL: Duration = Duration::from_millis(200);
 
-    // Safety: This HAPPENS BEFORE statics are accessed because `make_foo_a_sfl` is called before
-    // statics are accessed and thre is a happens before relationship established between the
-    // Release at the end of this block and the Acquire in `make_foo_a_sfl`.
-    unsafe {
-        test_support::override_lazy(&FOO_A_SFL_CFG, || {
+    assert!(FOO_A_SFL_CFG
+        .set({
             let src = Src::Fn(|| foo_a_sfl_cfg_adapter(&get_app_configuration()));
             FooASflCfg::new(src, RefreshMode::Refreshable(CACHE_TTL))
-        });
+        })
+        .is_ok());
 
-        test_support::override_lazy(&BAR_A_BF_CFG, || {
+    assert!(BAR_A_BF_CFG
+        .set({
             let src = Src::Fn(|| bar_a_bf_cfg_adapter(&get_app_configuration()));
             BarABfCfg::new(src, RefreshMode::Refreshable(CACHE_TTL))
-        });
-
-        READY.store(true, Ordering::Release);
-    }
+        })
+        .is_ok());
 
     run(RunIn {
         make_foo_a_sfl,
