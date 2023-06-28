@@ -1,7 +1,7 @@
 use common::{
     fs_data::{FooAIn, FooAOut, FooASflCfgInfo},
     fs_util::foo_core,
-    fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDeps, CfgDepsTpl, CfgRefCellRc, Pinfn},
+    fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDeps, CfgRefCellRc, Pinfn},
     pin_async_fn,
 };
 use std::time::Duration;
@@ -18,7 +18,6 @@ pub struct FooASflDeps {
 async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     let FooAIn { sleep_millis } = input;
     let FooASflDeps { bar_a_bf } = FOO_A_SFL_CFG_DEPS.get_deps();
-    sleep(Duration::from_millis(sleep_millis)).await;
 
     // This is to demonstrate use of global config instea of thread-local.
     let _cfg = FOO_A_SFL_CFG_DEPS.get_cfg();
@@ -29,14 +28,13 @@ async fn foo_a_sfl(input: FooAIn) -> FooAOut {
         let b = cfg.b;
         (a, b)
     };
+    sleep(Duration::from_millis(sleep_millis)).await;
     let bar_res = bar_a_bf(0).await;
     let res = foo_core(a, b, bar_res);
     FooAOut { res }
 }
 
 pub static FOO_A_SFL_CFG_DEPS: CfgDeps<FooASflCfg, FooASflDeps> = CfgDeps::new();
-
-impl CfgDepsTpl<FooASflCfg, FooASflDeps> for CfgDeps<FooASflCfg, FooASflDeps> {}
 
 thread_local! {
     pub static FOO_A_SFL_CFG_TL: CfgRefCellRc<FooASflCfgInfo> = cfg_to_thread_local(FOO_A_SFL_CFG_DEPS.get_cfg());

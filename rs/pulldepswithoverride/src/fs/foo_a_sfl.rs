@@ -2,9 +2,7 @@ use super::bar_a_bf;
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{
-    cfg_to_thread_local, CfgArcSwapArc, CfgDeps, CfgDepsTpl, CfgRefCellRc, Pinfn, RefreshMode,
-};
+use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDeps, CfgRefCellRc, Pinfn, RefreshMode};
 use common::pin_async_fn;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -34,24 +32,19 @@ pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     FooAOut { res }
 }
 
-pub static FOO_A_SFL_CFG_DEPS: CfgDeps<FooASflCfg, FooASflDeps> = CfgDeps::new();
-
-impl CfgDepsTpl<FooASflCfg, FooASflDeps> for CfgDeps<FooASflCfg, FooASflDeps> {
-    fn get_cfg_init(&self) -> Option<FooASflCfg> {
-        Some(FooASflCfg::new_boxed_with_cfg_adapter(
+pub static FOO_A_SFL_CFG_DEPS: CfgDeps<FooASflCfg, FooASflDeps> = CfgDeps::init(
+    || {
+        FooASflCfg::new_boxed_with_cfg_adapter(
             get_app_configuration, // use `|| todo!()` before get_app_configuration exists
             foo_a_sfl_cfg_adapter, // use `|_| todo!()` before foo_a_sfl_cfg_adapter exists
             RefreshMode::NoRefresh,
-        ))
-    }
-
-    fn get_deps_init(&self) -> Option<FooASflDeps> {
-        Some(FooASflDeps {
-            // bar_a_bf: || todo!(), // do this before bar_a_bf exists
-            bar_a_bf: pin_async_fn!(bar_a_bf), // replace above with this after bar_a_bf has been created
-        })
-    }
-}
+        )
+    },
+    || FooASflDeps {
+        // bar_a_bf: || todo!(), // do this before bar_a_bf exists
+        bar_a_bf: pin_async_fn!(bar_a_bf), // replace above with this after bar_a_bf has been created
+    },
+);
 
 thread_local! {
     pub static FOO_A_SFL_CFG_TL: CfgRefCellRc<FooASflCfgInfo> = cfg_to_thread_local(FOO_A_SFL_CFG_DEPS.get_cfg());
