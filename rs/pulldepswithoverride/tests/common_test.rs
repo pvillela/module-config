@@ -1,6 +1,8 @@
 use common::fs_data::{BarABfCfgInfo, FooAIn, FooASflCfgInfo};
 use common::fwk::{RefreshMode, Src};
-use pulldepswithoverride::fs::{foo_a_sfl, BarABfCfg, FooASflCfg, BAR_A_BF_CFG, FOO_A_SFL_CFG};
+use pulldepswithoverride::fs::{
+    foo_a_sfl, BarABfCfg, FooASflCfg, BAR_A_BF_CFG, FOO_A_SFL_CFG_DEPS,
+};
 use tokio;
 
 pub async fn common_test(
@@ -11,10 +13,7 @@ pub async fn common_test(
         let src = Src::new_boxed(move || foo_a_sfl_cfg_info.clone());
         FooASflCfg::new(src, RefreshMode::NoRefresh)
     };
-    assert!(
-        FOO_A_SFL_CFG.set(foo_a_sfl_cfg).is_ok(),
-        "FOO_A_SFL_CFG already initialized"
-    );
+    FOO_A_SFL_CFG_DEPS.set_cfg_strict(foo_a_sfl_cfg);
 
     let bar_a_bf_cfg = {
         let src = Src::new_boxed(move || bar_a_bf_cfg_info.clone());

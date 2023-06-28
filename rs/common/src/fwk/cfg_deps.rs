@@ -78,3 +78,14 @@ impl<C, D> CfgDeps<C, D> {
         }
     }
 }
+
+impl<C> CfgDeps<C, ()> {
+    pub const fn init_with_cfg(cfg_init: fn() -> C) -> Self {
+        CfgDeps {
+            cfg: OnceLock::new(),
+            deps: OnceLock::new(),
+            cfg_init: Some(cfg_init),
+            deps_init: None,
+        }
+    }
+}

@@ -18,7 +18,7 @@ pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     let FooASflDeps { bar_a_bf } = FOO_A_SFL_CFG_DEPS.get_deps();
 
     // This is to demonstrate use of global config instea of thread-local.
-    let _cfg = FOO_A_SFL_CFG_DEPS.get_cfg();
+    let _cfg = FOO_A_SFL_CFG_DEPS.get_cfg().get_cfg();
 
     let (a, b) = {
         let cfg = FOO_A_SFL_CFG_TL.with(|c| c.get_cfg());
