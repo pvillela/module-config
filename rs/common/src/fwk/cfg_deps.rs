@@ -45,14 +45,14 @@ impl<C, D> CfgDeps<C, D> {
     pub fn set_cfg_strict(&self, cfg: C) {
         assert!(
             self.cfg.set(cfg).is_ok(),
-            "Attempt to set already initialized OnceLock."
+            "Attempt to set already initialized cfg."
         );
     }
 
     pub fn set_deps_strict(&self, deps: D) {
         assert!(
             self.deps.set(deps).is_ok(),
-            "Attempt to set already initialized OnceLock."
+            "Attempt to set already initialized deps."
         );
     }
 

@@ -3,7 +3,7 @@ use common::fs_data::{BarBfCfgInfo, FooSflCfgInfo};
 use common::fs_util::bar_core;
 use common::fwk::{RefreshMode, Src};
 use pulldepswithoverride::fs::{
-    foo_sfl, BarBfCfg, FooSflCfg, FooSflDeps, BAR_BF_CFG, BAR_BF_CFG_TL, FOO_SFL_CFG, FOO_SFL_DEPS,
+    foo_sfl, BarBfCfg, FooSflCfg, FooSflDeps, BAR_BF_CFG, BAR_BF_CFG_TL, FOO_SFL_CFG_DEPS,
 };
 use std::thread;
 
@@ -15,27 +15,23 @@ fn bar_ovd_bf() -> String {
 }
 
 fn main() {
-    assert!(FOO_SFL_CFG
-        .set({
-            let src = Src::Fn(|| FooSflCfgInfo {
-                a: "a from foo_sfl_cfg_override".to_owned(),
-                b: 4200,
-            });
-            FooSflCfg::new(src, RefreshMode::NoRefresh)
-        })
-        .is_ok());
+    FOO_SFL_CFG_DEPS.set_cfg_strict({
+        let src = Src::Fn(|| FooSflCfgInfo {
+            a: "a from foo_sfl_cfg_override".to_owned(),
+            b: 4200,
+        });
+        FooSflCfg::new(src, RefreshMode::NoRefresh)
+    });
 
-    assert!(FOO_SFL_DEPS.set(FooSflDeps { bar_bf: bar_ovd_bf }).is_ok());
+    FOO_SFL_CFG_DEPS.set_deps_strict(FooSflDeps { bar_bf: bar_ovd_bf });
 
-    assert!(BAR_BF_CFG
-        .set({
-            let src = Src::Fn(|| BarBfCfgInfo {
-                u: 1100,
-                v: "u from bar_bf_cfg_override".to_owned(),
-            });
-            BarBfCfg::new(src, RefreshMode::NoRefresh)
-        })
-        .is_ok());
+    BAR_BF_CFG.set_cfg_strict({
+        let src = Src::Fn(|| BarBfCfgInfo {
+            u: 1100,
+            v: "u from bar_bf_cfg_override".to_owned(),
+        });
+        BarBfCfg::new(src, RefreshMode::NoRefresh)
+    });
 
     let handle = thread::spawn(move || foo_sfl());
     let res = handle.join().unwrap();

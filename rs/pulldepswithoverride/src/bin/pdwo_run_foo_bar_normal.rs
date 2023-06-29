@@ -1,5 +1,5 @@
 use pulldepswithoverride::fs::foo_sfl;
 
 fn main() {
-    foo_sfl();
+    println!("{}", foo_sfl());
 }

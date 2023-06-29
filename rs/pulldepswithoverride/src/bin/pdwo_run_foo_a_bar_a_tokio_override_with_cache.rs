@@ -4,7 +4,7 @@ use common::fwk::{arc_pin_async_fn, ArcPinFn, RefreshMode, Src};
 use common::tokio_run::{run, RunIn};
 use pulldepswithoverride::fs::{
     bar_a_bf_cfg_adapter, foo_a_sfl, foo_a_sfl_cfg_adapter, BarABfCfg, FooASflCfg, BAR_A_BF_CFG,
-    FOO_A_SFL_CFG,
+    FOO_A_SFL_CFG_DEPS,
 };
 use std::time::Duration;
 use tokio;
@@ -19,19 +19,15 @@ async fn main() {
 
     const CACHE_TTL: Duration = Duration::from_millis(200);
 
-    assert!(FOO_A_SFL_CFG
-        .set({
-            let src = Src::Fn(|| foo_a_sfl_cfg_adapter(&get_app_configuration()));
-            FooASflCfg::new(src, RefreshMode::Refreshable(CACHE_TTL))
-        })
-        .is_ok());
+    FOO_A_SFL_CFG_DEPS.set_cfg_strict({
+        let src = Src::Fn(|| foo_a_sfl_cfg_adapter(&get_app_configuration()));
+        FooASflCfg::new(src, RefreshMode::Refreshable(CACHE_TTL))
+    });
 
-    assert!(BAR_A_BF_CFG
-        .set({
-            let src = Src::Fn(|| bar_a_bf_cfg_adapter(&get_app_configuration()));
-            BarABfCfg::new(src, RefreshMode::Refreshable(CACHE_TTL))
-        })
-        .is_ok());
+    BAR_A_BF_CFG.set_cfg_strict({
+        let src = Src::Fn(|| bar_a_bf_cfg_adapter(&get_app_configuration()));
+        BarABfCfg::new(src, RefreshMode::Refreshable(CACHE_TTL))
+    });
 
     run(RunIn {
         make_foo_a_sfl,

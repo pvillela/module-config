@@ -19,10 +19,7 @@ pub async fn common_test(
         let src = Src::new_boxed(move || bar_a_bf_cfg_info.clone());
         BarABfCfg::new(src, RefreshMode::NoRefresh)
     };
-    assert!(
-        BAR_A_BF_CFG.set(bar_a_bf_cfg).is_ok(),
-        "BAR_BF_CFG already initialized"
-    );
+    BAR_A_BF_CFG.set_cfg_strict(bar_a_bf_cfg);
 
     let handle = tokio::spawn(async move { foo_a_sfl(FooAIn { sleep_millis: 0 }).await });
     let res = handle.await.ok().map(|x| x.res);
