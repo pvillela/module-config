@@ -1,12 +1,9 @@
 use common::{
     fs_data::{FooAIn, FooAOut, FooASflCfgInfo},
     fs_util::foo_core,
-    fwk::{
-        cfg_to_thread_local, get_from_once_lock, set_once_lock, CfgArcSwapArc, CfgRefCellRc, Pinfn,
-    },
+    fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDeps, CfgRefCellRc, Pinfn},
     pin_async_fn,
 };
-use std::sync::OnceLock;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -20,11 +17,10 @@ pub struct FooASflDeps {
 
 async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     let FooAIn { sleep_millis } = input;
-    let FooASflDeps { bar_a_bf } = get_deps();
-    sleep(Duration::from_millis(sleep_millis)).await;
+    let FooASflDeps { bar_a_bf } = FOO_A_SFL_CFG_DEPS.get_deps();
 
     // This is to demonstrate use of global config instea of thread-local.
-    let _cfg = get_cfg().get_cfg();
+    let _cfg = FOO_A_SFL_CFG_DEPS.get_cfg().get_cfg();
 
     let (a, b) = {
         let cfg = FOO_A_SFL_CFG_TL.with(|c| c.get_cfg());
@@ -32,29 +28,20 @@ async fn foo_a_sfl(input: FooAIn) -> FooAOut {
         let b = cfg.b;
         (a, b)
     };
+    sleep(Duration::from_millis(sleep_millis)).await;
     let bar_res = bar_a_bf(0).await;
     let res = foo_core(a, b, bar_res);
     FooAOut { res }
 }
 
-static FOO_A_SFL_CFG: OnceLock<FooASflCfg> = OnceLock::new();
-
-fn get_cfg() -> &'static FooASflCfg {
-    get_from_once_lock(&FOO_A_SFL_CFG)
-}
+pub static FOO_A_SFL_CFG_DEPS: CfgDeps<FooASflCfg, FooASflDeps> = CfgDeps::new();
 
 thread_local! {
-    pub static FOO_A_SFL_CFG_TL: CfgRefCellRc<FooASflCfgInfo> = cfg_to_thread_local(get_cfg());
-}
-
-static FOO_A_SFL_DEPS: OnceLock<FooASflDeps> = OnceLock::new();
-
-fn get_deps() -> &'static FooASflDeps {
-    get_from_once_lock(&FOO_A_SFL_DEPS)
+    pub static FOO_A_SFL_CFG_TL: CfgRefCellRc<FooASflCfgInfo> = cfg_to_thread_local(FOO_A_SFL_CFG_DEPS.get_cfg());
 }
 
 pub fn get_foo_a_sfl_raw(cfg: FooASflCfg, deps: FooASflDeps) -> FooASflT {
-    let _ = set_once_lock(&FOO_A_SFL_CFG, cfg);
-    let _ = set_once_lock(&FOO_A_SFL_DEPS, deps);
+    let _ = FOO_A_SFL_CFG_DEPS.set_cfg_lenient(cfg);
+    let _ = FOO_A_SFL_CFG_DEPS.set_deps_lenient(deps);
     pin_async_fn!(foo_a_sfl)
 }
