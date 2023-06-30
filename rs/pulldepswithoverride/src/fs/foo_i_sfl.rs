@@ -6,7 +6,7 @@ use common::{
 };
 use std::rc::Rc;
 
-use super::bar_i_bf;
+use super::{bar_i_bf, BAR_I_BF_CFG};
 
 pub type FooISflT = fn() -> String;
 
@@ -26,9 +26,10 @@ pub fn foo_i_sfl() -> String {
     foo_core(a, b, bar_res)
 }
 
-pub static FOO_I_SFL_CFG_DEPS: CfgDeps<FooISflCfgInfo, FooISflDeps> = CfgDeps::init(
+pub static FOO_I_SFL_CFG_DEPS: CfgDeps<FooISflCfgInfo, FooISflDeps> = CfgDeps::lazy_init(
     || foo_i_sfl_cfg_adapter(&get_app_configuration()),
     || {
+        BAR_I_BF_CFG.prime(); // optional, just in case we want to force up-front app initialization.
         FooISflDeps {
             // bar_i_bf: || todo!(), // do this before bar_i_bf exists
             bar_i_bf, // replace above with this after bar_i_bf has been created

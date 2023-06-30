@@ -22,7 +22,7 @@ pub async fn bar_ai_bf(sleep_millis: u64) -> String {
 }
 
 pub static BAR_AI_BF_CFG: CfgDeps<BarAiBfCfgInfo, ()> =
-    CfgDeps::init_with_cfg(|| bar_ai_bf_cfg_adapter(&get_app_configuration()));
+    CfgDeps::lazy_init_with_cfg(|| bar_ai_bf_cfg_adapter(&get_app_configuration()));
 
 thread_local! {
     pub static BAR_AI_BF_CFG_TL: Rc<BarAiBfCfgInfo> = Rc::new(BAR_AI_BF_CFG.get_cfg().clone());

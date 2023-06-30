@@ -12,3 +12,11 @@ pub fn get_foo_a_sfl_with_cache() -> FooASflT {
         RefreshMode::Refreshable(Duration::from_millis(150)),
     )
 }
+
+pub fn init_foo_a_sfl_no_refresh() {
+    get_foo_a_sfl_no_refresh();
+}
+
+pub fn init_foo_a_sfl_with_cache() {
+    get_foo_a_sfl_with_cache();
+}

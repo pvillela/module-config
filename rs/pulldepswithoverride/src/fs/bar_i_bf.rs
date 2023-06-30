@@ -17,7 +17,7 @@ pub fn bar_i_bf() -> String {
 }
 
 pub static BAR_I_BF_CFG: CfgDeps<BarIBfCfgInfo, ()> =
-    CfgDeps::init_with_cfg(|| bar_i_bf_cfg_adapter(&get_app_configuration()));
+    CfgDeps::lazy_init_with_cfg(|| bar_i_bf_cfg_adapter(&get_app_configuration()));
 
 thread_local! {
     pub static BAR_I_BF_CFG_TL: Rc<BarIBfCfgInfo> = Rc::new(BAR_I_BF_CFG.get_cfg().clone());

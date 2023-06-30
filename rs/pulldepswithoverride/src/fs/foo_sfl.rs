@@ -5,7 +5,7 @@ use common::{
     fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDeps, CfgRefCellRc, RefreshMode},
 };
 
-use super::bar_bf;
+use super::{bar_bf, BAR_BF_CFG};
 
 pub type FooSflCfg = CfgArcSwapArc<FooSflCfgInfo>;
 
@@ -27,7 +27,7 @@ pub fn foo_sfl() -> String {
     foo_core(a, b, bar_res)
 }
 
-pub static FOO_SFL_CFG_DEPS: CfgDeps<FooSflCfg, FooSflDeps> = CfgDeps::init(
+pub static FOO_SFL_CFG_DEPS: CfgDeps<FooSflCfg, FooSflDeps> = CfgDeps::lazy_init(
     || {
         FooSflCfg::new_boxed_with_cfg_adapter(
             get_app_configuration, // use `|| todo!()` before get_app_configuration exists
@@ -36,6 +36,7 @@ pub static FOO_SFL_CFG_DEPS: CfgDeps<FooSflCfg, FooSflDeps> = CfgDeps::init(
         )
     },
     || {
+        BAR_BF_CFG.prime(); // optional, just in case we want to force up-front app initialization.
         FooSflDeps {
             // bar_bf: || todo!(), // do this before bar_bf exists
             bar_bf, // replace above with this after bar_bf has been created

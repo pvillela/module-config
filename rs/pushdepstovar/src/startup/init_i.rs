@@ -6,3 +6,7 @@ use crate::fs::{boot::get_foo_i_sfl_with_app_cfg, FooISflT};
 pub fn get_foo_i_sfl() -> FooISflT {
     get_foo_i_sfl_with_app_cfg(&get_app_configuration())
 }
+
+pub fn init_foo_i_sfl() {
+    get_foo_i_sfl();
+}

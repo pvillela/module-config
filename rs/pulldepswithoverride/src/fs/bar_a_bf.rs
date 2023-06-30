@@ -22,7 +22,7 @@ pub async fn bar_a_bf(sleep_millis: u64) -> String {
     bar_core(u, v)
 }
 
-pub static BAR_A_BF_CFG: CfgDeps<BarABfCfg, ()> = CfgDeps::init_with_cfg(|| {
+pub static BAR_A_BF_CFG: CfgDeps<BarABfCfg, ()> = CfgDeps::lazy_init_with_cfg(|| {
     BarABfCfg::new_boxed_with_cfg_adapter(
         get_app_configuration, // use `|| todo!()` before get_app_configuration exists
         bar_a_bf_cfg_adapter,  // use `|_| todo!()` before bar_bf_cfg_adapter exists

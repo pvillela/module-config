@@ -1,4 +1,4 @@
-use super::bar_a_bf;
+use super::{bar_a_bf, BAR_A_BF_CFG};
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
@@ -32,7 +32,7 @@ pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     FooAOut { res }
 }
 
-pub static FOO_A_SFL_CFG_DEPS: CfgDeps<FooASflCfg, FooASflDeps> = CfgDeps::init(
+pub static FOO_A_SFL_CFG_DEPS: CfgDeps<FooASflCfg, FooASflDeps> = CfgDeps::lazy_init(
     || {
         FooASflCfg::new_boxed_with_cfg_adapter(
             get_app_configuration, // use `|| todo!()` before get_app_configuration exists
@@ -40,9 +40,12 @@ pub static FOO_A_SFL_CFG_DEPS: CfgDeps<FooASflCfg, FooASflDeps> = CfgDeps::init(
             RefreshMode::NoRefresh,
         )
     },
-    || FooASflDeps {
-        // bar_a_bf: || todo!(), // do this before bar_a_bf exists
-        bar_a_bf: pin_async_fn!(bar_a_bf), // replace above with this after bar_a_bf has been created
+    || {
+        BAR_A_BF_CFG.prime(); // optional, just in case we want to force up-front app initialization.
+        FooASflDeps {
+            // bar_a_bf: || todo!(), // do this before bar_a_bf exists
+            bar_a_bf: pin_async_fn!(bar_a_bf), // replace above with this after bar_a_bf has been created
+        }
     },
 );
 

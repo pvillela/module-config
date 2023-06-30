@@ -17,7 +17,7 @@ pub fn bar_bf() -> String {
     bar_core(u, v)
 }
 
-pub static BAR_BF_CFG: CfgDeps<BarBfCfg, ()> = CfgDeps::init_with_cfg(|| {
+pub static BAR_BF_CFG: CfgDeps<BarBfCfg, ()> = CfgDeps::lazy_init_with_cfg(|| {
     BarBfCfg::new_boxed_with_cfg_adapter(
         get_app_configuration, // use `|| todo!()` before get_app_configuration exists
         bar_bf_cfg_adapter,    // use `|_| todo!()` before bar_bf_cfg_adapter exists
