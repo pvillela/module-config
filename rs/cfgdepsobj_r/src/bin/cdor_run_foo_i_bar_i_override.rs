@@ -1,4 +1,4 @@
-use cfgdepsmethod_r::fs::{get_foo_i_sfl_raw, FooISflDeps};
+use cfgdepsobj_r::fs::{get_foo_i_sfl_raw, FooISflDeps};
 use common::config::refresh_app_configuration;
 use common::fs_data::{BarIBfCfgInfo, FooISflCfgInfo};
 use common::fs_util::bar_core;

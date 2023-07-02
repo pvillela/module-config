@@ -1,6 +1,6 @@
 use std::sync::OnceLock;
 
-use cfgdepsmethod_r::fs::{BarABfCfg, BarABfS, FooASflCfg, FooASflDeps, FooASflS};
+use cfgdepsobj_r::fs::{BarABfCfg, BarABfS, FooASflCfg, FooASflDeps, FooASflS};
 use common::fs_data::{BarABfCfgInfo, FooAIn, FooASflCfgInfo};
 use common::fwk::{RefreshMode, Src};
 use tokio;

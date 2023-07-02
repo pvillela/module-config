@@ -1,5 +1,5 @@
 use actix_web::{web, App, HttpServer};
-use cfgdepsmethod_r::fs::boot::get_foo_a_sfl_s_no_refresh;
+use cfgdepsobj_r::fs::boot::get_foo_a_sfl_s_no_refresh;
 use common::web::actix_handler::handler_of;
 
 #[actix_web::main]

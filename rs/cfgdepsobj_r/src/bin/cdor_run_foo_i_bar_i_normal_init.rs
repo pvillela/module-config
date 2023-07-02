@@ -1,4 +1,4 @@
-use cfgdepsmethod_r::startup::get_foo_i_sfl;
+use cfgdepsobj_r::startup::get_foo_i_sfl;
 use common::config::refresh_app_configuration;
 use std::thread;
 

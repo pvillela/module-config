@@ -1,4 +1,4 @@
-use cfgdepsmethod_r::fs::boot::get_foo_sfl_s_no_refresh;
+use cfgdepsobj_r::fs::boot::get_foo_sfl_s_no_refresh;
 use common::config::refresh_app_configuration;
 use std::thread;
 

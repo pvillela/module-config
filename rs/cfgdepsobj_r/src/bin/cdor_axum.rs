@@ -1,5 +1,5 @@
 use axum::{routing::post, Router};
-use cfgdepsmethod_r::fs::boot::get_foo_a_sfl_s_no_refresh;
+use cfgdepsobj_r::fs::boot::get_foo_a_sfl_s_no_refresh;
 use common::web::axum_handler::handler_of;
 
 #[tokio::main]

@@ -1,17 +1,17 @@
-use cfgdepsmethod_r::fs::boot::get_foo_a_sfl_s_cached;
+use cfgdepsobj_r::fs::boot::get_foo_a_sfl_s_no_refresh;
 use common::fs_data::{FooAIn, FooAOut};
 use common::fwk::{arc_pin_async_fn, ArcPinFn};
 use common::tokio_run::{run, RunIn};
 use tokio;
 
 fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
-    let foo_a_sfl_s = get_foo_a_sfl_s_cached();
+    let foo_a_sfl_s = get_foo_a_sfl_s_no_refresh();
     arc_pin_async_fn(|input| foo_a_sfl_s.run(input))
 }
 
 #[tokio::main]
 async fn main() {
-    println!("===== pdv_run_foo_a_bar_a_tokio__cache =====");
+    println!("===== pdv_run_foo_a_bar_a_tokio_no_refresh =====");
 
     run(RunIn {
         make_foo_a_sfl,

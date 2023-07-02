@@ -1,5 +1,5 @@
-use cfgdepsmethod_r::fs::FooAiSflDeps;
-use cfgdepsmethod_r::fs::{get_bar_ai_bf_raw, get_foo_ai_sfl_raw};
+use cfgdepsobj_r::fs::FooAiSflDeps;
+use cfgdepsobj_r::fs::{get_bar_ai_bf_raw, get_foo_ai_sfl_raw};
 use common::fs_data::{BarAiBfCfgInfo, FooAiIn, FooAiSflCfgInfo};
 use tokio;
 
