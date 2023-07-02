@@ -13,7 +13,7 @@ fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
     }
 }
 
-fn get_foo_a_sfl_s_wtih_app_cfg(
+fn get_foo_a_sfl_s_with_app_cfg(
     app_cfg_src: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
     deps: FooASflDeps,
@@ -28,10 +28,10 @@ fn get_foo_a_sfl_s_wtih_app_cfg(
     }
 }
 
-pub fn get_foo_a_sfl_s_no_refresh() -> &'static FooASflS<'static> {
+pub fn get_foo_a_sfl_s_no_refresh() -> &'static FooASflS {
     static FOO_A_SFL_S: OnceLock<FooASflS> = OnceLock::new();
     FOO_A_SFL_S.get_or_init(|| {
-        get_foo_a_sfl_s_wtih_app_cfg(
+        get_foo_a_sfl_s_with_app_cfg(
             get_app_configuration,
             RefreshMode::NoRefresh,
             FooASflDeps {
@@ -41,10 +41,10 @@ pub fn get_foo_a_sfl_s_no_refresh() -> &'static FooASflS<'static> {
     })
 }
 
-pub fn get_foo_a_sfl_s_cached() -> &'static FooASflS<'static> {
+pub fn get_foo_a_sfl_s_cached() -> &'static FooASflS {
     static FOO_A_SFL_S_CACHED: OnceLock<FooASflS> = OnceLock::new();
     FOO_A_SFL_S_CACHED.get_or_init(|| {
-        get_foo_a_sfl_s_wtih_app_cfg(
+        get_foo_a_sfl_s_with_app_cfg(
             get_app_configuration,
             RefreshMode::Refreshable(Duration::from_millis(150)),
             FooASflDeps {

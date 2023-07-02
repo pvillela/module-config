@@ -12,7 +12,7 @@ fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
     }
 }
 
-pub fn get_foo_a_sfl_wtih_app_cfg(
+pub fn get_foo_a_sfl_with_app_cfg(
     app_cfg_src: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
 ) -> FooASflT {

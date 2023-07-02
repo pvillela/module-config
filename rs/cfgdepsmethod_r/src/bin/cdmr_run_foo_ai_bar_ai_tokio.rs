@@ -1,4 +1,4 @@
-use cfgdepsmethods::startup::get_foo_ai_sfl;
+use cfgdepsmethod_r::startup::get_foo_ai_sfl;
 use common::fs_data::{FooAiIn, FooAiOut};
 use common::fwk::ArcPinFn;
 use common::tokio_run::{run, RunIn};

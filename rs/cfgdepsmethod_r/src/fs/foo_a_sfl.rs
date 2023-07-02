@@ -1,27 +1,24 @@
+use super::BarABfS;
 use common::{
     fs_data::{FooAIn, FooAOut, FooASflCfgInfo},
     fs_util::foo_core,
-    fwk::{CfgArcSwapArc, Pinfn},
+    fwk::CfgArcSwapArc,
 };
 use std::time::Duration;
 use tokio::time::sleep;
 
-use super::BarABfS;
-
-pub type FooASflT = Pinfn<FooAIn, FooAOut>;
-
 pub type FooASflCfg = CfgArcSwapArc<FooASflCfgInfo>;
 
-pub struct FooASflDeps<'a> {
-    pub bar_a_bf_s: &'a BarABfS,
+pub struct FooASflDeps {
+    pub bar_a_bf_s: &'static BarABfS,
 }
 
-pub struct FooASflS<'a> {
+pub struct FooASflS {
     pub cfg: FooASflCfg,
-    pub deps: FooASflDeps<'a>,
+    pub deps: FooASflDeps,
 }
 
-impl<'a> FooASflS<'a> {
+impl FooASflS {
     pub async fn run(&self, input: FooAIn) -> FooAOut {
         let FooAIn { sleep_millis } = input;
         let FooASflDeps { bar_a_bf_s } = self.deps;

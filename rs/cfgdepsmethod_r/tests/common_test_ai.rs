@@ -1,6 +1,6 @@
+use cfgdepsmethod_r::fs::FooAiSflDeps;
+use cfgdepsmethod_r::fs::{get_bar_ai_bf_raw, get_foo_ai_sfl_raw};
 use common::fs_data::{BarAiBfCfgInfo, FooAiIn, FooAiSflCfgInfo};
-use cfgdepsmethods::fs::FooAiSflDeps;
-use cfgdepsmethods::fs::{get_bar_ai_bf_raw, get_foo_ai_sfl_raw};
 use tokio;
 
 pub async fn common_test(

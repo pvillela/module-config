@@ -1,7 +1,8 @@
-use super::get_bar_i_bf_with_app_cfg;
-use crate::fs::{get_foo_i_sfl_raw, FooISflDeps, FooISflT};
-use common::config::AppCfgInfo;
+use crate::fs::boot::get_bar_i_bf_s;
+use crate::fs::{FooISflDeps, FooISflS};
+use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::FooISflCfgInfo;
+use std::sync::{Arc, OnceLock};
 
 fn foo_i_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooISflCfgInfo {
     FooISflCfgInfo {
@@ -10,9 +11,24 @@ fn foo_i_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooISflCfgInfo {
     }
 }
 
-pub fn get_foo_i_sfl_with_app_cfg(app_cfg: &AppCfgInfo) -> FooISflT {
-    // A stereotype should initialize its dependencies.
-    let bar_i_bf = get_bar_i_bf_with_app_cfg(app_cfg);
-    let deps = FooISflDeps { bar_i_bf };
-    get_foo_i_sfl_raw(foo_i_sfl_cfg_adapter(app_cfg), deps)
+fn get_foo_i_sfl_s_with_app_cfg(
+    app_cfg_src: fn() -> Arc<AppCfgInfo>,
+    deps: FooISflDeps,
+) -> FooISflS {
+    FooISflS {
+        cfg: foo_i_sfl_cfg_adapter(&app_cfg_src()),
+        deps,
+    }
+}
+
+pub fn get_foo_i_sfl_s() -> &'static FooISflS {
+    static FOO_A_SFL_S: OnceLock<FooISflS> = OnceLock::new();
+    FOO_A_SFL_S.get_or_init(|| {
+        get_foo_i_sfl_s_with_app_cfg(
+            get_app_configuration,
+            FooISflDeps {
+                bar_i_bf_s: get_bar_i_bf_s(),
+            },
+        )
+    })
 }

@@ -1,5 +1,5 @@
-use cfgdepsmethods::fs::foo_ac_sfl;
-use cfgdepsmethods::fs::FooAcIn;
+use cfgdepsmethod_r::fs::foo_ac_sfl;
+use cfgdepsmethod_r::fs::FooAcIn;
 use futures::future::join_all;
 use std::time::Instant;
 use tokio;
