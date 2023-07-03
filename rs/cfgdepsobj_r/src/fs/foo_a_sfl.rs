@@ -1,16 +1,17 @@
-use super::BarABfS;
+use std::time::Duration;
+
+use super::bar_a_bf::BarABfD;
 use common::{
     fs_data::{FooAIn, FooAOut, FooASflCfgInfo},
     fs_util::foo_core,
-    fwk::CfgArcSwapArc,
+    fwk::{CfgArcSwapArc, Dep1a},
 };
-use std::time::Duration;
 use tokio::time::sleep;
 
 pub type FooASflCfg = CfgArcSwapArc<FooASflCfgInfo>;
 
 pub struct FooASflDeps {
-    pub bar_a_bf_s: &'static BarABfS,
+    pub bar_a_bf_d: BarABfD,
 }
 
 pub struct FooASflS {
@@ -18,17 +19,17 @@ pub struct FooASflS {
     pub deps: FooASflDeps,
 }
 
-impl FooASflS {
-    pub async fn run(&self, input: FooAIn) -> FooAOut {
-        let FooAIn { sleep_millis } = input;
-        let FooASflDeps { bar_a_bf_s } = self.deps;
-        let cfg = self.cfg.get_cfg();
-        let a = cfg.a.clone();
-        let b = cfg.b;
+pub type FooASflD = Dep1a<FooASflS, FooAOut, FooAIn>;
 
-        sleep(Duration::from_millis(sleep_millis)).await;
-        let bar_res = bar_a_bf_s.run(0).await;
-        let res = foo_core(a, b, bar_res);
-        FooAOut { res }
-    }
+pub async fn foo_a_sfl_c(s: &FooASflS, input: FooAIn) -> FooAOut {
+    let FooAIn { sleep_millis } = input;
+    let FooASflDeps { bar_a_bf_d } = &s.deps;
+    let cfg = s.cfg.get_cfg();
+    let a = cfg.a.clone();
+    let b = cfg.b;
+
+    sleep(Duration::from_millis(sleep_millis)).await;
+    let bar_res = bar_a_bf_d.run(0).await;
+    let res = foo_core(a, b, bar_res);
+    FooAOut { res }
 }

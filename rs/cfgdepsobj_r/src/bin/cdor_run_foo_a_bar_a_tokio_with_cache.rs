@@ -5,8 +5,8 @@ use common::tokio_run::{run, RunIn};
 use tokio;
 
 fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
-    let foo_a_sfl_s = get_foo_a_sfl_s_cached();
-    arc_pin_async_fn(|input| foo_a_sfl_s.run(input))
+    let foo_a_sfl_d = get_foo_a_sfl_d_cached();
+    arc_pin_async_fn(|input| foo_a_sfl_d.run(input))
 }
 
 #[tokio::main]

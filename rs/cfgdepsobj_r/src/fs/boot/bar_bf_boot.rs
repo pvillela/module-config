@@ -1,3 +1,4 @@
+use crate::fs::bar_bf::{bar_bf_c, BarBfD};
 use crate::fs::{BarBfCfg, BarBfS};
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::BarBfCfgInfo;
@@ -21,18 +22,26 @@ fn get_bar_bf_s_with_app_cfg(
     }
 }
 
-pub fn get_bar_bf_s_no_refresh() -> &'static BarBfS {
-    static BAR_A_BF_S: OnceLock<BarBfS> = OnceLock::new();
-    BAR_A_BF_S
-        .get_or_init(|| get_bar_bf_s_with_app_cfg(get_app_configuration, RefreshMode::NoRefresh))
+pub fn get_bar_bf_d_no_refresh() -> BarBfD {
+    static BAR_BF_S: OnceLock<BarBfS> = OnceLock::new();
+    let bar_bf_s = BAR_BF_S
+        .get_or_init(|| get_bar_bf_s_with_app_cfg(get_app_configuration, RefreshMode::NoRefresh));
+    BarBfD {
+        s: bar_bf_s,
+        f: bar_bf_c,
+    }
 }
 
-pub fn get_bar_bf_s_cached() -> &'static BarBfS {
-    static BAR_A_BF_S_CACHED: OnceLock<BarBfS> = OnceLock::new();
-    BAR_A_BF_S_CACHED.get_or_init(|| {
+pub fn get_bar_bf_d_cached() -> BarBfD {
+    static BAR_BF_S_CACHED: OnceLock<BarBfS> = OnceLock::new();
+    let bar_bf_s = BAR_BF_S_CACHED.get_or_init(|| {
         get_bar_bf_s_with_app_cfg(
             get_app_configuration,
             RefreshMode::Refreshable(Duration::from_millis(150)),
         )
-    })
+    });
+    BarBfD {
+        s: bar_bf_s,
+        f: bar_bf_c,
+    }
 }

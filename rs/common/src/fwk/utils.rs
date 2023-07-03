@@ -33,8 +33,11 @@ impl<S, T, F> PinFn<S, T> for F where
 {
 }
 
-/// Desugared type of async function with boxed and pinned output.
+/// Desugared type of async function with single argument and boxed and pinned output.
 pub type Pinfn<S, T> = fn(S) -> Pin<Box<dyn Future<Output = T> + Send + Sync>>;
+
+/// Desugared type of async function with two arguments and boxed and pinned output.
+pub type Pinfn2<S1, S2, T> = fn(S1, S2) -> Pin<Box<dyn Future<Output = T> + Send + Sync>>;
 
 /// Boxes and pins an async function so it can be passed across theads.
 pub fn arc_pin_async_fn<S: 'static, T: Send + Sync, Fut>(

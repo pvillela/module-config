@@ -1,5 +1,5 @@
-use crate::fs::boot::{get_bar_bf_s_cached, get_bar_bf_s_no_refresh};
-use crate::fs::{FooSflCfg, FooSflDeps, FooSflS};
+use crate::fs::boot::{get_bar_bf_d_cached, get_bar_bf_d_no_refresh};
+use crate::fs::{foo_sfl_c, FooSflCfg, FooSflD, FooSflDeps, FooSflS};
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::FooSflCfgInfo;
 use common::fwk::RefreshMode;
@@ -24,28 +24,36 @@ pub fn get_foo_sfl_s_with_app_cfg(
     }
 }
 
-pub fn get_foo_sfl_s_no_refresh() -> &'static FooSflS {
-    static FOO_A_SFL_S: OnceLock<FooSflS> = OnceLock::new();
-    FOO_A_SFL_S.get_or_init(|| {
+pub fn get_foo_sfl_d_no_refresh() -> FooSflD {
+    static FOO_SFL_S: OnceLock<FooSflS> = OnceLock::new();
+    let foo_sfl_s = FOO_SFL_S.get_or_init(|| {
         get_foo_sfl_s_with_app_cfg(
             get_app_configuration,
             RefreshMode::NoRefresh,
             FooSflDeps {
-                bar_bf_s: get_bar_bf_s_no_refresh(),
+                bar_bf_d: get_bar_bf_d_no_refresh(),
             },
         )
-    })
+    });
+    FooSflD {
+        s: foo_sfl_s,
+        f: foo_sfl_c,
+    }
 }
 
-pub fn get_foo_sfl_s_cached() -> &'static FooSflS {
-    static FOO_A_SFL_S_CACHED: OnceLock<FooSflS> = OnceLock::new();
-    FOO_A_SFL_S_CACHED.get_or_init(|| {
+pub fn get_foo_sfl_d_cached() -> FooSflD {
+    static FOO_SFL_S_CACHED: OnceLock<FooSflS> = OnceLock::new();
+    let foo_sfl_s = FOO_SFL_S_CACHED.get_or_init(|| {
         get_foo_sfl_s_with_app_cfg(
             get_app_configuration,
             RefreshMode::Refreshable(Duration::from_millis(150)),
             FooSflDeps {
-                bar_bf_s: get_bar_bf_s_cached(),
+                bar_bf_d: get_bar_bf_d_cached(),
             },
         )
-    })
+    });
+    FooSflD {
+        s: foo_sfl_s,
+        f: foo_sfl_c,
+    }
 }

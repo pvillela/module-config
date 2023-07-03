@@ -1,10 +1,14 @@
-use super::BarBfS;
-use common::{fs_data::FooSflCfgInfo, fs_util::foo_core, fwk::CfgArcSwapArc};
+use super::bar_bf::BarBfD;
+use common::{
+    fs_data::FooSflCfgInfo,
+    fs_util::foo_core,
+    fwk::{CfgArcSwapArc, Dep0},
+};
 
 pub type FooSflCfg = CfgArcSwapArc<FooSflCfgInfo>;
 
 pub struct FooSflDeps {
-    pub bar_bf_s: &'static BarBfS,
+    pub bar_bf_d: BarBfD,
 }
 
 pub struct FooSflS {
@@ -12,13 +16,13 @@ pub struct FooSflS {
     pub deps: FooSflDeps,
 }
 
-impl FooSflS {
-    pub fn run(&self) -> String {
-        let FooSflDeps { bar_bf_s } = self.deps;
-        let cfg = self.cfg.get_cfg();
-        let a = cfg.a.clone();
-        let b = cfg.b;
-        let bar_res = bar_bf_s.run();
-        foo_core(a, b, bar_res)
-    }
+pub type FooSflD = Dep0<FooSflS, String>;
+
+pub fn foo_sfl_c(s: &FooSflS) -> String {
+    let FooSflDeps { bar_bf_d } = &s.deps;
+    let cfg = s.cfg.get_cfg();
+    let a = cfg.a.clone();
+    let b = cfg.b;
+    let bar_res = bar_bf_d.run();
+    foo_core(a, b, bar_res)
 }

@@ -1,6 +1,6 @@
 use common::fs_data::BarBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::CfgArcSwapArc;
+use common::fwk::{CfgArcSwapArc, Dep0};
 
 pub type BarBfCfg = CfgArcSwapArc<BarBfCfgInfo>;
 
@@ -8,11 +8,11 @@ pub struct BarBfS {
     pub cfg: BarBfCfg,
 }
 
-impl BarBfS {
-    pub fn run(&self) -> String {
-        let cfg = self.cfg.get_cfg();
-        let u = cfg.u;
-        let v = cfg.v.clone();
-        bar_core(u, v)
-    }
+pub type BarBfD = Dep0<BarBfS, String>;
+
+pub fn bar_bf_c(s: &BarBfS) -> String {
+    let cfg = s.cfg.get_cfg();
+    let u = cfg.u;
+    let v = cfg.v.clone();
+    bar_core(u, v)
 }

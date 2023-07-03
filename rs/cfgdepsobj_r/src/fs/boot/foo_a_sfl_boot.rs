@@ -1,4 +1,4 @@
-use crate::fs::boot::{get_bar_a_bf_s_cached, get_bar_a_bf_s_no_refresh};
+use crate::fs::boot::{get_bar_a_bf_d_cached, get_bar_a_bf_d_no_refresh};
 use crate::fs::{FooASflCfg, FooASflDeps, FooASflS};
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::FooASflCfgInfo;
@@ -35,7 +35,7 @@ pub fn get_foo_a_sfl_s_no_refresh() -> &'static FooASflS {
             get_app_configuration,
             RefreshMode::NoRefresh,
             FooASflDeps {
-                bar_a_bf_s: get_bar_a_bf_s_no_refresh(),
+                bar_a_bf_d: get_bar_a_bf_d_no_refresh(),
             },
         )
     })
@@ -48,7 +48,7 @@ pub fn get_foo_a_sfl_s_cached() -> &'static FooASflS {
             get_app_configuration,
             RefreshMode::Refreshable(Duration::from_millis(150)),
             FooASflDeps {
-                bar_a_bf_s: get_bar_a_bf_s_cached(),
+                bar_a_bf_d: get_bar_a_bf_d_cached(),
             },
         )
     })
