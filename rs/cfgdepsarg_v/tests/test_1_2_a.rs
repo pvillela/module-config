@@ -1,8 +1,8 @@
-mod common_test;
+mod common_test_a;
 
 use common::fs_data::BarBfCfgInfo;
 use common::fs_data::FooSflCfgInfo;
-use common_test::common_test;
+use common_test_a::common_test;
 use tokio;
 
 mod t1 {
