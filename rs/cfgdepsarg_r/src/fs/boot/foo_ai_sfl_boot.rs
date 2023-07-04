@@ -2,7 +2,7 @@ use super::bar_ai_bf_boot;
 use crate::fs::{foo_ai_sfl_c, FooAiSflDeps, FooAiSflS, FooAiSflT};
 use common::config::AppCfgInfo;
 use common::fs_data::FooAiSflCfgInfo;
-use common::ref_pin_async_fn;
+use common::fwk::ref_pin_async_fn;
 use std::sync::Arc;
 
 fn foo_ai_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooAiSflCfgInfo {
@@ -19,5 +19,5 @@ pub fn foo_ai_sfl_boot(app_cfg: fn() -> Arc<AppCfgInfo>) -> FooAiSflT {
     };
     let foo_ai_sfl_s = Arc::new(FooAiSflS { cfg, deps });
     let f = move |input| foo_ai_sfl_c(foo_ai_sfl_s.clone(), input);
-    ref_pin_async_fn!(f)
+    ref_pin_async_fn(f)
 }

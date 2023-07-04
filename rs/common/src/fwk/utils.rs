@@ -5,10 +5,11 @@ use std::sync::Arc;
 
 use std::sync::OnceLock;
 
-/// Type of boxed and pinned wrapper of async functions.
+/// Type of boxed and pinned wrapper of async closures.
 pub type ArcPinFn<S, T> =
     Arc<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync>;
 
+/// Type of static reference to desugared async closure.
 pub type RefPinFn<S, T> =
     &'static (dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync);
 
@@ -156,6 +157,36 @@ pub fn static_closure_0_thread_safe<T>(
     f: impl Fn() -> T + Send + Sync + 'static,
 ) -> &'static (dyn Fn() -> T + Send + Sync) {
     Box::leak(Box::new(f))
+}
+
+pub fn static_closure_1_thread_safe<S, T>(
+    f: impl Fn(S) -> T + Send + Sync + 'static,
+) -> &'static (dyn Fn(S) -> T + Send + Sync) {
+    Box::leak(Box::new(f))
+}
+
+/// Transforms an async closure into a closure that returns a pinned-boxed future.
+pub fn pin_async_fn<S: 'static, T: 'static + Send + Sync, Fut>(
+    f: impl Fn(S) -> Fut + 'static + Send + Sync,
+) -> impl Fn(S) -> Pin<Box<dyn 'static + Future<Output = T> + Send + Sync>>
+where
+    Fut: 'static + Future<Output = T> + Send + Sync,
+{
+    move |s| {
+        let x = f(s);
+        let y: Pin<Box<dyn 'static + Future<Output = T> + Send + Sync>> = Box::pin(x);
+        y
+    }
+}
+
+/// Transforms an async closure into a static (leaked) reference to a closure that returns a pinned-boxed future.
+pub fn ref_pin_async_fn<S, T: 'static + Send + Sync, Fut>(
+    f: impl Fn(S) -> Fut + 'static + Send + Sync,
+) -> &'static (dyn Fn(S) -> Pin<Box<dyn 'static + Future<Output = T> + Send + Sync>> + Send + Sync)
+where
+    Fut: 'static + Future<Output = T> + Send + Sync,
+{
+    Box::leak(Box::new(pin_async_fn(f)))
 }
 
 pub type StaticFn<S, T> = &'static (dyn Fn(S) -> T + Send + Sync);

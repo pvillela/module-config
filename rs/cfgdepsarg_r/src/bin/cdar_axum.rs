@@ -1,13 +1,12 @@
 use axum::{routing::post, Router};
 use cfgdepsarg_r::{
     fs::{bar_a_bf_c, foo_a_sfl_c, BarABfCfg, BarABfS, FooASflCfg, FooASflDeps, FooASflS},
-    startup::{make_foo_a_sfl_no_refresh, make_foo_a_sfl_refreshable},
+    startup::make_foo_a_sfl_refreshable,
 };
 use common::{
     config::refresh_app_configuration,
     fs_data::{BarBfCfgInfo, FooSflCfgInfo},
-    fwk::{RefreshMode, Src},
-    ref_pin_async_fn,
+    fwk::{ref_pin_async_fn, RefreshMode, Src},
     web::axum_handler::handler_of,
 };
 use std::{sync::Arc, thread, time::Duration};
@@ -32,7 +31,7 @@ async fn main() {
         bar_a_bf_c(bar_a_s, sleep_millis)
     };
 
-    let foo_a_sfl = move |input| {
+    let _foo_a_sfl = move |input| {
         let foo_a_sfl_cfg_info = FooSflCfgInfo {
             a: "foo_aw_test1".to_owned(),
             b: 1,
@@ -44,7 +43,7 @@ async fn main() {
         );
 
         let foo_a_deps = FooASflDeps {
-            bar_a_bf: ref_pin_async_fn!(bar_a_bf),
+            bar_a_bf: ref_pin_async_fn(bar_a_bf),
         };
 
         let foo_a_s = Arc::new(FooASflS {

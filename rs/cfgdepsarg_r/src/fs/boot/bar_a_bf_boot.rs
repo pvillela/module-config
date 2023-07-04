@@ -1,8 +1,7 @@
 use crate::fs::{bar_a_bf_c, BarABfCfg, BarABfS, BarABfT};
 use common::config::AppCfgInfo;
 use common::fs_data::BarABfCfgInfo;
-use common::fwk::RefreshMode;
-use common::ref_pin_async_fn;
+use common::fwk::{ref_pin_async_fn, RefreshMode};
 use std::sync::Arc;
 
 fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarABfCfgInfo {
@@ -17,5 +16,5 @@ pub fn bar_a_bf_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode
         BarABfCfg::new_boxed_with_cfg_adapter(app_cfg, bar_a_bf_cfg_adapter, refresh_mode.clone());
     let bar_a_bf_s = Arc::new(BarABfS { cfg, deps: () });
     let f = move |sleep_millis| bar_a_bf_c(bar_a_bf_s.clone(), sleep_millis);
-    ref_pin_async_fn!(f)
+    ref_pin_async_fn(f)
 }

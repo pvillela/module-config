@@ -1,9 +1,8 @@
-use std::sync::Arc;
-
 use cfgdepsarg_r::fs::{bar_ai_bf_c, foo_ai_sfl_c, BarAiBfS, FooAiSflDeps, FooAiSflS};
 use common::fs_data::BarAiBfCfgInfo;
 use common::fs_data::{FooAiIn, FooAiSflCfgInfo};
-use common::ref_pin_async_fn;
+use common::fwk::ref_pin_async_fn;
+use std::sync::Arc;
 use tokio;
 
 pub async fn common_test(
@@ -20,7 +19,7 @@ pub async fn common_test(
     };
 
     let foo_ai_sfl_deps = FooAiSflDeps {
-        bar_ai_bf: ref_pin_async_fn!(bar_ai_bf),
+        bar_ai_bf: ref_pin_async_fn(bar_ai_bf),
     };
     let foo_ai_sfl_s = Arc::new(FooAiSflS {
         cfg: foo_ai_sfl_cfg_info,

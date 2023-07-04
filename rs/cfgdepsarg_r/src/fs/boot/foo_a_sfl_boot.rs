@@ -2,8 +2,7 @@ use super::bar_a_bf_boot;
 use crate::fs::{foo_a_sfl_c, FooASflCfg, FooASflDeps, FooASflS, FooASflT};
 use common::config::AppCfgInfo;
 use common::fs_data::FooASflCfgInfo;
-use common::fwk::RefreshMode;
-use common::ref_pin_async_fn;
+use common::fwk::{ref_pin_async_fn, RefreshMode};
 use std::sync::Arc;
 
 fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
@@ -24,5 +23,5 @@ pub fn foo_a_sfl_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMod
     };
     let foo_a_sfl_s = Arc::new(FooASflS { cfg, deps });
     let f = move |input| foo_a_sfl_c(foo_a_sfl_s.clone(), input);
-    ref_pin_async_fn!(f)
+    ref_pin_async_fn(f)
 }
