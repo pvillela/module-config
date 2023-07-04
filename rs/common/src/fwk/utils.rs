@@ -9,12 +9,15 @@ use std::sync::OnceLock;
 pub type ArcPinFn<S, T> =
     Arc<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync>;
 
+pub type RefPinFn<S, T> =
+    &'static (dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync);
+
 /// Part 1 of the definition of a type alias for a closure that returns a boxed and pinned future.
 /// As type aliases for traits are not yet supported, we need to define a new trait and a
 /// blanket implementation for it.
 /// This is the trait definition.
 /// See https://users.rust-lang.org/t/why-cant-type-aliases-be-used-for-traits/10002/9.
-pub trait PinFn<S, T>:
+pub trait PinFnExperimental<S, T>:
     Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync
 {
 }
@@ -28,7 +31,7 @@ pub trait PinFn<S, T>:
 /// blanket implementation for it.
 /// This is the blanket impl.
 /// See https://users.rust-lang.org/t/why-cant-type-aliases-be-used-for-traits/10002/9.
-impl<S, T, F> PinFn<S, T> for F where
+impl<S, T, F> PinFnExperimental<S, T> for F where
     F: Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync
 {
 }
