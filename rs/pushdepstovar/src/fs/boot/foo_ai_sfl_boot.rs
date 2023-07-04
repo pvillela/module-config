@@ -11,7 +11,7 @@ fn foo_ai_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooAiSflCfgInfo {
     }
 }
 
-pub fn get_foo_ai_sfl_wtih_app_cfg(app_cfg_src: fn() -> Arc<AppCfgInfo>) -> FooAiSflT {
+pub fn get_foo_ai_sfl_with_app_cfg(app_cfg_src: fn() -> Arc<AppCfgInfo>) -> FooAiSflT {
     // A stereotype should initialize its dependencies.
     let bar_ai_bf = get_bar_ai_bf_with_app_cfg(app_cfg_src);
     let deps = FooAiSflDeps { bar_ai_bf };

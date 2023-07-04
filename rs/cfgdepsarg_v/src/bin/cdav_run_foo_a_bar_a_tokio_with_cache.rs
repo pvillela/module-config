@@ -1,23 +1,22 @@
+use std::time::Duration;
+
+use cfgdepsarg::fs::boot::foo_a_sfl_boot;
 use common::config::get_app_configuration;
 use common::fs_data::{FooAIn, FooAOut};
 use common::fwk::{ArcPinFn, RefreshMode};
 use common::tokio_run::{run, RunIn};
-use pushdepstovar::fs::boot::get_foo_a_sfl_with_app_cfg;
-use std::sync::Arc;
-use std::time::Duration;
 use tokio;
 
 fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
-    let foo_a_sfl = get_foo_a_sfl_with_app_cfg(
+    foo_a_sfl_boot(
         get_app_configuration,
-        RefreshMode::Refreshable(Duration::from_millis(150)),
-    );
-    Arc::new(foo_a_sfl)
+        RefreshMode::Refreshable(Duration::from_millis(160)),
+    )
 }
 
 #[tokio::main]
 async fn main() {
-    println!("===== pdv_run_foo_a_bar_a_tokio__cache =====");
+    println!("===== cda_run_foo_a_bar_a_tokio_with_cache =====");
 
     run(RunIn {
         make_foo_a_sfl,

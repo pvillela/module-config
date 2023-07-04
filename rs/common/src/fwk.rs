@@ -10,5 +10,8 @@ pub use cfg_ovd_def::*;
 mod cfg_ext;
 pub use cfg_ext::*;
 
+mod dep;
+pub use dep::*;
+
 mod utils;
 pub use utils::*;
