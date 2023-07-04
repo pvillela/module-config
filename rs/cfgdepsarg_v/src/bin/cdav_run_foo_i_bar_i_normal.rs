@@ -1,4 +1,4 @@
-use cfgdepsarg::startup::make_foo_i_sfl;
+use cfgdepsarg_v::startup::make_foo_i_sfl;
 use common::config::refresh_app_configuration;
 
 fn main() {

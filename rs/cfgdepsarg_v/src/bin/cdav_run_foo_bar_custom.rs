@@ -1,4 +1,4 @@
-use cfgdepsarg::fs::{boot::foo_sfl_boot, FooSflT};
+use cfgdepsarg_v::fs::{boot::foo_sfl_boot, FooSflT};
 use common::{
     config::{refresh_app_configuration, AppCfgInfo},
     fwk::RefreshMode,

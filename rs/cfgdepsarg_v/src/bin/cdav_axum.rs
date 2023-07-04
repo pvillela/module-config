@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::{routing::post, Router};
-use cfgdepsarg::fs::{
+use cfgdepsarg_v::fs::{
     bar_a_bf_c, foo_a_sfl_c, BarABfCfg, BarABfS, FooASflCfg, FooASflDeps, FooASflS,
 };
 use common::{

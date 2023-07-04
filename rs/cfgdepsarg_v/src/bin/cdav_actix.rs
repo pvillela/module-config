@@ -1,10 +1,10 @@
 use actix_web::{web, App, HttpServer};
+use cfgdepsarg_v::fs::{bar_aw_bf_c, foo_aw_sfl_c, BarAwBfCfg, FooAwSflCfg, FooAwSflDeps};
 use common::{
     fs_data::{BarBfCfgInfo, FooSflCfgInfo},
     fwk::{RefreshMode, Src},
     web::actix_handler::handler_of_rcpin,
 };
-use cfgdepsarg::fs::{bar_aw_bf_c, foo_aw_sfl_c, BarAwBfCfg, FooAwSflCfg, FooAwSflDeps};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

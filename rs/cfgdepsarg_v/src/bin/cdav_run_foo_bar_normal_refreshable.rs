@@ -1,4 +1,4 @@
-use cfgdepsarg::startup::make_foo_sfl_refreshable;
+use cfgdepsarg_v::startup::make_foo_sfl_refreshable;
 use common::config::refresh_app_configuration;
 use std::{thread, time::Duration};
 

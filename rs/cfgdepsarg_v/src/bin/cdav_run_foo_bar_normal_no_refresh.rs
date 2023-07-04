@@ -1,4 +1,4 @@
-use cfgdepsarg::startup::make_foo_sfl_no_refresh;
+use cfgdepsarg_v::startup::make_foo_sfl_no_refresh;
 use common::config::refresh_app_configuration;
 
 fn main() {

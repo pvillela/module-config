@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use cfgdepsarg::fs::{bar_ai_bf_c, foo_ai_sfl_c, BarAiBfS, FooAiSflDeps, FooAiSflS};
+use cfgdepsarg_v::fs::{bar_ai_bf_c, foo_ai_sfl_c, BarAiBfS, FooAiSflDeps, FooAiSflS};
 use common::fs_data::BarAiBfCfgInfo;
 use common::fs_data::{FooAiIn, FooAiSflCfgInfo};
 use common::fwk::arc_pin_async_fn;

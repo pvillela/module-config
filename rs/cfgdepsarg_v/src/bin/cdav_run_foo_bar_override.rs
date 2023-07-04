@@ -1,4 +1,4 @@
-use cfgdepsarg::fs::{foo_sfl_c, FooSflCfg, FooSflDeps, FooSflS};
+use cfgdepsarg_v::fs::{foo_sfl_c, FooSflCfg, FooSflDeps, FooSflS};
 use common::config::refresh_app_configuration;
 use common::fs_data::{BarBfCfgInfo, FooSflCfgInfo};
 use common::fs_util::bar_core;

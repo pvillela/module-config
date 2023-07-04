@@ -1,8 +1,8 @@
+use cfgdepsarg_v::fs::boot::foo_a_sfl_boot;
 use common::config::get_app_configuration;
 use common::fs_data::{FooAIn, FooAOut};
 use common::fwk::{ArcPinFn, RefreshMode};
 use common::tokio_run::{run, RunIn};
-use cfgdepsarg::fs::boot::foo_a_sfl_boot;
 use tokio;
 
 fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
