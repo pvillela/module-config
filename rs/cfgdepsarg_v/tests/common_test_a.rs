@@ -18,7 +18,10 @@ pub async fn common_test(
             Src::new_boxed(move || bar_a_bf_cfg_info.clone()),
             RefreshMode::NoRefresh,
         );
-        let bar_a_bf_s = Arc::new(BarABfS { cfg: bar_a_bf_cfg });
+        let bar_a_bf_s = Arc::new(BarABfS {
+            cfg: bar_a_bf_cfg,
+            deps: (),
+        });
         bar_a_bf_c(bar_a_bf_s, sleep_millis)
     };
 

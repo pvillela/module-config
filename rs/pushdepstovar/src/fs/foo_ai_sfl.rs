@@ -1,7 +1,7 @@
 use common::{
     fs_data::{FooAiIn, FooAiOut, FooAiSflCfgInfo},
     fs_util::foo_core,
-    fwk::{CfgDeps, Pinfn},
+    fwk::{CfgDepsS, Pinfn},
     pin_async_fn,
 };
 use std::{rc::Rc, time::Duration};
@@ -32,7 +32,7 @@ async fn foo_ai_sfl(input: FooAiIn) -> FooAiOut {
     FooAiOut { res }
 }
 
-static FOO_AI_SFL_CFG_DEPS: CfgDeps<FooAiSflCfgInfo, FooAiSflDeps> = CfgDeps::new();
+static FOO_AI_SFL_CFG_DEPS: CfgDepsS<FooAiSflCfgInfo, FooAiSflDeps> = CfgDepsS::new();
 
 thread_local! {
     pub static FOO_AI_SFL_CFG_TL: Rc<FooAiSflCfgInfo> = Rc::new(FOO_AI_SFL_CFG_DEPS.get_cfg().clone());

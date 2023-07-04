@@ -1,7 +1,7 @@
 use common::{
     fs_data::FooSflCfgInfo,
     fs_util::foo_core,
-    fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDeps, CfgRefCellRc},
+    fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc},
 };
 
 pub type FooSflCfg = CfgArcSwapArc<FooSflCfgInfo>;
@@ -24,7 +24,7 @@ fn foo_sfl() -> String {
     foo_core(a, b, bar_res)
 }
 
-static FOO_SFL_CFG_DEPS: CfgDeps<FooSflCfg, FooSflDeps> = CfgDeps::new();
+static FOO_SFL_CFG_DEPS: CfgDepsS<FooSflCfg, FooSflDeps> = CfgDepsS::new();
 
 thread_local! {
     pub static FOO_SFL_CFG_TL: CfgRefCellRc<FooSflCfgInfo> = cfg_to_thread_local(FOO_SFL_CFG_DEPS.get_cfg());

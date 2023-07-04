@@ -14,6 +14,7 @@ pub async fn common_test(
         let bar_ai_bf_cfg_info = bar_ai_bf_cfg_info.clone();
         let bar_ai_bf_s = Arc::new(BarAiBfS {
             cfg: bar_ai_bf_cfg_info,
+            deps: (),
         });
         bar_ai_bf_c(bar_ai_bf_s, sleep_millis)
     };

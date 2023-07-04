@@ -2,7 +2,7 @@ use common::{
     config::{get_app_configuration, AppCfgInfo},
     fs_data::FooSflCfgInfo,
     fs_util::foo_core,
-    fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDeps, CfgRefCellRc, RefreshMode},
+    fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc, RefreshMode},
 };
 
 use super::{bar_bf, BAR_BF_CFG};
@@ -27,7 +27,7 @@ pub fn foo_sfl() -> String {
     foo_core(a, b, bar_res)
 }
 
-pub static FOO_SFL_CFG_DEPS: CfgDeps<FooSflCfg, FooSflDeps> = CfgDeps::lazy_init(
+pub static FOO_SFL_CFG_DEPS: CfgDepsS<FooSflCfg, FooSflDeps> = CfgDepsS::lazy_init(
     || {
         FooSflCfg::new_boxed_with_cfg_adapter(
             get_app_configuration, // use `|| todo!()` before get_app_configuration exists

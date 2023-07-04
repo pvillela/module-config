@@ -2,7 +2,7 @@ use common::{
     config::{get_app_configuration, AppCfgInfo},
     fs_data::{FooAiIn, FooAiOut, FooAiSflCfgInfo},
     fs_util::foo_core,
-    fwk::{CfgDeps, Pinfn},
+    fwk::{CfgDepsS, Pinfn},
     pin_async_fn,
 };
 use std::{rc::Rc, time::Duration};
@@ -35,7 +35,7 @@ pub async fn foo_ai_sfl(input: FooAiIn) -> FooAiOut {
     FooAiOut { res }
 }
 
-pub static FOO_AI_SFL_CFG_DEPS: CfgDeps<FooAiSflCfgInfo, FooAiSflDeps> = CfgDeps::lazy_init(
+pub static FOO_AI_SFL_CFG_DEPS: CfgDepsS<FooAiSflCfgInfo, FooAiSflDeps> = CfgDepsS::lazy_init(
     || foo_ai_sfl_cfg_adapter(&get_app_configuration()),
     || {
         BAR_AI_BF_CFG.prime(); // optional, just in case we want to force up-front app initialization.

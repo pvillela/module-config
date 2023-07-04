@@ -1,7 +1,7 @@
 use common::{
     fs_data::{FooAIn, FooAOut, FooASflCfgInfo},
     fs_util::foo_core,
-    fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDeps, CfgRefCellRc, Pinfn},
+    fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc, Pinfn},
     pin_async_fn,
 };
 use std::time::Duration;
@@ -34,7 +34,7 @@ async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     FooAOut { res }
 }
 
-pub static FOO_A_SFL_CFG_DEPS: CfgDeps<FooASflCfg, FooASflDeps> = CfgDeps::new();
+pub static FOO_A_SFL_CFG_DEPS: CfgDepsS<FooASflCfg, FooASflDeps> = CfgDepsS::new();
 
 thread_local! {
     pub static FOO_A_SFL_CFG_TL: CfgRefCellRc<FooASflCfgInfo> = cfg_to_thread_local(FOO_A_SFL_CFG_DEPS.get_cfg());

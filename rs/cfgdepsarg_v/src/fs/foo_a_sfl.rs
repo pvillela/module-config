@@ -1,6 +1,6 @@
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{ArcPinFn, CfgArcSwapArc};
+use common::fwk::{ArcPinFn, CfgArcSwapArc, CfgDeps};
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -14,10 +14,7 @@ pub struct FooASflDeps {
     pub bar_a_bf: ArcPinFn<u64, String>,
 }
 
-pub struct FooASflS {
-    pub cfg: FooASflCfg,
-    pub deps: FooASflDeps,
-}
+pub type FooASflS = CfgDeps<FooASflCfg, FooASflDeps>;
 
 pub async fn foo_a_sfl_c(s: Arc<FooASflS>, input: FooAIn) -> FooAOut {
     let c = s.cfg.get_cfg();

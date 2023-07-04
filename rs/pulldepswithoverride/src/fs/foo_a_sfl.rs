@@ -2,7 +2,7 @@ use super::{bar_a_bf, BAR_A_BF_CFG};
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDeps, CfgRefCellRc, Pinfn, RefreshMode};
+use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc, Pinfn, RefreshMode};
 use common::pin_async_fn;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -32,7 +32,7 @@ pub async fn foo_a_sfl(input: FooAIn) -> FooAOut {
     FooAOut { res }
 }
 
-pub static FOO_A_SFL_CFG_DEPS: CfgDeps<FooASflCfg, FooASflDeps> = CfgDeps::lazy_init(
+pub static FOO_A_SFL_CFG_DEPS: CfgDepsS<FooASflCfg, FooASflDeps> = CfgDepsS::lazy_init(
     || {
         FooASflCfg::new_boxed_with_cfg_adapter(
             get_app_configuration, // use `|| todo!()` before get_app_configuration exists

@@ -1,7 +1,7 @@
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::BarBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDeps, CfgRefCellRc, RefreshMode};
+use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc, RefreshMode};
 
 pub type BarBfCfg = CfgArcSwapArc<BarBfCfgInfo>;
 
@@ -17,7 +17,7 @@ pub fn bar_bf() -> String {
     bar_core(u, v)
 }
 
-pub static BAR_BF_CFG: CfgDeps<BarBfCfg, ()> = CfgDeps::lazy_init_with_cfg(|| {
+pub static BAR_BF_CFG: CfgDepsS<BarBfCfg, ()> = CfgDepsS::lazy_init_with_cfg(|| {
     BarBfCfg::new_boxed_with_cfg_adapter(
         get_app_configuration, // use `|| todo!()` before get_app_configuration exists
         bar_bf_cfg_adapter,    // use `|_| todo!()` before bar_bf_cfg_adapter exists

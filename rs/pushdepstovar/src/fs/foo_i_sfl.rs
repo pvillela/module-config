@@ -1,4 +1,4 @@
-use common::{fs_data::FooISflCfgInfo, fs_util::foo_core, fwk::CfgDeps};
+use common::{fs_data::FooISflCfgInfo, fs_util::foo_core, fwk::CfgDepsS};
 use std::rc::Rc;
 
 pub type FooISflT = fn() -> String;
@@ -19,7 +19,7 @@ fn foo_i_sfl() -> String {
     foo_core(a, b, bar_res)
 }
 
-static FOO_I_SFL_CFG_DEPS: CfgDeps<FooISflCfgInfo, FooISflDeps> = CfgDeps::new();
+static FOO_I_SFL_CFG_DEPS: CfgDepsS<FooISflCfgInfo, FooISflDeps> = CfgDepsS::new();
 
 thread_local! {
     pub static FOO_I_SFL_CFG_TL: Rc<FooISflCfgInfo> = Rc::new(FOO_I_SFL_CFG_DEPS.get_cfg().clone());

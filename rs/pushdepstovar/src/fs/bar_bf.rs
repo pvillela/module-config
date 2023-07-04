@@ -1,6 +1,6 @@
 use common::fs_data::BarBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDeps, CfgRefCellRc};
+use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc};
 
 pub type BarBfCfg = CfgArcSwapArc<BarBfCfgInfo>;
 
@@ -16,7 +16,7 @@ fn bar_bf() -> String {
     bar_core(u, v)
 }
 
-static BAR_BF_CFG: CfgDeps<BarBfCfg, ()> = CfgDeps::new();
+static BAR_BF_CFG: CfgDepsS<BarBfCfg, ()> = CfgDepsS::new();
 
 thread_local! {
     pub static BAR_BF_CFG_TL: CfgRefCellRc<BarBfCfgInfo> = cfg_to_thread_local(BAR_BF_CFG.get_cfg());

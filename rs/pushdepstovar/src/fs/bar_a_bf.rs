@@ -1,6 +1,6 @@
 use common::fs_data::BarABfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDeps, CfgRefCellRc, Pinfn};
+use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc, Pinfn};
 use common::pin_async_fn;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -21,7 +21,7 @@ async fn bar_a_bf(sleep_millis: u64) -> String {
     bar_core(u, v)
 }
 
-static BAR_A_BF_CFG: CfgDeps<BarABfCfg, ()> = CfgDeps::new();
+static BAR_A_BF_CFG: CfgDepsS<BarABfCfg, ()> = CfgDepsS::new();
 
 thread_local! {
     pub static BAR_A_BF_CFG_TL: CfgRefCellRc<BarABfCfgInfo> = cfg_to_thread_local(BAR_A_BF_CFG.get_cfg());

@@ -15,7 +15,7 @@ fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
 pub fn bar_bf_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> BarBfT {
     let cfg =
         BarBfCfg::new_boxed_with_cfg_adapter(app_cfg, bar_bf_cfg_adapter, refresh_mode.clone());
-    let bar_bf_s = Rc::new(BarBfS { cfg });
+    let bar_bf_s = Rc::new(BarBfS { cfg, deps: () });
     let f = move || bar_bf_c(&bar_bf_s.clone());
     Box::new(f)
 }

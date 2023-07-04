@@ -1,6 +1,6 @@
 use common::fs_data::BarIBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::CfgDeps;
+use common::fwk::CfgDepsS;
 use std::rc::Rc;
 
 pub type BarIBfT = fn() -> String;
@@ -15,7 +15,7 @@ fn bar_i_bf() -> String {
     bar_core(u, v)
 }
 
-static BAR_I_BF_CFG: CfgDeps<BarIBfCfgInfo, ()> = CfgDeps::new();
+static BAR_I_BF_CFG: CfgDepsS<BarIBfCfgInfo, ()> = CfgDepsS::new();
 
 thread_local! {
     pub static BAR_I_BF_CFG_TL: Rc<BarIBfCfgInfo> = Rc::new(BAR_I_BF_CFG.get_cfg().clone());

@@ -13,7 +13,7 @@ fn bar_ai_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarAiBfCfgInfo {
 
 pub fn bar_ai_bf_boot(app_cfg: fn() -> Arc<AppCfgInfo>) -> BarAiBfT {
     let cfg = bar_ai_bf_cfg_adapter(&app_cfg());
-    let bar_ai_bf_s = Arc::new(BarAiBfS { cfg });
+    let bar_ai_bf_s = Arc::new(BarAiBfS { cfg, deps: () });
     let f = move |sleep_millis| bar_ai_bf_c(bar_ai_bf_s.clone(), sleep_millis);
     arc_pin_async_fn(f)
 }

@@ -1,6 +1,9 @@
 mod cfg;
 pub use cfg::*;
 
+mod cfg_deps_s;
+pub use cfg_deps_s::*;
+
 mod cfg_deps;
 pub use cfg_deps::*;
 

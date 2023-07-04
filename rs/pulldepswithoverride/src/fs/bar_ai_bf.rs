@@ -1,7 +1,7 @@
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::BarAiBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{CfgDeps, Pinfn};
+use common::fwk::{CfgDepsS, Pinfn};
 use common::pin_async_fn;
 use std::rc::Rc;
 use std::time::Duration;
@@ -21,8 +21,8 @@ pub async fn bar_ai_bf(sleep_millis: u64) -> String {
     bar_core(u, v)
 }
 
-pub static BAR_AI_BF_CFG: CfgDeps<BarAiBfCfgInfo, ()> =
-    CfgDeps::lazy_init_with_cfg(|| bar_ai_bf_cfg_adapter(&get_app_configuration()));
+pub static BAR_AI_BF_CFG: CfgDepsS<BarAiBfCfgInfo, ()> =
+    CfgDepsS::lazy_init_with_cfg(|| bar_ai_bf_cfg_adapter(&get_app_configuration()));
 
 thread_local! {
     pub static BAR_AI_BF_CFG_TL: Rc<BarAiBfCfgInfo> = Rc::new(BAR_AI_BF_CFG.get_cfg().clone());

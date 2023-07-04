@@ -2,7 +2,7 @@ use common::{
     config::{get_app_configuration, AppCfgInfo},
     fs_data::FooISflCfgInfo,
     fs_util::foo_core,
-    fwk::CfgDeps,
+    fwk::CfgDepsS,
 };
 use std::rc::Rc;
 
@@ -26,7 +26,7 @@ pub fn foo_i_sfl() -> String {
     foo_core(a, b, bar_res)
 }
 
-pub static FOO_I_SFL_CFG_DEPS: CfgDeps<FooISflCfgInfo, FooISflDeps> = CfgDeps::lazy_init(
+pub static FOO_I_SFL_CFG_DEPS: CfgDepsS<FooISflCfgInfo, FooISflDeps> = CfgDepsS::lazy_init(
     || foo_i_sfl_cfg_adapter(&get_app_configuration()),
     || {
         BAR_I_BF_CFG.prime(); // optional, just in case we want to force up-front app initialization.

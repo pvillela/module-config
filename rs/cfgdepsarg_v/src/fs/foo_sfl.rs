@@ -1,7 +1,7 @@
 use super::BarBfT;
 use common::fs_data::FooSflCfgInfo;
 use common::fs_util::foo_core;
-use common::fwk::CfgRefCellRc;
+use common::fwk::{CfgDeps, CfgRefCellRc};
 
 pub type FooSflT = Box<dyn Fn() -> String>;
 
@@ -11,10 +11,7 @@ pub struct FooSflDeps {
     pub bar_bf: BarBfT,
 }
 
-pub struct FooSflS {
-    pub cfg: FooSflCfg,
-    pub deps: FooSflDeps,
-}
+pub type FooSflS = CfgDeps<FooSflCfg, FooSflDeps>;
 
 pub fn foo_sfl_c(s: &FooSflS) -> String {
     let FooSflDeps { bar_bf } = &s.deps;

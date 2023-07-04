@@ -1,7 +1,7 @@
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fs_data::BarABfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDeps, CfgRefCellRc, Pinfn, RefreshMode};
+use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc, Pinfn, RefreshMode};
 use common::pin_async_fn;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -22,7 +22,7 @@ pub async fn bar_a_bf(sleep_millis: u64) -> String {
     bar_core(u, v)
 }
 
-pub static BAR_A_BF_CFG: CfgDeps<BarABfCfg, ()> = CfgDeps::lazy_init_with_cfg(|| {
+pub static BAR_A_BF_CFG: CfgDepsS<BarABfCfg, ()> = CfgDepsS::lazy_init_with_cfg(|| {
     BarABfCfg::new_boxed_with_cfg_adapter(
         get_app_configuration, // use `|| todo!()` before get_app_configuration exists
         bar_a_bf_cfg_adapter,  // use `|_| todo!()` before bar_bf_cfg_adapter exists
