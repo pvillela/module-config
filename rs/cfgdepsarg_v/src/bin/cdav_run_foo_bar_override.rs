@@ -39,7 +39,7 @@ fn foo_sfl_s() -> FooSflS {
 fn main() {
     println!("Running foo_sfl with config-deps override in 2 threads.");
 
-    let handle = thread::spawn(move || foo_sfl_c(foo_sfl_s()));
+    let handle = thread::spawn(move || foo_sfl_c(&foo_sfl_s()));
 
     let res = handle.join().unwrap();
     println!("{}", res);
@@ -47,7 +47,7 @@ fn main() {
     refresh_app_configuration();
     println!("App configuration refreshed -- there should be no difference in output.");
 
-    let handle = thread::spawn(move || foo_sfl_c(foo_sfl_s()));
+    let handle = thread::spawn(move || foo_sfl_c(&foo_sfl_s()));
 
     let res = handle.join().unwrap();
     println!("{}", res);

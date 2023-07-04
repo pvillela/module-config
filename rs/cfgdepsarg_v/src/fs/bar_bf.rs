@@ -10,7 +10,7 @@ pub struct BarBfS {
     pub cfg: BarBfCfg,
 }
 
-pub fn bar_bf_c(s: BarBfS) -> String {
+pub fn bar_bf_c(s: &BarBfS) -> String {
     let cfg = s.cfg.get_cfg();
     let u = cfg.u;
     let v = cfg.v.clone();

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use cfgdepsarg::fs::{bar_ai_bf_c, foo_ai_sfl_c, BarAiBfS, FooAiSflDeps, FooAiSflS};
 use common::fs_data::BarAiBfCfgInfo;
 use common::fs_data::{FooAiIn, FooAiSflCfgInfo};
@@ -10,19 +12,19 @@ pub async fn common_test(
 ) -> Option<String> {
     let bar_ai_bf = move |sleep_millis| {
         let bar_ai_bf_cfg_info = bar_ai_bf_cfg_info.clone();
-        let bar_ai_bf_s = BarAiBfS {
+        let bar_ai_bf_s = Arc::new(BarAiBfS {
             cfg: bar_ai_bf_cfg_info,
-        };
+        });
         bar_ai_bf_c(bar_ai_bf_s, sleep_millis)
     };
 
     let foo_ai_sfl_deps = FooAiSflDeps {
         bar_ai_bf: arc_pin_async_fn(bar_ai_bf),
     };
-    let foo_ai_sfl_s = FooAiSflS {
+    let foo_ai_sfl_s = Arc::new(FooAiSflS {
         cfg: foo_ai_sfl_cfg_info,
         deps: foo_ai_sfl_deps,
-    };
+    });
 
     let foo_ai_sfl = |input| foo_ai_sfl_c(foo_ai_sfl_s, input);
 

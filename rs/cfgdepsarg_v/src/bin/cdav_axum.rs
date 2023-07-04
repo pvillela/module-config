@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{routing::post, Router};
 use cfgdepsarg::fs::{
     bar_a_bf_c, foo_a_sfl_c, BarABfCfg, BarABfS, FooASflCfg, FooASflDeps, FooASflS,
@@ -20,7 +22,7 @@ async fn main() {
             Src::new_boxed(move || bar_a_bf_cfg_info.clone()),
             RefreshMode::NoRefresh,
         );
-        let bar_a_s = BarABfS { cfg: bar_a_cfg };
+        let bar_a_s = Arc::new(BarABfS { cfg: bar_a_cfg });
 
         bar_a_bf_c(bar_a_s, sleep_millis)
     };
@@ -46,10 +48,10 @@ async fn main() {
         //     // (StatusCode::OK, Json(res))
         // };
 
-        let foo_a_s = FooASflS {
+        let foo_a_s = Arc::new(FooASflS {
             cfg: foo_a_cfg,
             deps: foo_a_deps,
-        };
+        });
 
         foo_a_sfl_c(foo_a_s, input)
     };

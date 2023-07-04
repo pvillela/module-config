@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use cfgdepsarg::fs::{
     bar_a_bf_c, foo_a_sfl_c, BarABfCfg, BarABfS, FooASflCfg, FooASflDeps, FooASflS,
 };
@@ -16,7 +18,7 @@ pub async fn common_test(
             Src::new_boxed(move || bar_a_bf_cfg_info.clone()),
             RefreshMode::NoRefresh,
         );
-        let bar_a_bf_s = BarABfS { cfg: bar_a_bf_cfg };
+        let bar_a_bf_s = Arc::new(BarABfS { cfg: bar_a_bf_cfg });
         bar_a_bf_c(bar_a_bf_s, sleep_millis)
     };
 
@@ -27,10 +29,10 @@ pub async fn common_test(
     let foo_a_sfl_deps = FooASflDeps {
         bar_a_bf: arc_pin_async_fn(bar_a_bf),
     };
-    let foo_a_sfl_s = FooASflS {
+    let foo_a_sfl_s = Arc::new(FooASflS {
         cfg: foo_a_sfl_cfg,
         deps: foo_a_sfl_deps,
-    };
+    });
 
     let foo_a_sfl = |input| foo_a_sfl_c(foo_a_sfl_s, input);
 

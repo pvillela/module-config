@@ -13,7 +13,7 @@ pub struct FooISflS {
     pub deps: FooISflDeps,
 }
 
-pub fn foo_i_sfl_c(s: FooISflS) -> String {
+pub fn foo_i_sfl_c(s: &FooISflS) -> String {
     let FooISflDeps { bar_i_bf } = &s.deps;
     let cfg = &s.cfg;
     let a = cfg.a.clone();

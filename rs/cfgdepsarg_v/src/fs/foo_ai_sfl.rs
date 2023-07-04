@@ -1,6 +1,7 @@
 use common::fs_data::{FooAiIn, FooAiOut, FooAiSflCfgInfo};
 use common::fs_util::foo_core;
 use common::fwk::ArcPinFn;
+use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -16,7 +17,7 @@ pub struct FooAiSflS {
     pub deps: FooAiSflDeps,
 }
 
-pub async fn foo_ai_sfl_c(s: FooAiSflS, input: FooAiIn) -> FooAiOut {
+pub async fn foo_ai_sfl_c(s: Arc<FooAiSflS>, input: FooAiIn) -> FooAiOut {
     let c = &s.cfg;
     let d = &s.deps;
     let FooAiIn { sleep_millis } = input;

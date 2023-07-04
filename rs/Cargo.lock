@@ -383,34 +383,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cfgdepsarg_r"
-version = "0.1.0"
-dependencies = [
- "actix-web",
- "arc-swap",
- "axum",
- "common",
- "futures",
- "serde",
- "serde_json",
- "tokio",
-]
-
-[[package]]
-name = "cfgdepsobj_r"
-version = "0.1.0"
-dependencies = [
- "actix-web",
- "arc-swap",
- "axum",
- "common",
- "futures",
- "serde",
- "serde_json",
- "tokio",
-]
-
-[[package]]
 name = "common"
 version = "0.1.0"
 dependencies = [

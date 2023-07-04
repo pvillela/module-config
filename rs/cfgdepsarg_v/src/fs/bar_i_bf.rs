@@ -7,7 +7,7 @@ pub struct BarIBfS {
     pub cfg: BarIBfCfgInfo,
 }
 
-pub fn bar_i_bf_c(s: BarIBfS) -> String {
+pub fn bar_i_bf_c(s: &BarIBfS) -> String {
     let cfg = &s.cfg;
     let u = cfg.u;
     let v = cfg.v.clone();
