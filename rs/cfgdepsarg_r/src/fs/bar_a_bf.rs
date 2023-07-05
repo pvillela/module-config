@@ -1,11 +1,11 @@
 use common::fs_data::BarABfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{CfgArcSwapArc, CfgDeps, RefPinFn};
+use common::fwk::{BoxPinFn, CfgArcSwapArc, CfgDeps};
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
-pub type BarABfT = RefPinFn<u64, String>;
+pub type BarABfT = BoxPinFn<u64, String>;
 
 pub type BarABfCfg = CfgArcSwapArc<BarABfCfgInfo>;
 

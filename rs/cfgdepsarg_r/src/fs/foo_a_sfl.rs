@@ -5,13 +5,15 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
+use super::BarABfT;
+
 pub type FooASflT = RefPinFn<FooAIn, FooAOut>;
 
 pub type FooASflCfg = CfgArcSwapArc<FooASflCfgInfo>;
 
 // #[derive(Clone)]
 pub struct FooASflDeps {
-    pub bar_a_bf: RefPinFn<u64, String>,
+    pub bar_a_bf: BarABfT,
 }
 
 pub type FooASflS = CfgDeps<FooASflCfg, FooASflDeps>;

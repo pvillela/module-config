@@ -3,7 +3,7 @@ use cfgdepsarg_r::fs::{
 };
 use common::fs_data::BarABfCfgInfo;
 use common::fs_data::{FooAIn, FooASflCfgInfo};
-use common::fwk::{ref_pin_async_fn, RefreshMode, Src};
+use common::fwk::{box_pin_async_fn, RefreshMode, Src};
 use std::sync::Arc;
 use tokio;
 
@@ -29,7 +29,7 @@ pub async fn common_test(
         RefreshMode::NoRefresh,
     );
     let foo_a_sfl_deps = FooASflDeps {
-        bar_a_bf: ref_pin_async_fn(bar_a_bf),
+        bar_a_bf: box_pin_async_fn(bar_a_bf),
     };
     let foo_a_sfl_s = Arc::new(FooASflS {
         cfg: foo_a_sfl_cfg,

@@ -6,7 +6,7 @@ use cfgdepsarg_r::{
 use common::{
     config::refresh_app_configuration,
     fs_data::{BarBfCfgInfo, FooSflCfgInfo},
-    fwk::{ref_pin_async_fn, RefreshMode, Src},
+    fwk::{box_pin_async_fn, RefreshMode, Src},
     web::axum_handler::handler_of,
 };
 use std::{sync::Arc, thread, time::Duration};
@@ -43,7 +43,7 @@ async fn main() {
         );
 
         let foo_a_deps = FooASflDeps {
-            bar_a_bf: ref_pin_async_fn(bar_a_bf),
+            bar_a_bf: box_pin_async_fn(bar_a_bf),
         };
 
         let foo_a_s = Arc::new(FooASflS {

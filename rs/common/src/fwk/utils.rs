@@ -5,13 +5,18 @@ use std::sync::Arc;
 
 use std::sync::OnceLock;
 
+/// Type of dynamic object of pinned wrapper of async closures.
+pub type PinFn<S, T> =
+    dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync;
+
+/// Type of Arced and pinned wrapper of async closures.
+pub type ArcPinFn<S, T> = Arc<PinFn<S, T>>;
+
 /// Type of boxed and pinned wrapper of async closures.
-pub type ArcPinFn<S, T> =
-    Arc<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync>;
+pub type BoxPinFn<S, T> = Box<PinFn<S, T>>;
 
 /// Type of static reference to desugared async closure.
-pub type RefPinFn<S, T> =
-    &'static (dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync);
+pub type RefPinFn<S, T> = &'static PinFn<S, T>;
 
 /// Part 1 of the definition of a type alias for a closure that returns a boxed and pinned future.
 /// As type aliases for traits are not yet supported, we need to define a new trait and a
@@ -43,7 +48,7 @@ pub type Pinfn<S, T> = fn(S) -> Pin<Box<dyn Future<Output = T> + Send + Sync>>;
 /// Desugared type of async function with two arguments and boxed and pinned output.
 pub type Pinfn2<S1, S2, T> = fn(S1, S2) -> Pin<Box<dyn Future<Output = T> + Send + Sync>>;
 
-/// Boxes and pins an async function so it can be passed across theads.
+/// Arcs and pins an async function so it can be passed across theads.
 pub fn arc_pin_async_fn<S: 'static, T: Send + Sync, Fut>(
     f: impl Fn(S) -> Fut + 'static + Send + Sync,
 ) -> ArcPinFn<S, T>
@@ -53,25 +58,55 @@ where
     Arc::new(move |s| Box::pin(f(s)))
 }
 
-// /// Type of boxed and pinned wrapper of async functions.
-// pub type ArcPinFnL<'a, S, T> =
-//     Box<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'a + Send + Sync>> + Send + Sync>;
+/// Arcs and pins an async function so it can be passed across theads.
+pub fn box_pin_async_fn<S: 'static, T: Send + Sync, Fut>(
+    f: impl Fn(S) -> Fut + 'static + Send + Sync,
+) -> BoxPinFn<S, T>
+where
+    Fut: 'static + Future<Output = T> + Send + Sync,
+{
+    Box::new(move |s| Box::pin(f(s)))
+}
 
-// /// Boxes and pins an async function so it can be passed across theads.
-// pub fn arc_pin_async_fn_l<'a, S: 'a, T: Send + Sync, Fut>(
-//     f: impl Fn(S) -> Fut + 'a + Send + Sync,
-// ) -> ArcPinFnL<'a, S, T>
-// where
-//     Fut: 'a + Future<Output = T> + Send + Sync,
-// {
-//     Box::new(move |s| Box::pin(f(s)))
-//     // todo!()
-// }
+/// Transforms an async closure into a closure that returns a pinned-boxed future.
+pub fn pin_async_fn<S: 'static, T: 'static + Send + Sync, Fut>(
+    f: impl Fn(S) -> Fut + 'static + Send + Sync,
+) -> impl Fn(S) -> Pin<Box<dyn 'static + Future<Output = T> + Send + Sync>>
+where
+    Fut: 'static + Future<Output = T> + Send + Sync,
+{
+    move |s| {
+        let x = f(s);
+        let y: Pin<Box<dyn 'static + Future<Output = T> + Send + Sync>> = Box::pin(x);
+        y
+    }
+}
 
-/// Type of boxed and pinned wrapper of async functions.
+/// Transforms an async closure into a static (leaked) reference to a closure that returns a pinned-boxed future.
+/// Same functionality as [ref_pin_async_fn] with different implementation details.
+pub fn ref_pin_async_fn_original<S, T: 'static + Send + Sync, Fut>(
+    f: impl Fn(S) -> Fut + 'static + Send + Sync,
+) -> RefPinFn<S, T>
+where
+    Fut: 'static + Future<Output = T> + Send + Sync,
+{
+    Box::leak(Box::new(pin_async_fn(f)))
+}
+
+/// Transforms an async closure into a static (leaked) reference to a closure that returns a pinned-boxed future.
+pub fn ref_pin_async_fn<S, T: 'static + Send + Sync, Fut>(
+    f: impl Fn(S) -> Fut + 'static + Send + Sync,
+) -> RefPinFn<S, T>
+where
+    Fut: 'static + Future<Output = T> + Send + Sync,
+{
+    Box::leak(box_pin_async_fn(f))
+}
+
+/// Type of Rc'd and pinned wrapper of async functions.
 pub type RcPinFnWeb<S, T> = Rc<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static>>>;
 
-/// Boxes and pins an async function so it can be passed across theads.
+/// Arcs and pins an async function so it can be passed across theads.
 pub fn arc_pin_async_fn_web<S, T: Send + Sync, Fut>(
     f: impl Fn(S) -> Fut + 'static,
 ) -> RcPinFnWeb<S, T>
@@ -81,10 +116,10 @@ where
     Rc::new(move |s| Box::pin(f(s)))
 }
 
-/// Type of boxed wrapper of async functions.
+/// Type of minimalistic boxed wrapper of async functions.
 pub type MinBoxFn<S, T> = Box<dyn Fn(S) -> Box<dyn Future<Output = T>>>;
 
-/// Boxes and pins an async function so it can be passed across theads.
+/// Boxes and pins an async function so it can be passed.
 pub fn min_box_async_fn<S, T, Fut>(f: impl Fn(S) -> Fut + 'static) -> MinBoxFn<S, T>
 where
     Fut: Future<Output = T> + 'static,
@@ -163,30 +198,6 @@ pub fn static_closure_1_thread_safe<S, T>(
     f: impl Fn(S) -> T + Send + Sync + 'static,
 ) -> &'static (dyn Fn(S) -> T + Send + Sync) {
     Box::leak(Box::new(f))
-}
-
-/// Transforms an async closure into a closure that returns a pinned-boxed future.
-pub fn pin_async_fn<S: 'static, T: 'static + Send + Sync, Fut>(
-    f: impl Fn(S) -> Fut + 'static + Send + Sync,
-) -> impl Fn(S) -> Pin<Box<dyn 'static + Future<Output = T> + Send + Sync>>
-where
-    Fut: 'static + Future<Output = T> + Send + Sync,
-{
-    move |s| {
-        let x = f(s);
-        let y: Pin<Box<dyn 'static + Future<Output = T> + Send + Sync>> = Box::pin(x);
-        y
-    }
-}
-
-/// Transforms an async closure into a static (leaked) reference to a closure that returns a pinned-boxed future.
-pub fn ref_pin_async_fn<S, T: 'static + Send + Sync, Fut>(
-    f: impl Fn(S) -> Fut + 'static + Send + Sync,
-) -> &'static (dyn Fn(S) -> Pin<Box<dyn 'static + Future<Output = T> + Send + Sync>> + Send + Sync)
-where
-    Fut: 'static + Future<Output = T> + Send + Sync,
-{
-    Box::leak(Box::new(pin_async_fn(f)))
 }
 
 pub type StaticFn<S, T> = &'static (dyn Fn(S) -> T + Send + Sync);
