@@ -1,8 +1,8 @@
 use axum::{routing::post, Router};
-use cfgdepsarg_r::{
-    fs::{bar_a_bf_c, foo_a_sfl_c, BarABfCfg, BarABfS, FooASflCfg, FooASflDeps, FooASflS},
-    startup::make_foo_a_sfl_refreshable,
+use cfgdepsarg_r::fs::{
+    bar_a_bf_c, foo_a_sfl_c, BarABfCfg, BarABfS, FooASflCfg, FooASflDeps, FooASflS,
 };
+use cfgdepsarg_r::startup::get_foo_a_sfl_refreshable;
 use common::{
     config::refresh_app_configuration,
     fs_data::{BarBfCfgInfo, FooSflCfgInfo},
@@ -60,7 +60,7 @@ async fn main() {
     //     // (StatusCode::OK, Json(res))
     // };
 
-    let foo_a_sfl = make_foo_a_sfl_refreshable();
+    let foo_a_sfl = get_foo_a_sfl_refreshable();
 
     let foo_a_sfl_hdlr = handler_of(foo_a_sfl);
 
