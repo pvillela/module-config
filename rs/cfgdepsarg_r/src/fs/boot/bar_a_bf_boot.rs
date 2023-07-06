@@ -1,7 +1,7 @@
 use crate::fs::{bar_a_bf_c, BarABfCfg, BarABfS, BarABfT};
 use common::config::AppCfgInfo;
 use common::fs_data::BarABfCfgInfo;
-use common::fwk::{box_pin_async_fn, RefreshMode};
+use common::fwk::{box_pin_async_fn, ref_pin_async_fn, RefreshMode};
 use std::sync::{Arc, OnceLock};
 
 fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarABfCfgInfo {
@@ -19,8 +19,8 @@ pub fn bar_a_bf_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode
     box_pin_async_fn(f)
 }
 
-// The only benefit of this version over the above is that it saves an Arc clone for each call to the returned function.
-pub fn bar_a_bf_boot_xr(
+// The only benefit of this version over _boot is that it saves an Arc clone for each call to the returned function.
+pub fn bar_a_bf_boot_xs(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
 ) -> Box<BarABfT> {
@@ -35,4 +35,17 @@ pub fn bar_a_bf_boot_xr(
     });
     let f = move |sleep_millis| bar_a_bf_c(bar_a_bf_s, sleep_millis);
     box_pin_async_fn(f)
+}
+
+/// Returns a leaked static reference to a bar_a_bf closure.
+/// The only benefit of this version over _boot is that it saves an Arc clone for each call to the returned function.
+pub fn bar_a_bf_boot_lr(
+    app_cfg: fn() -> Arc<AppCfgInfo>,
+    refresh_mode: RefreshMode,
+) -> &'static BarABfT {
+    let cfg =
+        BarABfCfg::new_boxed_with_cfg_adapter(app_cfg, bar_a_bf_cfg_adapter, refresh_mode.clone());
+    let bar_a_bf_s: &BarABfS = Box::leak(Box::new(BarABfS { cfg, deps: () }));
+    let f = move |sleep_millis| bar_a_bf_c(bar_a_bf_s, sleep_millis);
+    ref_pin_async_fn(f)
 }
