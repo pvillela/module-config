@@ -1,20 +1,22 @@
 use common::fs_data::{FooAiIn, FooAiOut, FooAiSflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{CfgDeps, RefPinFn};
-use std::sync::Arc;
+use common::fwk::{CfgDeps, PinFn};
+use std::ops::Deref;
 use std::time::Duration;
 use tokio::time::sleep;
 
-pub type FooAiSflT = RefPinFn<FooAiIn, FooAiOut>;
+use super::BarAiBfT;
+
+pub type FooAiSflT = PinFn<FooAiIn, FooAiOut>;
 
 // #[derive(Clone)]
 pub struct FooAiSflDeps {
-    pub bar_ai_bf: RefPinFn<u64, String>,
+    pub bar_ai_bf: Box<BarAiBfT>,
 }
 
 pub type FooAiSflS = CfgDeps<FooAiSflCfgInfo, FooAiSflDeps>;
 
-pub async fn foo_ai_sfl_c(s: Arc<FooAiSflS>, input: FooAiIn) -> FooAiOut {
+pub async fn foo_ai_sfl_c(s: impl Deref<Target = FooAiSflS>, input: FooAiIn) -> FooAiOut {
     let c = &s.cfg;
     let d = &s.deps;
     let FooAiIn { sleep_millis } = input;

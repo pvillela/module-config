@@ -2,7 +2,7 @@ use common::fs_data::BarBfCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::{CfgDeps, CfgRefCellRc};
 
-pub type BarBfT = Box<dyn Fn() -> String>;
+pub type BarBfT = dyn Fn() -> String;
 
 pub type BarBfCfg = CfgRefCellRc<BarBfCfgInfo>;
 

@@ -2,7 +2,8 @@ use common::fs_data::BarIBfCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::CfgDeps;
 
-pub type BarIBfT = Box<dyn Fn() -> String>;
+// Send + Sync below is only to support foo_i_sfl_boot_r.
+pub type BarIBfT = dyn Fn() -> String + Send + Sync;
 
 pub type BarIBfS = CfgDeps<BarIBfCfgInfo, ()>;
 

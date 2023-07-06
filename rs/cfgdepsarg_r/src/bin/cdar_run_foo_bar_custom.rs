@@ -5,7 +5,7 @@ use common::{
 };
 use std::{sync::Arc, thread};
 
-fn make_foo_sfl1() -> FooSflT {
+fn make_foo_sfl1() -> Box<FooSflT> {
     let app_cfg_src1 = move || {
         Arc::new(AppCfgInfo {
             x: "custom".to_owned(),

@@ -13,7 +13,7 @@ fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
     }
 }
 
-pub fn foo_sfl_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> FooSflT {
+pub fn foo_sfl_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> Box<FooSflT> {
     let cfg =
         FooSflCfg::new_boxed_with_cfg_adapter(app_cfg, foo_sfl_cfg_adapter, refresh_mode.clone());
     let deps = FooSflDeps {
@@ -23,3 +23,6 @@ pub fn foo_sfl_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode)
     let f = move || foo_sfl_c(&foo_sfl_s.clone());
     Box::new(f)
 }
+
+// foo_sfl_boot_r can't be created per the usual pattern because FooSflCfg uses RefCell and Rc, which
+// cannot are not Send/Sync and cannot be held in a OnceLock.

@@ -3,10 +3,10 @@ use common::fs_data::FooISflCfgInfo;
 use common::fs_util::foo_core;
 use common::fwk::CfgDeps;
 
-pub type FooISflT = Box<dyn Fn() -> String>;
+pub type FooISflT = dyn Fn() -> String;
 
 pub struct FooISflDeps {
-    pub bar_i_bf: BarIBfT,
+    pub bar_i_bf: Box<BarIBfT>,
 }
 
 pub type FooISflS = CfgDeps<FooISflCfgInfo, FooISflDeps>;
