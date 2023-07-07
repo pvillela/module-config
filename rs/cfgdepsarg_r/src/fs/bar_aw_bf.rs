@@ -1,22 +1,20 @@
-use common::fs_data::BarABfCfgInfo;
+use common::fs_data::BarAwBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{rc_pin_async_fn_web, CfgRefCellId, RcPinFnWeb};
+use common::fwk::{CfgDeps, CfgRefCellId, PinFnWeb};
+use std::ops::Deref;
 use std::time::Duration;
 use tokio::time::sleep;
 
-pub type BarAwBfT = RcPinFnWeb<u64, String>;
+pub type BarAwBfT = PinFnWeb<u64, String>;
 
-pub type BarAwBfCfg = CfgRefCellId<BarABfCfgInfo>;
+pub type BarAwBfCfg = CfgRefCellId<BarAwBfCfgInfo>;
 
-pub fn bar_aw_bf_c(cfg: BarAwBfCfg) -> BarAwBfT {
-    let f = move |sleep_millis: u64| {
-        let cfg = cfg.get_cfg();
-        async move {
-            sleep(Duration::from_millis(sleep_millis)).await;
-            let u = cfg.u;
-            let v = cfg.v.clone();
-            bar_core(u, v)
-        }
-    };
-    rc_pin_async_fn_web(f)
+pub type BarAwBfS = CfgDeps<BarAwBfCfg, ()>;
+
+pub async fn bar_aw_bf_c(s: impl Deref<Target = BarAwBfS>, sleep_millis: u64) -> String {
+    let cfg = s.cfg.get_cfg();
+    sleep(Duration::from_millis(sleep_millis)).await;
+    let u = cfg.u;
+    let v = cfg.v.clone();
+    bar_core(u, v)
 }

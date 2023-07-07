@@ -1,7 +1,7 @@
-use crate::fwk::RcPinFnWeb;
+use crate::fwk::{PinFn, RcPinFnWeb};
 use actix_web::{body::BoxBody, http::header::ContentType, web::Json, HttpResponse, Responder};
 use futures::Future;
-use std::{pin::Pin, sync::Arc};
+use std::{pin::Pin, rc::Rc, sync::Arc};
 
 pub fn common_respond_to<T: serde::Serialize>(t: T) -> HttpResponse<BoxBody> {
     let body = serde_json::to_string(&t).unwrap();
@@ -30,7 +30,16 @@ where
     move |Json(input)| f(input)
 }
 
-pub fn handler_arc_of_rcpin<
+pub fn handler_of_web<S: 'static + serde::Deserialize<'static>, T: Responder + Send + Sync, Fut>(
+    f: impl Fn(S) -> Fut + 'static + Send + Sync + Clone,
+) -> impl Fn(Json<S>) -> Fut + Send + Sync + 'static + Clone
+where
+    Fut: Future<Output = T>,
+{
+    move |Json(input)| f(input)
+}
+
+pub fn handler_arc_of_rcpin_web<
     S: 'static + serde::Deserialize<'static>,
     T: 'static + Responder + Send + Sync,
 >(
@@ -39,11 +48,20 @@ pub fn handler_arc_of_rcpin<
     Arc::new(move |Json(input)| f(input))
 }
 
-pub fn handler_of_rcpin<
+pub fn handler_of_rcpin_web<
     S: 'static + serde::Deserialize<'static>,
     T: 'static + Responder + Send + Sync,
 >(
     f: RcPinFnWeb<S, T>,
+) -> impl Fn(Json<S>) -> Pin<Box<dyn Future<Output = T>>> + 'static + Clone {
+    move |Json(input)| f(input)
+}
+
+pub fn handler_of_rcpin<
+    S: 'static + serde::Deserialize<'static>,
+    T: 'static + Responder + Send + Sync,
+>(
+    f: Rc<PinFn<S, T>>,
 ) -> impl Fn(Json<S>) -> Pin<Box<dyn Future<Output = T>>> + 'static + Clone {
     move |Json(input)| f(input)
 }

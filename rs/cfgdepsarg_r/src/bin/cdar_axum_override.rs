@@ -4,7 +4,7 @@ use cfgdepsarg_r::fs::{
 };
 use common::{
     config::refresh_app_configuration,
-    fs_data::{BarBfCfgInfo, FooSflCfgInfo},
+    fs_data::{BarABfCfgInfo, FooASflCfgInfo},
     fwk::{box_pin_async_fn, RefreshMode, Src},
     web::axum_handler::handler_of,
 };
@@ -13,7 +13,7 @@ use std::{sync::Arc, thread, time::Duration};
 #[tokio::main]
 async fn main() {
     let bar_a_bf = |sleep_millis| {
-        let bar_a_bf_cfg_info = BarBfCfgInfo {
+        let bar_a_bf_cfg_info = BarABfCfgInfo {
             u: 11,
             v: "bar_a_test1".to_owned(),
         };
@@ -31,8 +31,8 @@ async fn main() {
     };
 
     let foo_a_sfl = move |input| {
-        let foo_a_sfl_cfg_info = FooSflCfgInfo {
-            a: "foo_aw_test1".to_owned(),
+        let foo_a_sfl_cfg_info = FooASflCfgInfo {
+            a: "foo_a_test1".to_owned(),
             b: 1,
         };
 
