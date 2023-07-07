@@ -6,8 +6,7 @@ use std::sync::Arc;
 use std::sync::OnceLock;
 
 /// Type of dynamic object of pinned wrapper of async closures.
-pub type PinFn<S, T> =
-    dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync;
+pub type PinFn<S, T> = dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + Send + Sync>> + Send + Sync;
 
 /// Type of Arced and pinned wrapper of async closures.
 pub type ArcPinFn<S, T> = Arc<PinFn<S, T>>;
@@ -19,7 +18,7 @@ pub type BoxPinFn<S, T> = Box<PinFn<S, T>>;
 pub type RefPinFn<S, T> = &'static PinFn<S, T>;
 
 /// Type of dynamic object of pinned wrapper of async closures, without Send + Sync..
-pub type PinFnWeb<S, T> = dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static>>;
+pub type PinFnWeb<S, T> = dyn Fn(S) -> Pin<Box<dyn Future<Output = T>>>;
 
 /// Type of Rc'd and pinned wrapper of async functions, without Send + Sync.
 pub type RcPinFnWeb<S, T> = Rc<PinFnWeb<S, T>>;
@@ -33,7 +32,7 @@ pub type BoxPinFnWeb<S, T> = Box<PinFnWeb<S, T>>;
 /// This is the trait definition.
 /// See https://users.rust-lang.org/t/why-cant-type-aliases-be-used-for-traits/10002/9.
 pub trait PinFnExperimental<S, T>:
-    Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync
+    Fn(S) -> Pin<Box<dyn Future<Output = T> + Send + Sync>> + Send + Sync
 {
 }
 
@@ -47,7 +46,7 @@ pub trait PinFnExperimental<S, T>:
 /// This is the blanket impl.
 /// See https://users.rust-lang.org/t/why-cant-type-aliases-be-used-for-traits/10002/9.
 impl<S, T, F> PinFnExperimental<S, T> for F where
-    F: Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static + Send + Sync>> + Send + Sync
+    F: Fn(S) -> Pin<Box<dyn Future<Output = T> + Send + Sync>> + Send + Sync
 {
 }
 
@@ -80,7 +79,7 @@ where
 /// Transforms an async closure into a closure that returns a pinned-boxed future.
 pub fn pin_async_fn<S: 'static, T: 'static + Send + Sync, Fut>(
     f: impl Fn(S) -> Fut + 'static + Send + Sync,
-) -> impl Fn(S) -> Pin<Box<dyn 'static + Future<Output = T> + Send + Sync>>
+) -> impl Fn(S) -> Pin<Box<dyn Future<Output = T> + Send + Sync>>
 where
     Fut: 'static + Future<Output = T> + Send + Sync,
 {
