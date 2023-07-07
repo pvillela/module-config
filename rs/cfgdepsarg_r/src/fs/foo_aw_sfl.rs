@@ -1,12 +1,12 @@
 use super::BarAwBfT;
 use common::fs_data::{FooAwIn, FooAwOut, FooAwSflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{CfgDeps, CfgRefCellId, PinFnWeb};
+use common::fwk::{CfgDeps, CfgRefCellId, PinFnWss};
 use std::ops::Deref;
 use std::time::Duration;
 use tokio::time::sleep;
 
-pub type FooAwSflT = PinFnWeb<FooAwIn, FooAwOut>;
+pub type FooAwSflT = PinFnWss<FooAwIn, FooAwOut>;
 
 pub type FooAwSflCfg = CfgRefCellId<FooAwSflCfgInfo>;
 

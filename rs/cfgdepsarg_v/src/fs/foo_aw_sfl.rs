@@ -1,16 +1,16 @@
 use common::fs_data::{FooAwIn, FooAwOut, FooAwSflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{rc_pin_async_fn_web, CfgRefCellId, RcPinFnWeb};
+use common::fwk::{rc_pin_async_fn_wss, CfgRefCellId, RcPinFnWss};
 use std::time::Duration;
 use tokio::time::sleep;
 
-pub type FooAwSflT = RcPinFnWeb<FooAwIn, FooAwOut>;
+pub type FooAwSflT = RcPinFnWss<FooAwIn, FooAwOut>;
 
 pub type FooAwSflCfg = CfgRefCellId<FooAwSflCfgInfo>;
 
 #[derive(Clone)]
 pub struct FooAwSflDeps {
-    pub bar_aw_bf: RcPinFnWeb<u64, String>,
+    pub bar_aw_bf: RcPinFnWss<u64, String>,
 }
 
 pub fn foo_aw_sfl_c(cfg: FooAwSflCfg, deps: FooAwSflDeps) -> FooAwSflT {
@@ -27,5 +27,5 @@ pub fn foo_aw_sfl_c(cfg: FooAwSflCfg, deps: FooAwSflDeps) -> FooAwSflT {
             FooAwOut { res }
         }
     };
-    rc_pin_async_fn_web(f)
+    rc_pin_async_fn_wss(f)
 }

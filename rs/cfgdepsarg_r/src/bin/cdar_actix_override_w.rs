@@ -4,7 +4,7 @@ use cfgdepsarg_r::fs::{
 };
 use common::{
     fs_data::{BarAwBfCfgInfo, FooAwSflCfgInfo},
-    fwk::{box_pin_async_fn_web, RefreshMode, Src},
+    fwk::{box_pin_async_fn_wss, RefreshMode, Src},
     web::actix_handler::handler_of_web,
 };
 use std::sync::Arc;
@@ -42,7 +42,7 @@ async fn main() -> std::io::Result<()> {
             );
 
             let foo_aw_deps = FooAwSflDeps {
-                bar_aw_bf: box_pin_async_fn_web(bar_aw_bf),
+                bar_aw_bf: box_pin_async_fn_wss(bar_aw_bf),
             };
 
             let foo_aw_s = Arc::new(FooAwSflS {

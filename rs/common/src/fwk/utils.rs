@@ -18,13 +18,13 @@ pub type BoxPinFn<S, T> = Box<PinFn<S, T>>;
 pub type RefPinFn<S, T> = &'static PinFn<S, T>;
 
 /// Type of dynamic object of pinned wrapper of async closures, without Send + Sync..
-pub type PinFnWeb<S, T> = dyn Fn(S) -> Pin<Box<dyn Future<Output = T>>>;
-
-/// Type of Rc'd and pinned wrapper of async functions, without Send + Sync.
-pub type RcPinFnWeb<S, T> = Rc<PinFnWeb<S, T>>;
+pub type PinFnWss<S, T> = dyn Fn(S) -> Pin<Box<dyn Future<Output = T>>>;
 
 /// Type of boxed and pinned wrapper of async functions, without Send + Sync.
-pub type BoxPinFnWeb<S, T> = Box<PinFnWeb<S, T>>;
+pub type BoxPinFnWss<S, T> = Box<PinFnWss<S, T>>;
+
+/// Type of Rc'd and pinned wrapper of async functions, without Send + Sync.
+pub type RcPinFnWss<S, T> = Rc<PinFnWss<S, T>>;
 
 /// Part 1 of the definition of a type alias for a closure that returns a boxed and pinned future.
 /// As type aliases for traits are not yet supported, we need to define a new trait and a
@@ -112,9 +112,9 @@ where
 }
 
 /// Rc's and pins an async function so it can be passed as a param or return type.
-pub fn rc_pin_async_fn_web<S, T: Send + Sync, Fut>(
+pub fn rc_pin_async_fn_wss<S, T: Send + Sync, Fut>(
     f: impl Fn(S) -> Fut + 'static,
-) -> RcPinFnWeb<S, T>
+) -> RcPinFnWss<S, T>
 where
     Fut: 'static + Future<Output = T>,
 {
@@ -122,9 +122,9 @@ where
 }
 
 /// Boxed and pins an async function so it can be passed as a param or return type.
-pub fn box_pin_async_fn_web<S, T: Send + Sync, Fut>(
+pub fn box_pin_async_fn_wss<S, T: Send + Sync, Fut>(
     f: impl Fn(S) -> Fut + 'static,
-) -> BoxPinFnWeb<S, T>
+) -> BoxPinFnWss<S, T>
 where
     Fut: 'static + Future<Output = T>,
 {

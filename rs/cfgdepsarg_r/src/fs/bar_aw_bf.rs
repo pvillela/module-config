@@ -1,11 +1,11 @@
 use common::fs_data::BarAwBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{CfgDeps, CfgRefCellId, PinFnWeb};
+use common::fwk::{CfgDeps, CfgRefCellId, PinFnWss};
 use std::ops::Deref;
 use std::time::Duration;
 use tokio::time::sleep;
 
-pub type BarAwBfT = PinFnWeb<u64, String>;
+pub type BarAwBfT = PinFnWss<u64, String>;
 
 pub type BarAwBfCfg = CfgRefCellId<BarAwBfCfgInfo>;
 

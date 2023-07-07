@@ -2,7 +2,7 @@ use super::bar_aw_bf_boot;
 use crate::fs::{foo_aw_sfl_c, FooAwSflCfg, FooAwSflDeps, FooAwSflS, FooAwSflT};
 use common::config::AppCfgInfo;
 use common::fs_data::FooAwSflCfgInfo;
-use common::fwk::{box_pin_async_fn_web, RefreshMode};
+use common::fwk::{box_pin_async_fn_wss, RefreshMode};
 use std::sync::Arc;
 
 fn foo_aw_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooAwSflCfgInfo {
@@ -26,5 +26,5 @@ pub fn foo_aw_sfl_boot(
     };
     let foo_aw_sfl_s = Arc::new(FooAwSflS { cfg, deps });
     let f = move |input| foo_aw_sfl_c(foo_aw_sfl_s.clone(), input);
-    box_pin_async_fn_web(f)
+    box_pin_async_fn_wss(f)
 }
