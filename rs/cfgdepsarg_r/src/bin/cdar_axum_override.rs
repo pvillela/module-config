@@ -2,7 +2,6 @@ use axum::{routing::post, Router};
 use cfgdepsarg_r::fs::{
     bar_a_bf_c, foo_a_sfl_c, BarABfCfg, BarABfS, FooASflCfg, FooASflDeps, FooASflS,
 };
-use cfgdepsarg_r::startup::get_foo_a_sfl_refreshable;
 use common::{
     config::refresh_app_configuration,
     fs_data::{BarBfCfgInfo, FooSflCfgInfo},
@@ -31,7 +30,7 @@ async fn main() {
         bar_a_bf_c(bar_a_s, sleep_millis)
     };
 
-    let _foo_a_sfl = move |input| {
+    let foo_a_sfl = move |input| {
         let foo_a_sfl_cfg_info = FooSflCfgInfo {
             a: "foo_aw_test1".to_owned(),
             b: 1,
@@ -59,8 +58,6 @@ async fn main() {
     //     Json(res)
     //     // (StatusCode::OK, Json(res))
     // };
-
-    let foo_a_sfl = get_foo_a_sfl_refreshable();
 
     let foo_a_sfl_hdlr = handler_of(foo_a_sfl);
 

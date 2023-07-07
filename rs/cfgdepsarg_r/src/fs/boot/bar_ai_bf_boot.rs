@@ -1,7 +1,7 @@
 use crate::fs::{bar_ai_bf_c, BarAiBfS, BarAiBfT};
-use common::config::AppCfgInfo;
 use common::fs_data::BarAiBfCfgInfo;
 use common::fwk::box_pin_async_fn;
+use common::{config::AppCfgInfo, fwk::ref_pin_async_fn};
 use std::sync::{Arc, OnceLock};
 
 fn bar_ai_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarAiBfCfgInfo {
@@ -18,8 +18,8 @@ pub fn bar_ai_bf_boot(app_cfg: fn() -> Arc<AppCfgInfo>) -> Box<BarAiBfT> {
     box_pin_async_fn(f)
 }
 
-// The only benefit of this version over the above is that it saves an Arc clone for each call to the returned function.
-pub fn bar_ai_bf_boot_xr(app_cfg: fn() -> Arc<AppCfgInfo>) -> Box<BarAiBfT> {
+// The only benefit of this version over _boot is that it saves an Arc clone for each call to the returned function.
+pub fn bar_ai_bf_boot_xs(app_cfg: fn() -> Arc<AppCfgInfo>) -> Box<BarAiBfT> {
     static BAR_AI_BF_S_X: OnceLock<BarAiBfS> = OnceLock::new();
     let bar_ai_bf_s = BAR_AI_BF_S_X.get_or_init(|| {
         let cfg = bar_ai_bf_cfg_adapter(&app_cfg());
@@ -27,4 +27,11 @@ pub fn bar_ai_bf_boot_xr(app_cfg: fn() -> Arc<AppCfgInfo>) -> Box<BarAiBfT> {
     });
     let f = move |sleep_millis| bar_ai_bf_c(bar_ai_bf_s, sleep_millis);
     box_pin_async_fn(f)
+}
+
+pub fn bar_ai_bf_boot_lr(app_cfg: fn() -> Arc<AppCfgInfo>) -> &'static BarAiBfT {
+    let cfg = bar_ai_bf_cfg_adapter(&app_cfg());
+    let bar_ai_bf_s: &BarAiBfS = Box::leak(Box::new(BarAiBfS { cfg, deps: () }));
+    let f = move |sleep_millis| bar_ai_bf_c(bar_ai_bf_s, sleep_millis);
+    ref_pin_async_fn(f)
 }

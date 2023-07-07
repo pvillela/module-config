@@ -3,7 +3,7 @@ use common::fs_data::FooISflCfgInfo;
 use common::fs_util::foo_core;
 use common::fwk::CfgDeps;
 
-pub type FooISflT = dyn Fn() -> String;
+pub type FooISflT = dyn Fn() -> String + Send + Sync;
 
 pub struct FooISflDeps {
     pub bar_i_bf: Box<BarIBfT>,

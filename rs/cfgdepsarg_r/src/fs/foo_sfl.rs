@@ -1,11 +1,11 @@
 use super::BarBfT;
 use common::fs_data::FooSflCfgInfo;
 use common::fs_util::foo_core;
-use common::fwk::{CfgDeps, CfgRefCellRc};
+use common::fwk::{CfgArcSwapArc, CfgDeps};
 
-pub type FooSflT = dyn Fn() -> String;
+pub type FooSflT = dyn Fn() -> String + Send + Sync;
 
-pub type FooSflCfg = CfgRefCellRc<FooSflCfgInfo>;
+pub type FooSflCfg = CfgArcSwapArc<FooSflCfgInfo>;
 
 pub struct FooSflDeps {
     pub bar_bf: Box<BarBfT>,

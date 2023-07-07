@@ -1,6 +1,6 @@
 use common::fs_data::BarABfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{arc_pin_async_fn_web, CfgRefCellId, RcPinFnWeb};
+use common::fwk::{rc_pin_async_fn_web, CfgRefCellId, RcPinFnWeb};
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -18,5 +18,5 @@ pub fn bar_aw_bf_c(cfg: BarAwBfCfg) -> BarAwBfT {
             bar_core(u, v)
         }
     };
-    arc_pin_async_fn_web(f)
+    rc_pin_async_fn_web(f)
 }

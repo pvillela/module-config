@@ -1,6 +1,6 @@
 use common::fs_data::{FooAwIn, FooAwOut, FooAwSflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{arc_pin_async_fn_web, CfgRefCellId, RcPinFnWeb};
+use common::fwk::{rc_pin_async_fn_web, CfgRefCellId, RcPinFnWeb};
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -27,5 +27,5 @@ pub fn foo_aw_sfl_c(cfg: FooAwSflCfg, deps: FooAwSflDeps) -> FooAwSflT {
             FooAwOut { res }
         }
     };
-    arc_pin_async_fn_web(f)
+    rc_pin_async_fn_web(f)
 }

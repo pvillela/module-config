@@ -5,15 +5,15 @@ use common::fwk::RefreshMode;
 use std::sync::OnceLock;
 use std::time::Duration;
 
+pub fn make_foo_a_sfl_no_refresh() -> Box<FooASflT> {
+    foo_a_sfl_boot(get_app_configuration, RefreshMode::NoRefresh)
+}
+
 pub fn make_foo_a_sfl_refreshable() -> Box<FooASflT> {
     foo_a_sfl_boot(
         get_app_configuration,
         RefreshMode::Refreshable(Duration::from_millis(60)),
     )
-}
-
-pub fn make_foo_a_sfl_no_refresh() -> Box<FooASflT> {
-    foo_a_sfl_boot(get_app_configuration, RefreshMode::NoRefresh)
 }
 
 pub fn get_foo_a_sfl_no_refresh() -> &'static FooASflT {

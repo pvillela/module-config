@@ -1,10 +1,10 @@
 use common::fs_data::BarBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{CfgDeps, CfgRefCellRc};
+use common::fwk::{CfgArcSwapArc, CfgDeps};
 
-pub type BarBfT = dyn Fn() -> String;
+pub type BarBfT = dyn Fn() -> String + Send + Sync;
 
-pub type BarBfCfg = CfgRefCellRc<BarBfCfgInfo>;
+pub type BarBfCfg = CfgArcSwapArc<BarBfCfgInfo>;
 
 pub type BarBfS = CfgDeps<BarBfCfg, ()>;
 

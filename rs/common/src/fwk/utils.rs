@@ -18,6 +18,9 @@ pub type BoxPinFn<S, T> = Box<PinFn<S, T>>;
 /// Type of static reference to desugared async closure.
 pub type RefPinFn<S, T> = &'static PinFn<S, T>;
 
+/// Type of Rc'd and pinned wrapper of async functions.
+pub type RcPinFnWeb<S, T> = Rc<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static>>>;
+
 /// Part 1 of the definition of a type alias for a closure that returns a boxed and pinned future.
 /// As type aliases for traits are not yet supported, we need to define a new trait and a
 /// blanket implementation for it.
@@ -48,7 +51,7 @@ pub type Pinfn<S, T> = fn(S) -> Pin<Box<dyn Future<Output = T> + Send + Sync>>;
 /// Desugared type of async function with two arguments and boxed and pinned output.
 pub type Pinfn2<S1, S2, T> = fn(S1, S2) -> Pin<Box<dyn Future<Output = T> + Send + Sync>>;
 
-/// Arcs and pins an async function so it can be passed across theads.
+/// Arcs and pins an async function so it can be passed as a param or return type across theads.
 pub fn arc_pin_async_fn<S: 'static, T: Send + Sync, Fut>(
     f: impl Fn(S) -> Fut + 'static + Send + Sync,
 ) -> ArcPinFn<S, T>
@@ -58,7 +61,7 @@ where
     Arc::new(move |s| Box::pin(f(s)))
 }
 
-/// Arcs and pins an async function so it can be passed across theads.
+/// Boxes and pins an async function so it can be passed as a param or return type.
 pub fn box_pin_async_fn<S: 'static, T: Send + Sync, Fut>(
     f: impl Fn(S) -> Fut + 'static + Send + Sync,
 ) -> BoxPinFn<S, T>
@@ -103,11 +106,8 @@ where
     Box::leak(box_pin_async_fn(f))
 }
 
-/// Type of Rc'd and pinned wrapper of async functions.
-pub type RcPinFnWeb<S, T> = Rc<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static>>>;
-
-/// Arcs and pins an async function so it can be passed across theads.
-pub fn arc_pin_async_fn_web<S, T: Send + Sync, Fut>(
+/// Rc's and pins an async function so it can be passed as a param or return type.
+pub fn rc_pin_async_fn_web<S, T: Send + Sync, Fut>(
     f: impl Fn(S) -> Fut + 'static,
 ) -> RcPinFnWeb<S, T>
 where
@@ -129,19 +129,6 @@ where
 
 pub fn type_name<T>(_: &T) -> &'static str {
     std::any::type_name::<T>()
-}
-
-/// Type of boxed and pinned wrapper of async functions.
-pub type RcPinFn<S, T> = Rc<dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + 'static>>>;
-
-/// Boxes and pins an async function so it can be passed across theads.
-pub fn rc_pin_async_fn<S: 'static, T: Send + Sync, Fut>(
-    f: impl Fn(S) -> Fut + 'static,
-) -> RcPinFn<S, T>
-where
-    Fut: 'static + Future<Output = T>,
-{
-    Rc::new(move |s| Box::pin(f(s)))
 }
 
 /// Function that can be used as a placeholder for a configuration source during development.
