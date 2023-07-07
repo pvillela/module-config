@@ -1,16 +1,16 @@
 use axum::{routing::post, Router};
 use cfgdepsarg_r::startup::make_foo_a_sfl_refreshable;
 use common::config::refresh_app_configuration;
-use common::web::axum_handler::handler_of_arcpin;
-use std::{sync::Arc, thread, time::Duration};
+use common::web::axum_handler::handler_of_boxpin;
+use std::{thread, time::Duration};
 
 #[tokio::main]
 async fn main() {
     // Need to convert Box to Arc in order for Axum to work because Axum requires handler closures
     // to be Clone.
-    let foo_a_sfl = Arc::from(make_foo_a_sfl_refreshable());
+    let foo_a_sfl = make_foo_a_sfl_refreshable();
 
-    let foo_a_sfl_hdlr = handler_of_arcpin(foo_a_sfl);
+    let foo_a_sfl_hdlr = handler_of_boxpin(foo_a_sfl);
 
     let app = Router::new().route("/", post(foo_a_sfl_hdlr));
 

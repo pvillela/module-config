@@ -1,12 +1,11 @@
 use common::fs_data::{FooAiIn, FooAiOut};
-use common::fwk::ArcPinFn;
+use common::fwk::BoxPinFn;
 use common::tokio_run::{run, RunIn};
 use pulldepswithoverride::fs::foo_ai_sfl;
-use std::sync::Arc;
 use tokio;
 
-fn make_foo_ai_sfl() -> ArcPinFn<FooAiIn, FooAiOut> {
-    Arc::new(|input| Box::pin(foo_ai_sfl(input)))
+fn make_foo_ai_sfl() -> BoxPinFn<FooAiIn, FooAiOut> {
+    Box::new(|input| Box::pin(foo_ai_sfl(input)))
 }
 
 #[tokio::main]

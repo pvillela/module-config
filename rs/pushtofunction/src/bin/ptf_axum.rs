@@ -2,7 +2,7 @@ use axum::{routing::post, Router};
 use common::{
     fs_data::{BarBfCfgInfo, FooSflCfgInfo},
     fwk::{RefreshMode, Src},
-    web::axum_handler::handler_of_arcpin,
+    web::axum_handler::handler_of_boxpin,
 };
 use pushtofunction::fs::{bar_a_bf_c, foo_a_sfl_c, BarABfCfg, FooASflCfg, FooASflDeps};
 
@@ -38,7 +38,7 @@ async fn main() {
     // };
 
     let foo_a_sfl = foo_a_sfl_c(foo_a_cfg, foo_a_deps);
-    let foo_a_sfl_hdlr = handler_of_arcpin(foo_a_sfl);
+    let foo_a_sfl_hdlr = handler_of_boxpin(foo_a_sfl);
 
     let app = Router::new().route("/", post(foo_a_sfl_hdlr));
 

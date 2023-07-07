@@ -1,11 +1,11 @@
 use common::config::get_app_configuration;
 use common::fs_data::{FooAIn, FooAOut};
-use common::fwk::{ArcPinFn, RefreshMode};
+use common::fwk::{BoxPinFn, RefreshMode};
 use common::tokio_run::{run, RunIn};
 use pushtofunction::fs::boot::foo_a_sfl_boot;
 use tokio;
 
-fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
+fn make_foo_a_sfl() -> BoxPinFn<FooAIn, FooAOut> {
     foo_a_sfl_boot(get_app_configuration, RefreshMode::NoRefresh)
 }
 

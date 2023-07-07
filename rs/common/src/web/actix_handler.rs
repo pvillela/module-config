@@ -30,7 +30,7 @@ where
     move |Json(input)| f(input)
 }
 
-pub fn handler_of_web<S: 'static + serde::Deserialize<'static>, T: Responder + Send + Sync, Fut>(
+pub fn handler_of_wss<S: 'static + serde::Deserialize<'static>, T: Responder + Send + Sync, Fut>(
     f: impl Fn(S) -> Fut + 'static + Send + Sync + Clone,
 ) -> impl Fn(Json<S>) -> Fut + Send + Sync + 'static + Clone
 where
@@ -39,7 +39,7 @@ where
     move |Json(input)| f(input)
 }
 
-pub fn handler_arc_of_rcpin_web<
+pub fn handler_arc_of_rcpin_wss<
     S: 'static + serde::Deserialize<'static>,
     T: 'static + Responder + Send + Sync,
 >(
@@ -48,7 +48,7 @@ pub fn handler_arc_of_rcpin_web<
     Arc::new(move |Json(input)| f(input))
 }
 
-pub fn handler_of_rcpin_web<
+pub fn handler_of_rcpin_wss<
     S: 'static + serde::Deserialize<'static>,
     T: 'static + Responder + Send + Sync,
 >(

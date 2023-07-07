@@ -5,7 +5,7 @@ use cfgdepsarg_r::fs::{
 use common::{
     fs_data::{BarAwBfCfgInfo, FooAwSflCfgInfo},
     fwk::{box_pin_async_fn_wss, RefreshMode, Src},
-    web::actix_handler::handler_of_web,
+    web::actix_handler::handler_of_wss,
 };
 use std::sync::Arc;
 
@@ -53,7 +53,7 @@ async fn main() -> std::io::Result<()> {
             foo_aw_sfl_c(foo_aw_s, input)
         };
 
-        let f = handler_of_web(foo_aw_sfl);
+        let f = handler_of_wss(foo_aw_sfl);
         App::new().route("/", web::post().to(f))
     })
     .bind(("127.0.0.1", 8080))?

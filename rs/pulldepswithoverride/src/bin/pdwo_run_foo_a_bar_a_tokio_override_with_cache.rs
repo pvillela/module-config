@@ -1,6 +1,6 @@
 use common::config::get_app_configuration;
 use common::fs_data::{FooAIn, FooAOut};
-use common::fwk::{arc_pin_async_fn, ArcPinFn, RefreshMode, Src};
+use common::fwk::{box_pin_async_fn, BoxPinFn, RefreshMode, Src};
 use common::tokio_run::{run, RunIn};
 use pulldepswithoverride::fs::{
     bar_a_bf_cfg_adapter, foo_a_sfl, foo_a_sfl_cfg_adapter, BarABfCfg, FooASflCfg, BAR_A_BF_CFG,
@@ -9,8 +9,8 @@ use pulldepswithoverride::fs::{
 use std::time::Duration;
 use tokio;
 
-fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
-    arc_pin_async_fn(foo_a_sfl)
+fn make_foo_a_sfl() -> BoxPinFn<FooAIn, FooAOut> {
+    box_pin_async_fn(foo_a_sfl)
 }
 
 #[tokio::main]

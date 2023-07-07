@@ -6,7 +6,7 @@ use cfgdepsarg_v::fs::{
 };
 use common::{
     fs_data::{BarBfCfgInfo, FooSflCfgInfo},
-    fwk::{arc_pin_async_fn, RefreshMode, Src},
+    fwk::{box_pin_async_fn, RefreshMode, Src},
     web::axum_handler::handler_of,
 };
 
@@ -42,7 +42,7 @@ async fn main() {
         );
 
         let foo_a_deps = FooASflDeps {
-            bar_a_bf: arc_pin_async_fn(bar_a_bf),
+            bar_a_bf: box_pin_async_fn(bar_a_bf),
         };
 
         // let foo_a_sfl_hdlr = move |Json(payload): Json<FooAwIn>| async move {

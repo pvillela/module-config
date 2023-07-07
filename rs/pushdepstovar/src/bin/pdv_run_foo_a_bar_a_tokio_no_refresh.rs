@@ -1,13 +1,12 @@
 use common::fs_data::{FooAIn, FooAOut};
-use common::fwk::ArcPinFn;
+use common::fwk::BoxPinFn;
 use common::tokio_run::{run, RunIn};
 use pushdepstovar::startup::get_foo_a_sfl_no_refresh;
-use std::sync::Arc;
 use tokio;
 
-fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
+fn make_foo_a_sfl() -> BoxPinFn<FooAIn, FooAOut> {
     let foo_a_sfl = get_foo_a_sfl_no_refresh();
-    Arc::new(foo_a_sfl)
+    Box::new(foo_a_sfl)
 }
 
 #[tokio::main]

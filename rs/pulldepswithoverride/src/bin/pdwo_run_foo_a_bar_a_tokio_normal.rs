@@ -1,11 +1,11 @@
 use common::fs_data::{FooAIn, FooAOut};
-use common::fwk::{arc_pin_async_fn, ArcPinFn};
+use common::fwk::{box_pin_async_fn, BoxPinFn};
 use common::tokio_run::{run, RunIn};
 use pulldepswithoverride::fs::foo_a_sfl;
 use tokio;
 
-fn make_foo_a_sfl() -> ArcPinFn<FooAIn, FooAOut> {
-    arc_pin_async_fn(foo_a_sfl)
+fn make_foo_a_sfl() -> BoxPinFn<FooAIn, FooAOut> {
+    box_pin_async_fn(foo_a_sfl)
 }
 
 #[tokio::main]

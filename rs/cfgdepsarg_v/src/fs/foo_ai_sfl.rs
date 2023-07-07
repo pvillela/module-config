@@ -1,15 +1,15 @@
 use common::fs_data::{FooAiIn, FooAiOut, FooAiSflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{ArcPinFn, CfgDeps};
+use common::fwk::{BoxPinFn, CfgDeps};
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
-pub type FooAiSflT = ArcPinFn<FooAiIn, FooAiOut>;
+pub type FooAiSflT = BoxPinFn<FooAiIn, FooAiOut>;
 
 // #[derive(Clone)]
 pub struct FooAiSflDeps {
-    pub bar_ai_bf: ArcPinFn<u64, String>,
+    pub bar_ai_bf: BoxPinFn<u64, String>,
 }
 
 pub type FooAiSflS = CfgDeps<FooAiSflCfgInfo, FooAiSflDeps>;

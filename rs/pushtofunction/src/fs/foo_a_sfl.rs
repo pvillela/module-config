@@ -1,10 +1,10 @@
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{arc_pin_async_fn, ArcPinFn, CfgArcSwapArc};
+use common::fwk::{box_pin_async_fn, ArcPinFn, BoxPinFn, CfgArcSwapArc};
 use std::time::Duration;
 use tokio::time::sleep;
 
-pub type FooASflT = ArcPinFn<FooAIn, FooAOut>;
+pub type FooASflT = BoxPinFn<FooAIn, FooAOut>;
 
 pub type FooASflCfg = CfgArcSwapArc<FooASflCfgInfo>;
 
@@ -27,5 +27,5 @@ pub fn foo_a_sfl_c(cfg: FooASflCfg, deps: FooASflDeps) -> FooASflT {
             FooAOut { res }
         }
     };
-    arc_pin_async_fn(f)
+    box_pin_async_fn(f)
 }

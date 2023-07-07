@@ -3,7 +3,7 @@ use cfgdepsarg_v::fs::{bar_aw_bf_c, foo_aw_sfl_c, BarAwBfCfg, FooAwSflCfg, FooAw
 use common::{
     fs_data::{BarBfCfgInfo, FooSflCfgInfo},
     fwk::{RefreshMode, Src},
-    web::actix_handler::handler_arc_of_rcpin_web,
+    web::actix_handler::handler_arc_of_rcpin_wss,
 };
 
 #[actix_web::main]
@@ -33,7 +33,7 @@ async fn main() -> std::io::Result<()> {
         let foo_aw_deps = FooAwSflDeps { bar_aw_bf };
 
         let foo_aw_sfl = foo_aw_sfl_c(foo_aw_cfg, foo_aw_deps);
-        let arc_f = handler_arc_of_rcpin_web(foo_aw_sfl);
+        let arc_f = handler_arc_of_rcpin_wss(foo_aw_sfl);
         let f = move |i| arc_f(i);
         App::new().route("/", web::post().to(f))
     })

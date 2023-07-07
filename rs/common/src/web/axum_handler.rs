@@ -1,4 +1,4 @@
-use crate::fwk::{arc_pin_async_fn, ArcPinFn};
+use crate::fwk::{arc_pin_async_fn, ArcPinFn, BoxPinFn};
 use axum::response::IntoResponse;
 use axum::Json;
 use futures::{Future, FutureExt};
@@ -33,6 +33,29 @@ where
     S: 'static + serde::Deserialize<'static>,
     T: 'static + Send + Sync,
 {
+    let hdlr = move |Json(input): Json<S>| {
+        let fut = f(input);
+        let fut = async move {
+            let res = fut.await;
+            Json(res)
+        };
+        fut.boxed()
+    };
+    hdlr
+}
+
+pub fn handler_of_boxpin<S, T>(
+    f: BoxPinFn<S, T>,
+) -> impl Fn(Json<S>) -> Pin<Box<(dyn Future<Output = Json<T>> + Send + 'static)>>
+       + Send
+       + Sync
+       + 'static
+       + Clone
+where
+    S: 'static + serde::Deserialize<'static>,
+    T: 'static + Send + Sync,
+{
+    let f: ArcPinFn<S, T> = Arc::from(f);
     let hdlr = move |Json(input): Json<S>| {
         let fut = f(input);
         let fut = async move {

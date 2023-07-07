@@ -1,11 +1,11 @@
 use common::fs_data::BarAiBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{ArcPinFn, CfgDeps};
+use common::fwk::{BoxPinFn, CfgDeps};
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
-pub type BarAiBfT = ArcPinFn<u64, String>;
+pub type BarAiBfT = BoxPinFn<u64, String>;
 
 pub type BarAiBfS = CfgDeps<BarAiBfCfgInfo, ()>;
 
