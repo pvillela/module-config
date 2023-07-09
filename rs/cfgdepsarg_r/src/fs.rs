@@ -21,6 +21,9 @@ pub mod boot;
 mod foo_a_sfl;
 pub use foo_a_sfl::*;
 
+mod foo_ad_sfl;
+pub use foo_ad_sfl::*;
+
 mod foo_ai_sfl;
 pub use foo_ai_sfl::*;
 

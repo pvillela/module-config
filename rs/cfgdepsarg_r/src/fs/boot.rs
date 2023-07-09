@@ -1,3 +1,6 @@
+mod boot_utils;
+pub use boot_utils::*;
+
 mod bar_bf_boot;
 pub use bar_bf_boot::*;
 
@@ -18,6 +21,9 @@ pub use foo_sfl_boot::*;
 
 mod foo_a_sfl_boot;
 pub use foo_a_sfl_boot::*;
+
+mod foo_ad_sfl_boot;
+pub use foo_ad_sfl_boot::*;
 
 mod foo_ai_sfl_boot;
 pub use foo_ai_sfl_boot::*;
