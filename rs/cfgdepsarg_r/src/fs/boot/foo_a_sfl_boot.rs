@@ -1,4 +1,4 @@
-use super::{bar_a_bf_boot, bar_a_bf_boot_lr};
+use super::{bar_a_bf_boot, bar_a_bf_boot_lr, cfg_deps_boot_a, cfg_deps_boot_a_lr};
 use crate::fs::{foo_a_sfl_c, FooASflCfg, FooASflDeps, FooASflS, FooASflT};
 use bar_a_bf_boot::bar_a_bf_boot_xs;
 use common::config::AppCfgInfo;
@@ -28,6 +28,25 @@ pub fn foo_a_sfl_boot(
     let foo_a_sfl_s = Arc::new(FooASflS { cfg, deps });
     let f = move |input| foo_a_sfl_c(foo_a_sfl_s.clone(), input);
     box_pin_async_fn(f)
+}
+
+pub fn foo_a_sfl_boot_1(
+    app_cfg: fn() -> Arc<AppCfgInfo>,
+    refresh_mode: RefreshMode,
+) -> Box<FooASflT> {
+    let cfg_factory = FooASflCfg::new_boxed_with_cfg_adapter;
+    let deps = || FooASflDeps {
+        bar_a_bf: Box::new(bar_a_bf_boot(app_cfg, refresh_mode.clone())),
+    };
+
+    cfg_deps_boot_a(
+        foo_a_sfl_c,
+        cfg_factory,
+        foo_a_sfl_cfg_adapter,
+        deps,
+        app_cfg,
+        refresh_mode.clone(),
+    )
 }
 
 // The only benefit of this version over the above is that it saves an Arc clone for each call to the returned function.
@@ -91,4 +110,23 @@ pub fn foo_a_sfl_boot_lr(
     let foo_a_sfl_s: &FooASflS = Box::leak(Box::new(FooASflS { cfg, deps }));
     let f = move |input| foo_a_sfl_c(foo_a_sfl_s, input);
     ref_pin_async_fn(f)
+}
+
+pub fn foo_a_sfl_boot_lr_1(
+    app_cfg: fn() -> Arc<AppCfgInfo>,
+    refresh_mode: RefreshMode,
+) -> &'static FooASflT {
+    let cfg_factory = FooASflCfg::new_boxed_with_cfg_adapter;
+    let deps = || FooASflDeps {
+        bar_a_bf: Box::new(bar_a_bf_boot_lr(app_cfg, refresh_mode.clone())),
+    };
+
+    cfg_deps_boot_a_lr(
+        foo_a_sfl_c,
+        cfg_factory,
+        foo_a_sfl_cfg_adapter,
+        deps,
+        app_cfg,
+        refresh_mode.clone(),
+    )
 }
