@@ -31,7 +31,6 @@ pub fn bar_aw_bf_boot(
     refresh_mode: RefreshMode,
 ) -> Box<BarAwBfT> {
     let cfg_factory = BarAwBfCfg::new_boxed_with_cfg_adapter;
-    let deps = ();
 
     cfg_deps_boot_aw(
         bar_aw_bf_c,
@@ -39,6 +38,6 @@ pub fn bar_aw_bf_boot(
         bar_aw_bf_cfg_adapter,
         app_cfg,
         refresh_mode.clone(),
-        deps,
+        (),
     )
 }

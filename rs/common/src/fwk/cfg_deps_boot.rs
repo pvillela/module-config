@@ -31,22 +31,22 @@ use std::sync::Arc;
 
 /// Returns a boxed non-async stereotype instance with refreshable configuration.
 pub fn cfg_deps_boot<C, D, A, T, ACFG, SCFG>(
-    f_c: fn(Arc<CfgDeps<C, D>>, A) -> T,
+    f_c: fn(&CfgDeps<C, D>, A) -> T,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfgdapter: fn(&ACFG) -> SCFG,
     app_cfg: fn() -> Arc<ACFG>,
     refresh_mode: RefreshMode,
     deps: D,
-) -> Box<dyn Fn(A) -> T>
+) -> Box<dyn Fn(A) -> T + Send + Sync>
 where
-    C: 'static,
-    D: 'static,
+    C: 'static + Send + Sync,
+    D: 'static + Send + Sync,
     A: 'static,
     T: 'static,
 {
     let cfg = cfg_factory(app_cfg, cfgdapter, refresh_mode);
     let s = Arc::new(CfgDeps { cfg, deps: deps });
-    let stereotype = move |input| f_c(s.clone(), input);
+    let stereotype = move |input| f_c(&s, input);
     Box::new(stereotype)
 }
 
@@ -58,7 +58,13 @@ pub fn cfg_deps_boot_lr<C, D, A, T, ACFG, SCFG>(
     app_cfg: fn() -> Arc<ACFG>,
     refresh_mode: RefreshMode,
     deps: D,
-) -> &'static dyn Fn(A) -> T {
+) -> &'static (dyn Fn(A) -> T + Send + Sync)
+where
+    C: 'static + Send + Sync,
+    D: 'static + Send + Sync,
+    A: 'static,
+    T: 'static,
+{
     let cfg = cfg_factory(app_cfg, cfgdapter, refresh_mode);
     let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps: deps }));
     let stereotype = move |input| f_c(s_ref_leak, input);

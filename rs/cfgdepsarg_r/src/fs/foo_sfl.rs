@@ -18,6 +18,6 @@ pub fn foo_sfl_c(s: &FooSflS) -> String {
     let cfg = s.cfg.get_cfg();
     let a = cfg.a.clone();
     let b = cfg.b;
-    let bar_res = bar_bf();
+    let bar_res = bar_bf(());
     foo_core(a, b, bar_res)
 }

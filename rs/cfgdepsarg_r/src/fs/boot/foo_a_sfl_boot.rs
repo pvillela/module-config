@@ -15,6 +15,7 @@ fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
 }
 
 /// Coded without use of [cfg_deps_boot_a].
+/// Returns a boxed foo_a_sfl closure.
 pub fn foo_a_sfl_boot_by_hand(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
@@ -32,7 +33,7 @@ pub fn foo_a_sfl_boot_by_hand(
     box_pin_async_fn(f)
 }
 
-/// Returns a boxed a foo_a_sfl closure.
+/// Returns a boxed foo_a_sfl closure.
 pub fn foo_a_sfl_boot(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
@@ -53,6 +54,9 @@ pub fn foo_a_sfl_boot(
 }
 
 /// Coded without use of [cfg_deps_boot_a_lr].
+/// Returns a leaked static reference to a foo_a_sfl closure.
+/// The benefit of this version over _boot is that it saves an Arc clone for this and its dependencies
+/// for each call to the returned function.
 pub fn foo_a_sfl_boot_lr_by_hand(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,

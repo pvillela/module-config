@@ -6,7 +6,7 @@ use common::fwk::{RefreshMode, Src};
 use std::thread;
 use std::time::Duration;
 
-fn bar_ovd_bf() -> String {
+fn bar_ovd_bf(_: ()) -> String {
     let cfg = BarBfCfgInfo {
         u: 33,
         v: "bar_override".to_owned(),

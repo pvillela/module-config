@@ -27,7 +27,6 @@ pub fn bar_a_bf_boot_by_hand(
 
 pub fn bar_a_bf_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> Box<BarABfT> {
     let cfg_factory = BarABfCfg::new_boxed_with_cfg_adapter;
-    let deps = ();
 
     cfg_deps_boot_a(
         bar_a_bf_c,
@@ -35,7 +34,7 @@ pub fn bar_a_bf_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode
         bar_a_bf_cfg_adapter,
         app_cfg,
         refresh_mode.clone(),
-        deps,
+        (),
     )
 }
 
@@ -58,7 +57,6 @@ pub fn bar_a_bf_boot_lr(
     refresh_mode: RefreshMode,
 ) -> &'static BarABfT {
     let cfg_factory = BarABfCfg::new_boxed_with_cfg_adapter;
-    let deps = ();
 
     cfg_deps_boot_a_lr(
         bar_a_bf_c,
@@ -66,6 +64,6 @@ pub fn bar_a_bf_boot_lr(
         bar_a_bf_cfg_adapter,
         app_cfg,
         refresh_mode.clone(),
-        deps,
+        (),
     )
 }
