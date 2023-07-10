@@ -1,10 +1,11 @@
-use super::{bar_a_bf_boot, bar_a_bf_boot_lr, cfg_deps_boot_a, cfg_deps_boot_a_lr};
+use super::{bar_a_bf_boot, bar_a_bf_boot_lr};
 use crate::fs::{foo_a_sfl_c, FooASflCfg, FooASflDeps, FooASflS, FooASflT};
-use bar_a_bf_boot::bar_a_bf_boot_xs;
 use common::config::AppCfgInfo;
 use common::fs_data::FooASflCfgInfo;
-use common::fwk::{box_pin_async_fn, ref_pin_async_fn, RefreshMode};
-use std::sync::{Arc, OnceLock};
+use common::fwk::{
+    box_pin_async_fn, cfg_deps_boot_a, cfg_deps_boot_a_lr, ref_pin_async_fn, RefreshMode,
+};
+use std::sync::Arc;
 
 fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
     FooASflCfgInfo {
@@ -13,7 +14,8 @@ fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
     }
 }
 
-pub fn foo_a_sfl_boot(
+/// Coded without use of [cfg_deps_boot_a].
+pub fn foo_a_sfl_boot_by_hand(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
 ) -> Box<FooASflT> {
@@ -30,12 +32,13 @@ pub fn foo_a_sfl_boot(
     box_pin_async_fn(f)
 }
 
-pub fn foo_a_sfl_boot_1(
+/// Returns a boxed a foo_a_sfl closure.
+pub fn foo_a_sfl_boot(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
 ) -> Box<FooASflT> {
     let cfg_factory = FooASflCfg::new_boxed_with_cfg_adapter;
-    let deps = || FooASflDeps {
+    let deps = FooASflDeps {
         bar_a_bf: Box::new(bar_a_bf_boot(app_cfg, refresh_mode.clone())),
     };
 
@@ -49,53 +52,8 @@ pub fn foo_a_sfl_boot_1(
     )
 }
 
-// The only benefit of this version over the above is that it saves an Arc clone for each call to the returned function.
-pub fn foo_a_sfl_boot_s(
-    app_cfg: fn() -> Arc<AppCfgInfo>,
-    refresh_mode: RefreshMode,
-) -> Box<FooASflT> {
-    static FOO_A_SFL_S: OnceLock<FooASflS> = OnceLock::new();
-    let foo_a_sfl_s = FOO_A_SFL_S.get_or_init(|| {
-        let cfg = FooASflCfg::new_boxed_with_cfg_adapter(
-            app_cfg,
-            foo_a_sfl_cfg_adapter,
-            refresh_mode.clone(),
-        );
-        let deps = FooASflDeps {
-            bar_a_bf: bar_a_bf_boot(app_cfg, refresh_mode.clone()),
-        };
-        FooASflS { cfg, deps }
-    });
-    let f = move |input| foo_a_sfl_c(foo_a_sfl_s.clone(), input);
-    box_pin_async_fn(f)
-}
-
-// The only benefit of this version over the above is that it saves an Arc clone for this and its dependencies
-// for each call to the returned function.
-pub fn foo_a_sfl_boot_xs(
-    app_cfg: fn() -> Arc<AppCfgInfo>,
-    refresh_mode: RefreshMode,
-) -> Box<FooASflT> {
-    static FOO_A_SFL_S_X: OnceLock<FooASflS> = OnceLock::new();
-    let foo_a_sfl_s = FOO_A_SFL_S_X.get_or_init(|| {
-        let cfg = FooASflCfg::new_boxed_with_cfg_adapter(
-            app_cfg,
-            foo_a_sfl_cfg_adapter,
-            refresh_mode.clone(),
-        );
-        let deps = FooASflDeps {
-            bar_a_bf: bar_a_bf_boot_xs(app_cfg, refresh_mode.clone()),
-        };
-        FooASflS { cfg, deps }
-    });
-    let f = move |input| foo_a_sfl_c(foo_a_sfl_s.clone(), input);
-    box_pin_async_fn(f)
-}
-
-/// Returns a leaked static reference to a foo_a_sfl closure.
-/// The only benefit of this version over _boot is that it saves an Arc clone for this and its dependencies
-/// for each call to the returned function.
-pub fn foo_a_sfl_boot_lr(
+/// Coded without use of [cfg_deps_boot_a_lr].
+pub fn foo_a_sfl_boot_lr_by_hand(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
 ) -> &'static FooASflT {
@@ -112,12 +70,15 @@ pub fn foo_a_sfl_boot_lr(
     ref_pin_async_fn(f)
 }
 
-pub fn foo_a_sfl_boot_lr_1(
+/// Returns a leaked static reference to a foo_a_sfl closure.
+/// The benefit of this version over _boot is that it saves an Arc clone for this and its dependencies
+/// for each call to the returned function.
+pub fn foo_a_sfl_boot_lr(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
 ) -> &'static FooASflT {
     let cfg_factory = FooASflCfg::new_boxed_with_cfg_adapter;
-    let deps = || FooASflDeps {
+    let deps = FooASflDeps {
         bar_a_bf: Box::new(bar_a_bf_boot_lr(app_cfg, refresh_mode.clone())),
     };
 
