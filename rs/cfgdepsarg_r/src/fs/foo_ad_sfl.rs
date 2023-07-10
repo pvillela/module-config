@@ -17,8 +17,8 @@ pub struct FooAdSflDeps {
 
 pub type FooAdSflS = CfgDeps<FooAdSflCfg, FooAdSflDeps>;
 
-pub async fn foo_ad_sfl_c(
-    s: &(dyn Deref<Target = FooAdSflS> + Send + Sync),
+pub async fn foo_ad_sfl_c<'a>(
+    s: &'a (dyn Deref<Target = FooAdSflS> + Send + Sync),
     input: FooAIn,
 ) -> FooAOut {
     let c = s.cfg.get_cfg();

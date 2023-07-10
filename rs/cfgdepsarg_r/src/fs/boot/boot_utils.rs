@@ -37,11 +37,11 @@ where
     }
 }
 
-pub fn cfg_deps_boot_a_lr<C, D, A, T, FUT, GCFG, LCFG>(
-    f_c: fn(&(dyn Deref<Target = CfgDeps<C, D>> + Send + Sync), A) -> FUT,
+pub fn cfg_deps_boot_a_lr<'a, C, D, A, T, FUT, GCFG, LCFG>(
+    f_c: fn(&'a (dyn Deref<Target = CfgDeps<C, D>> + Send + Sync), A) -> FUT,
     cfg_factory: impl Fn(fn() -> Arc<GCFG>, fn(&GCFG) -> LCFG, RefreshMode) -> C,
     cfg_adapter: fn(&GCFG) -> LCFG,
-    deps: fn() -> D,
+    deps: impl Fn() -> D,
 ) -> impl Fn(fn() -> Arc<GCFG>, RefreshMode) -> &'static PinFn<A, T>
 where
     C: 'static + Send + Sync,
