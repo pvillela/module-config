@@ -37,8 +37,8 @@ pub fn bar_aw_bf_boot(
         bar_aw_bf_c,
         cfg_factory,
         bar_aw_bf_cfg_adapter,
-        deps,
         app_cfg,
         refresh_mode.clone(),
+        deps,
     )
 }

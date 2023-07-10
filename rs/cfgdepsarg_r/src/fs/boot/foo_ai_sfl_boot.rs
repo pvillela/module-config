@@ -1,8 +1,9 @@
 use super::bar_ai_bf_boot;
 use crate::fs::{foo_ai_sfl_c, FooAiSflDeps, FooAiSflS, FooAiSflT};
-use bar_ai_bf_boot::{bar_ai_bf_boot_lr, bar_ai_bf_boot_xs};
+use bar_ai_bf_boot::{bar_ai_bf_boot_lr, bar_ai_bf_boot_xs, get_bar_ai_bf};
+use common::config::get_app_configuration;
 use common::fs_data::FooAiSflCfgInfo;
-use common::fwk::box_pin_async_fn;
+use common::fwk::{box_pin_async_fn, cfg_deps_boot_ai_lr};
 use common::{config::AppCfgInfo, fwk::ref_pin_async_fn};
 use std::sync::{Arc, OnceLock};
 
@@ -63,4 +64,20 @@ pub fn foo_ai_sfl_boot_lr(app_cfg: fn() -> Arc<AppCfgInfo>) -> &'static FooAiSfl
     let foo_ai_sfl_s: &FooAiSflS = Box::leak(Box::new(FooAiSflS { cfg, deps }));
     let f = move |input| foo_ai_sfl_c(foo_ai_sfl_s, input);
     ref_pin_async_fn(f)
+}
+
+pub fn get_foo_ai_sfl() -> &'static FooAiSflT {
+    static FOO_AI_SFL: OnceLock<&FooAiSflT> = OnceLock::new();
+    FOO_AI_SFL.get_or_init(|| {
+        let deps = FooAiSflDeps {
+            bar_ai_bf: Box::new(get_bar_ai_bf()),
+        };
+
+        cfg_deps_boot_ai_lr(
+            foo_ai_sfl_c,
+            foo_ai_sfl_cfg_adapter,
+            get_app_configuration(),
+            deps,
+        )
+    })
 }

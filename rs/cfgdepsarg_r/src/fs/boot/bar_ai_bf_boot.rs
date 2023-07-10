@@ -1,6 +1,7 @@
 use crate::fs::{bar_ai_bf_c, BarAiBfS, BarAiBfT};
+use common::config::get_app_configuration;
 use common::fs_data::BarAiBfCfgInfo;
-use common::fwk::box_pin_async_fn;
+use common::fwk::{box_pin_async_fn, cfg_deps_boot_ai_lr};
 use common::{config::AppCfgInfo, fwk::ref_pin_async_fn};
 use std::sync::{Arc, OnceLock};
 
@@ -34,4 +35,16 @@ pub fn bar_ai_bf_boot_lr(app_cfg: fn() -> Arc<AppCfgInfo>) -> &'static BarAiBfT 
     let bar_ai_bf_s: &BarAiBfS = Box::leak(Box::new(BarAiBfS { cfg, deps: () }));
     let f = move |sleep_millis| bar_ai_bf_c(bar_ai_bf_s, sleep_millis);
     ref_pin_async_fn(f)
+}
+
+pub fn get_bar_ai_bf() -> &'static BarAiBfT {
+    static BAR_AI_BF: OnceLock<&BarAiBfT> = OnceLock::new();
+    BAR_AI_BF.get_or_init(|| {
+        cfg_deps_boot_ai_lr(
+            bar_ai_bf_c,
+            bar_ai_bf_cfg_adapter,
+            get_app_configuration(),
+            (),
+        )
+    })
 }

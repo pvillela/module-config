@@ -15,7 +15,7 @@
 //! - `cfg_adapter`: function that transforms the application configuration info into the stereotype's
 //!    configuration info
 //! - `deps`: dependencies data structure for the stereotype
-//! - `app_cfg`: function that returns the application config info
+//! - `app_cfg`: application config info or function that returns application config info
 //! - `refresh_mode`: cache refresh specification used in case of mutable configuration
 
 use crate::fwk::{
@@ -23,6 +23,7 @@ use crate::fwk::{
 };
 use crate::fwk::{BoxPinFn, CfgDeps};
 use futures::Future;
+use std::ops::Deref;
 use std::sync::Arc;
 
 //=================
@@ -33,9 +34,9 @@ pub fn cfg_deps_boot<C, D, A, T, ACFG, SCFG>(
     f_c: fn(Arc<CfgDeps<C, D>>, A) -> T,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfgdapter: fn(&ACFG) -> SCFG,
-    deps: D,
     app_cfg: fn() -> Arc<ACFG>,
     refresh_mode: RefreshMode,
+    deps: D,
 ) -> Box<dyn Fn(A) -> T>
 where
     C: 'static,
@@ -54,9 +55,9 @@ pub fn cfg_deps_boot_lr<C, D, A, T, ACFG, SCFG>(
     f_c: fn(&'static CfgDeps<C, D>, A) -> T,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfgdapter: fn(&ACFG) -> SCFG,
-    deps: D,
     app_cfg: fn() -> Arc<ACFG>,
     refresh_mode: RefreshMode,
+    deps: D,
 ) -> &'static dyn Fn(A) -> T {
     let cfg = cfg_factory(app_cfg, cfgdapter, refresh_mode);
     let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps: deps }));
@@ -70,8 +71,8 @@ pub fn cfg_deps_boot_lr<C, D, A, T, ACFG, SCFG>(
 pub fn cfg_deps_boot_i<C, D, A, T, ACFG>(
     f_c: fn(Arc<CfgDeps<C, D>>, A) -> T,
     cfg_aidapter: fn(&ACFG) -> C,
+    app_cfg: impl Deref<Target = ACFG>,
     deps: D,
-    app_cfg: fn() -> Arc<ACFG>,
 ) -> Box<dyn Fn(A) -> T>
 where
     C: 'static,
@@ -79,7 +80,7 @@ where
     A: 'static,
     T: 'static,
 {
-    let cfg = cfg_aidapter(&app_cfg());
+    let cfg = cfg_aidapter(&app_cfg);
     let s = Arc::new(CfgDeps { cfg, deps: deps });
     let stereotype = move |input| f_c(s.clone(), input);
     Box::new(stereotype)
@@ -88,10 +89,10 @@ where
 pub fn cfg_deps_boot_i_lr<C, D, A, T, ACFG>(
     f_c: fn(&'static CfgDeps<C, D>, A) -> T,
     cfg_aidapter: fn(&ACFG) -> C,
+    app_cfg: impl Deref<Target = ACFG>,
     deps: D,
-    app_cfg: fn() -> Arc<ACFG>,
 ) -> &'static dyn Fn(A) -> T {
-    let cfg = cfg_aidapter(&app_cfg());
+    let cfg = cfg_aidapter(&app_cfg);
     let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps: deps }));
     let stereotype = move |input| f_c(s_ref_leak, input);
     Box::leak(Box::new(stereotype))
@@ -105,9 +106,9 @@ pub fn cfg_deps_boot_a<C, D, A, T, FUT, ACFG, SCFG>(
     f_c: fn(Arc<CfgDeps<C, D>>, A) -> FUT,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
-    deps: D,
     app_cfg: fn() -> Arc<ACFG>,
     refresh_mode: RefreshMode,
+    deps: D,
 ) -> BoxPinFn<A, T>
 where
     C: 'static + Send + Sync,
@@ -127,9 +128,9 @@ pub fn cfg_deps_boot_a_lr<C, D, A, T, FUT, ACFG, SCFG>(
     f_c: fn(&'static CfgDeps<C, D>, A) -> FUT,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
-    deps: D,
     app_cfg: fn() -> Arc<ACFG>,
     refresh_mode: RefreshMode,
+    deps: D,
 ) -> &'static PinFn<A, T>
 where
     C: Send + Sync,
@@ -150,8 +151,8 @@ where
 pub fn cfg_deps_boot_ai<C, D, A, T, FUT, ACFG>(
     f_c: fn(Arc<CfgDeps<C, D>>, A) -> FUT,
     cfg_aidapter: fn(&ACFG) -> C,
+    app_cfg: impl Deref<Target = ACFG>,
     deps: D,
-    app_cfg: fn() -> Arc<ACFG>,
 ) -> BoxPinFn<A, T>
 where
     C: 'static + Send + Sync,
@@ -160,7 +161,7 @@ where
     T: 'static + Send + Sync,
     FUT: Future<Output = T> + Send + Sync + 'static,
 {
-    let cfg = cfg_aidapter(&app_cfg());
+    let cfg = cfg_aidapter(&app_cfg);
     let s = Arc::new(CfgDeps { cfg, deps: deps });
     let stereotype = move |input| f_c(s.clone(), input);
     box_pin_async_fn(stereotype)
@@ -170,8 +171,8 @@ where
 pub fn cfg_deps_boot_ai_lr<C, D, A, T, FUT, ACFG>(
     f_c: fn(&'static CfgDeps<C, D>, A) -> FUT,
     cfg_aidapter: fn(&ACFG) -> C,
+    app_cfg: impl Deref<Target = ACFG>,
     deps: D,
-    app_cfg: fn() -> Arc<ACFG>,
 ) -> &'static PinFn<A, T>
 where
     C: Send + Sync,
@@ -180,7 +181,7 @@ where
     T: 'static + Send + Sync,
     FUT: Future<Output = T> + Send + Sync + 'static,
 {
-    let cfg = cfg_aidapter(&app_cfg());
+    let cfg = cfg_aidapter(&app_cfg);
     let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps: deps }));
     let stereotype = move |input| f_c(s_ref_leak, input);
     ref_pin_async_fn(stereotype)
@@ -194,9 +195,9 @@ pub fn cfg_deps_boot_aw<C, D, A, T, FUT, ACFG, SCFG>(
     f_c: fn(Arc<CfgDeps<C, D>>, A) -> FUT,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
-    deps: D,
     app_cfg: fn() -> Arc<ACFG>,
     refresh_mode: RefreshMode,
+    deps: D,
 ) -> Box<PinFnWss<A, T>>
 where
     C: 'static,

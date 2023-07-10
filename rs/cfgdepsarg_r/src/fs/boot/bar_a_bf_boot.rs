@@ -33,9 +33,9 @@ pub fn bar_a_bf_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode
         bar_a_bf_c,
         cfg_factory,
         bar_a_bf_cfg_adapter,
-        deps,
         app_cfg,
         refresh_mode.clone(),
+        deps,
     )
 }
 
@@ -64,8 +64,8 @@ pub fn bar_a_bf_boot_lr(
         bar_a_bf_c,
         cfg_factory,
         bar_a_bf_cfg_adapter,
-        deps,
         app_cfg,
         refresh_mode.clone(),
+        deps,
     )
 }

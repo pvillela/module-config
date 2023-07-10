@@ -46,9 +46,9 @@ pub fn foo_a_sfl_boot(
         foo_a_sfl_c,
         cfg_factory,
         foo_a_sfl_cfg_adapter,
-        deps,
         app_cfg,
         refresh_mode.clone(),
+        deps,
     )
 }
 
@@ -86,8 +86,8 @@ pub fn foo_a_sfl_boot_lr(
         foo_a_sfl_c,
         cfg_factory,
         foo_a_sfl_cfg_adapter,
-        deps,
         app_cfg,
         refresh_mode.clone(),
+        deps,
     )
 }
