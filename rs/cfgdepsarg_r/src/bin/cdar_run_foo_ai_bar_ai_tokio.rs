@@ -6,7 +6,7 @@ use common::tokio_run::{run, RunIn};
 use tokio;
 
 fn make_foo_ai_sfl() -> BoxPinFn<FooAiIn, FooAiOut> {
-    foo_ai_sfl_boot(get_app_configuration)
+    foo_ai_sfl_boot(&get_app_configuration())
 }
 
 #[tokio::main]

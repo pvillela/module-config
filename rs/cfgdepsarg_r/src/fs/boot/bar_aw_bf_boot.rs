@@ -12,6 +12,7 @@ fn bar_aw_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarAwBfCfgInfo {
 }
 
 /// Coded without use of [cfg_deps_boot_aw].
+/// Returns a bar_aw_bf stereotype instance.
 pub fn bar_aw_bf_boot_by_hand(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
@@ -26,12 +27,12 @@ pub fn bar_aw_bf_boot_by_hand(
     box_pin_async_fn_wss(f)
 }
 
+/// Returns a bar_aw_bf stereotype instance.
 pub fn bar_aw_bf_boot(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
 ) -> Box<BarAwBfT> {
     let cfg_factory = BarAwBfCfg::new_boxed_with_cfg_adapter;
-
     cfg_deps_boot_aw(
         bar_aw_bf_c,
         cfg_factory,

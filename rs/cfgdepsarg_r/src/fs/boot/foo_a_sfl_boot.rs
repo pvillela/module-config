@@ -42,7 +42,6 @@ pub fn foo_a_sfl_boot(
     let deps = FooASflDeps {
         bar_a_bf: Box::new(bar_a_bf_boot(app_cfg, refresh_mode.clone())),
     };
-
     cfg_deps_boot_a(
         foo_a_sfl_c,
         cfg_factory,
@@ -85,7 +84,6 @@ pub fn foo_a_sfl_boot_lr(
     let deps = FooASflDeps {
         bar_a_bf: Box::new(bar_a_bf_boot_lr(app_cfg, refresh_mode.clone())),
     };
-
     cfg_deps_boot_a_lr(
         foo_a_sfl_c,
         cfg_factory,
