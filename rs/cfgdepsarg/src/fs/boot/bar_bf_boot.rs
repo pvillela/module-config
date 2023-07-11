@@ -27,7 +27,6 @@ pub fn bar_bf_boot_by_hand(
 /// Returns a boxed bar_bf closure.
 pub fn bar_bf_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> Box<BarBfT> {
     let cfg_factory = BarBfCfg::new_boxed_with_cfg_adapter;
-
     cfg_deps_boot(
         bar_bf_c,
         cfg_factory,
@@ -55,7 +54,6 @@ pub fn bar_bf_boot_lr(
     refresh_mode: RefreshMode,
 ) -> &'static BarBfT {
     let cfg_factory = BarBfCfg::new_boxed_with_cfg_adapter;
-
     cfg_deps_boot_lr(
         bar_bf_c,
         cfg_factory,

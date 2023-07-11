@@ -1,5 +1,5 @@
 use actix_web::{web, App, HttpServer};
-use cfgdepsarg_r::fs::{
+use cfgdepsarg::fs::{
     bar_aw_bf_c, foo_aw_sfl_c, BarAwBfCfg, BarAwBfS, FooAwSflCfg, FooAwSflDeps, FooAwSflS,
 };
 use common::{

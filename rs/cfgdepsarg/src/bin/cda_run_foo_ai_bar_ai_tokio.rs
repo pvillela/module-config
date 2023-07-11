@@ -1,4 +1,4 @@
-use cfgdepsarg_r::fs::boot::foo_ai_sfl_boot;
+use cfgdepsarg::fs::boot::foo_ai_sfl_boot;
 use common::config::get_app_configuration;
 use common::fs_data::{FooAiIn, FooAiOut};
 use common::fwk::BoxPinFn;

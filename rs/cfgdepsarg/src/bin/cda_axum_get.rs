@@ -1,5 +1,5 @@
 use axum::{routing::post, Router};
-use cfgdepsarg_r::startup::get_foo_a_sfl_refreshable;
+use cfgdepsarg::startup::get_foo_a_sfl_refreshable;
 use common::{config::refresh_app_configuration, web::axum_handler::handler_of};
 use std::{thread, time::Duration};
 

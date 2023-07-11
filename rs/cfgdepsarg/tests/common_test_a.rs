@@ -1,4 +1,4 @@
-use cfgdepsarg_r::fs::{
+use cfgdepsarg::fs::{
     bar_a_bf_c, foo_a_sfl_c, BarABfCfg, BarABfS, FooASflCfg, FooASflDeps, FooASflS,
 };
 use common::fs_data::BarABfCfgInfo;

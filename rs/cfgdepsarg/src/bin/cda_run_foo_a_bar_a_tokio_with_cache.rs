@@ -1,17 +1,21 @@
-use cfgdepsarg_r::fs::boot::foo_a_sfl_boot;
+use cfgdepsarg::fs::boot::foo_a_sfl_boot;
 use common::config::get_app_configuration;
 use common::fs_data::{FooAIn, FooAOut};
 use common::fwk::{BoxPinFn, RefreshMode};
 use common::tokio_run::{run, RunIn};
+use std::time::Duration;
 use tokio;
 
 fn make_foo_a_sfl() -> BoxPinFn<FooAIn, FooAOut> {
-    foo_a_sfl_boot(get_app_configuration, RefreshMode::NoRefresh)
+    foo_a_sfl_boot(
+        get_app_configuration,
+        RefreshMode::Refreshable(Duration::from_millis(160)),
+    )
 }
 
 #[tokio::main]
 async fn main() {
-    println!("===== cda_run_foo_a_bar_a_tokio_no_cache =====");
+    println!("===== cda_run_foo_a_bar_a_tokio_with_cache =====");
 
     run(RunIn {
         make_foo_a_sfl,

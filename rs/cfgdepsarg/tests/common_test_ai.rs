@@ -1,4 +1,4 @@
-use cfgdepsarg_r::fs::{bar_ai_bf_c, foo_ai_sfl_c, BarAiBfS, FooAiSflDeps, FooAiSflS};
+use cfgdepsarg::fs::{bar_ai_bf_c, foo_ai_sfl_c, BarAiBfS, FooAiSflDeps, FooAiSflS};
 use common::fs_data::BarAiBfCfgInfo;
 use common::fs_data::{FooAiIn, FooAiSflCfgInfo};
 use common::fwk::box_pin_async_fn;
