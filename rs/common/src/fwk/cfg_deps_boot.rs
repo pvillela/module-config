@@ -26,7 +26,7 @@ use futures::Future;
 use std::ops::Deref;
 use std::sync::Arc;
 
-use super::{sfl_with_transaction, DbCfg, DbErr, Tx};
+use super::{fn2_with_transaction, DbCfg, DbErr, Tx};
 
 //=================
 // _boot
@@ -250,7 +250,7 @@ where
     ACFG: DbCfg,
 {
     let db = ACFG::get_db(&app_cfg());
-    let f_c = sfl_with_transaction(&db, f_c);
+    let f_c = fn2_with_transaction(&db, f_c);
     let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
     let s = Arc::new(CfgDeps { cfg, deps: deps });
     let stereotype = move |input| f_c(s.clone(), input);
@@ -277,7 +277,7 @@ where
     ACFG: DbCfg,
 {
     let db = ACFG::get_db(&app_cfg());
-    let f_c = sfl_with_transaction(&db, f_c);
+    let f_c = fn2_with_transaction(&db, f_c);
     let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
     let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps: deps }));
     let stereotype = move |input| f_c(s_ref_leak, input);
