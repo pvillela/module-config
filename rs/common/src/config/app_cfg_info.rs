@@ -55,6 +55,7 @@ pub fn get_app_configuration() -> Arc<AppCfgInfo> {
 
 impl DbCfg for AppCfgInfo {
     fn get_db(&self) -> Result<&'static Db, DbErr> {
+        // TODO: implement this properly
         static APP_CFG_INFO_DB: OnceLock<Db> = OnceLock::new();
         Ok(APP_CFG_INFO_DB.get_or_init(|| Db))
     }

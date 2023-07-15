@@ -1,5 +1,5 @@
 use futures::Future;
-use std::pin::Pin;
+use std::{pin::Pin, sync::OnceLock};
 
 pub struct Db;
 
@@ -13,19 +13,27 @@ pub struct Tx;
 
 impl<'a> Tx {
     pub async fn get(_db: &'a Db) -> Result<&'a Self, DbErr> {
-        todo!()
+        // TODO: implement this properly
+        static TX: OnceLock<Tx> = OnceLock::new();
+        Ok(TX.get_or_init(|| Tx))
     }
 
     pub async fn begin(&self) -> Result<(), DbErr> {
-        todo!()
+        // TODO: implement this properly
+        println!("Tx.begin() called");
+        Ok(())
     }
 
     pub async fn commit(&self) -> Result<(), DbErr> {
-        todo!()
+        // TODO: implement this properly
+        println!("Tx.commit() called");
+        Ok(())
     }
 
     pub async fn abort(&self) -> Result<(), DbErr> {
-        todo!()
+        // TODO: implement this properly
+        println!("Tx.abort() called");
+        Ok(())
     }
 }
 
