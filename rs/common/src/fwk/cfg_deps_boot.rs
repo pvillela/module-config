@@ -26,6 +26,8 @@ use futures::Future;
 use std::ops::Deref;
 use std::sync::Arc;
 
+use super::{sfl_with_transaction, DbCfg, DbErr, Tx};
+
 //=================
 // _boot
 
@@ -223,4 +225,61 @@ where
     let s = Arc::new(CfgDeps { cfg, deps: deps });
     let stereotype = move |input| f_c(s.clone(), input);
     box_pin_async_fn_wss(stereotype)
+}
+
+//=================
+// _boot_at
+
+/// Returns a boxed async stereotype instance with refreshable configuration,
+/// for a transactional stereotype constructor.
+pub fn cfg_deps_boot_at<'a, C, D, A, T, APPERR, FUT, ACFG, SCFG>(
+    f_c: fn(Arc<CfgDeps<C, D>>, A, &'a Tx) -> FUT,
+    cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
+    cfg_adapter: fn(&ACFG) -> SCFG,
+    app_cfg: fn() -> Arc<ACFG>,
+    refresh_mode: RefreshMode,
+    deps: D,
+) -> BoxPinFn<A, Result<T, APPERR>>
+where
+    C: 'static + Send + Sync,
+    D: 'static + Send + Sync,
+    A: 'static + Send + Sync,
+    T: 'static + Send + Sync,
+    APPERR: From<DbErr> + Send + Sync + 'static,
+    FUT: Future<Output = Result<T, APPERR>> + Send + Sync + 'static,
+    ACFG: DbCfg,
+{
+    let db = ACFG::get_db(&app_cfg());
+    let f_c = sfl_with_transaction(&db, f_c);
+    let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
+    let s = Arc::new(CfgDeps { cfg, deps: deps });
+    let stereotype = move |input| f_c(s.clone(), input);
+    box_pin_async_fn(stereotype)
+}
+
+/// Returns a leaked static reference to async stereotype instance with refreshable configuration,
+/// for a transactional stereotype constructor.
+pub fn cfg_deps_boot_at_lr<'a, C, D, A, T, APPERR, FUT, ACFG, SCFG>(
+    f_c: fn(&'static CfgDeps<C, D>, A, &'a Tx) -> FUT,
+    cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
+    cfg_adapter: fn(&ACFG) -> SCFG,
+    app_cfg: fn() -> Arc<ACFG>,
+    refresh_mode: RefreshMode,
+    deps: D,
+) -> &'static PinFn<A, Result<T, APPERR>>
+where
+    C: 'static + Send + Sync,
+    D: 'static + Send + Sync,
+    A: 'static + Send + Sync,
+    T: 'static + Send + Sync,
+    APPERR: From<DbErr> + Send + Sync + 'static,
+    FUT: Future<Output = Result<T, APPERR>> + Send + Sync + 'static,
+    ACFG: DbCfg,
+{
+    let db = ACFG::get_db(&app_cfg());
+    let f_c = sfl_with_transaction(&db, f_c);
+    let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
+    let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps: deps }));
+    let stereotype = move |input| f_c(s_ref_leak, input);
+    ref_pin_async_fn(stereotype)
 }

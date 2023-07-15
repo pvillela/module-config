@@ -6,7 +6,7 @@ pub struct Db;
 pub struct DbErr;
 
 pub trait DbCfg {
-    fn get_db(&self) -> Result<&'static Db, DbErr>;
+    fn get_db(&self) -> &'static Db;
 }
 
 pub struct Tx;
@@ -39,7 +39,7 @@ impl<'a> Tx {
 
 pub async fn with_transaction<'a, T, AppErr, Fut>(
     db: &'a Db,
-    box_block: Box<dyn FnOnce(&'a Tx) -> Fut>,
+    box_block: Box<dyn FnOnce(&'a Tx) -> Fut + Send + Sync>,
 ) -> Result<T, AppErr>
 where
     AppErr: From<DbErr>,
@@ -58,24 +58,29 @@ where
 
 pub fn sfl_with_transaction<S, In, Out, AppErr, Fut>(
     db: &'static Db,
-    sfl: fn(S, In, &'static Tx) -> Fut,
-) -> Box<dyn Fn(S, In) -> Pin<Box<dyn Future<Output = Result<Out, AppErr>> + 'static>> + 'static>
+    sfl_c: fn(S, In, &'static Tx) -> Fut,
+) -> Box<
+    dyn Fn(S, In) -> Pin<Box<dyn Future<Output = Result<Out, AppErr>> + Send + Sync + 'static>>
+        + Send
+        + Sync
+        + 'static,
+>
 where
-    S: 'static,
-    Out: 'static,
-    In: 'static,
-    AppErr: From<DbErr> + 'static,
-    Fut: Future<Output = Result<Out, AppErr>> + 'static,
+    S: Send + Sync + 'static,
+    In: Send + Sync + 'static,
+    Out: Send + Sync + 'static,
+    AppErr: From<DbErr> + Send + Sync + 'static,
+    Fut: Future<Output = Result<Out, AppErr>> + Send + Sync + 'static,
 {
     // Type inferencer annotates `sfl` as `impl FnOnce` but that is obviously incorrect
     //because `Box::new(sfl)` satisfies the return type of Box<dyn Fn>`.
-    let sfl = move |s, i| {
-        let block = move |tx| sfl(s, i, tx);
+    let sfl_c = move |s, i| {
+        let block = move |tx| sfl_c(s, i, tx);
         let box_block = Box::new(block);
         // Convert Pin<Box<impl> to Pin<Box<dyn>>:
-        let res: Pin<Box<dyn Future<Output = Result<Out, AppErr>> + 'static>> =
+        let res: Pin<Box<dyn Future<Output = Result<Out, AppErr>> + Send + Sync + 'static>> =
             Box::pin(with_transaction(db, box_block));
         res
     };
-    Box::new(sfl)
+    Box::new(sfl_c)
 }
