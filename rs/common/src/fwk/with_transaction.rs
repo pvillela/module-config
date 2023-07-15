@@ -1,20 +1,15 @@
-use std::pin::Pin;
-
 use futures::Future;
+use std::pin::Pin;
 
 pub struct Db;
 
-pub struct Tx;
-
 pub struct DbErr;
 
-pub struct AppErr;
-
-impl From<DbErr> for AppErr {
-    fn from(_value: DbErr) -> Self {
-        todo!()
-    }
+pub trait DbCfg {
+    fn get_db(&self) -> Result<&'static Db, DbErr>;
 }
+
+pub struct Tx;
 
 impl<'a> Tx {
     pub async fn get(_db: &'a Db) -> Result<&'a Self, DbErr> {
@@ -34,11 +29,12 @@ impl<'a> Tx {
     }
 }
 
-pub async fn with_transaction<'a, T, Fut>(
+pub async fn with_transaction<'a, T, AppErr, Fut>(
     db: &'a Db,
     box_block: Box<dyn FnOnce(&'a Tx) -> Fut>,
 ) -> Result<T, AppErr>
 where
+    AppErr: From<DbErr>,
     Fut: Future<Output = Result<T, AppErr>>,
 {
     let tx = Tx::get(db).await?;
@@ -48,7 +44,7 @@ where
     Ok(res)
 }
 
-pub fn sfl_with_transaction<S, In, Out, Fut>(
+pub fn sfl_with_transaction<S, In, Out, AppErr, Fut>(
     db: &'static Db,
     sfl: fn(S, In, &'static Tx) -> Fut,
 ) -> Box<dyn Fn(S, In) -> Pin<Box<dyn Future<Output = Result<Out, AppErr>> + 'static>> + 'static>
@@ -56,6 +52,7 @@ where
     S: 'static,
     Out: 'static,
     In: 'static,
+    AppErr: From<DbErr> + 'static,
     Fut: Future<Output = Result<Out, AppErr>> + 'static,
 {
     // Type inferencer annotates `sfl` as `impl FnOnce` but that is obviously incorrect
