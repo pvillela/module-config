@@ -39,9 +39,13 @@ where
 {
     let tx = Tx::get(db).await?;
     tx.begin().await?;
-    let res = box_block(tx).await?;
-    tx.commit().await?;
-    Ok(res)
+    let res = box_block(tx).await;
+    if res.is_ok() {
+        tx.commit().await?;
+    } else {
+        tx.abort().await?;
+    }
+    res
 }
 
 pub fn sfl_with_transaction<S, In, Out, AppErr, Fut>(
