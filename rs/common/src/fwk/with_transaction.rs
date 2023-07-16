@@ -35,6 +35,11 @@ impl<'a> Tx {
         println!("Tx.abort() called");
         Ok(())
     }
+
+    /// Dummy method to demonstrate use of transaction reference.
+    pub fn dummy(&self, src: &str) -> String {
+        format!("-Tx.dummy() called from {}", src)
+    }
 }
 
 pub async fn with_transaction<'a, T, AppErr, Fut>(
@@ -58,7 +63,7 @@ where
 
 pub fn fn2_with_transaction<S1, S2, T, AppErr, Fut>(
     db: &'static Db,
-    f: fn(S1, S2, &'static Tx) -> Fut,
+    f: impl Fn(S1, S2, &'static Tx) -> Fut + Clone + Send + Sync + 'static,
 ) -> impl Fn(S1, S2) -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'static>>
        + Send
        + Sync
@@ -73,6 +78,7 @@ where
     // Type inferencer annotates `f_t` as `impl FnOnce` but that is obviously incorrect
     // because the overall return type is satisfied.
     let f_t = move |s, i| {
+        let f = f.clone();
         let block = move |tx| f(s, i, tx);
         // Convert Pin<Box<impl> to Pin<Box<dyn>>:
         let res: Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'static>> =

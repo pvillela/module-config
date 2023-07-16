@@ -1,6 +1,7 @@
 pub use foo_a_data::*;
 pub use foo_ai_data::*;
 pub use foo_an_data::*;
+pub use foo_at_data::*;
 pub use foo_aw_data::*;
 pub use foo_data::*;
 pub use foo_i_data::*;
@@ -83,4 +84,14 @@ mod foo_aw_data {
     pub type FooAwIn = FooAIn;
 
     pub type FooAwOut = FooAOut;
+}
+
+mod foo_at_data {
+    use super::{FooAIn, FooAOut, FooASflCfgInfo};
+
+    pub type FooAtSflCfgInfo = FooASflCfgInfo;
+
+    pub type FooAtIn = FooAIn;
+
+    pub type FooAtOut = FooAOut;
 }

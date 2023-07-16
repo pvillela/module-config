@@ -2,11 +2,14 @@ use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::sync::Arc;
-
 use std::sync::OnceLock;
 
 /// Type of dynamic object of pinned wrapper of async closures.
 pub type PinFn<S, T> = dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + Send + Sync>> + Send + Sync;
+
+/// Type of dynamic object of pinned wrapper of async closures.
+pub type PinFn2r<S1, S2, T> =
+    dyn for<'a> Fn(S1, &'a S2) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync;
 
 /// Type of Arced and pinned wrapper of async closures.
 pub type ArcPinFn<S, T> = Arc<PinFn<S, T>>;

@@ -231,8 +231,8 @@ where
 // _boot_at
 
 /// Returns a boxed async stereotype instance with refreshable configuration,
-/// for a transactional stereotype constructor.
-pub fn cfg_deps_boot_at<'a, C, D, A, T, APPERR, FUT, ACFG, SCFG>(
+/// for a transactional stereotype constructor, executed withint a transaction.
+pub fn cfg_deps_boot_at_bound_tx<'a, C, D, A, T, APPERR, FUT, ACFG, SCFG>(
     f_c: fn(Arc<CfgDeps<C, D>>, A, &'a Tx) -> FUT,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -257,9 +257,34 @@ where
     box_pin_async_fn(stereotype)
 }
 
+/// Returns a boxed async stereotype instance with refreshable configuration,
+/// for a transactional stereotype constructor, with the transaction handle as a free variable.
+pub fn cfg_deps_boot_at_free_tx<'a, C, D, A, T, APPERR, FUT, ACFG, SCFG>(
+    f_c: fn(Arc<CfgDeps<C, D>>, A, &'a Tx) -> FUT,
+    cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
+    cfg_adapter: fn(&ACFG) -> SCFG,
+    app_cfg: fn() -> Arc<ACFG>,
+    refresh_mode: RefreshMode,
+    deps: D,
+) -> Box<dyn Fn(A, &'a Tx) -> FUT + Send + Sync + 'a>
+where
+    C: 'static + Send + Sync,
+    D: 'static + Send + Sync,
+    A: 'static + Send + Sync,
+    T: 'static + Send + Sync,
+    APPERR: From<DbErr> + Send + Sync + 'static,
+    FUT: Future<Output = Result<T, APPERR>> + Send + Sync + 'static,
+    ACFG: DbCfg,
+{
+    let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
+    let s = Arc::new(CfgDeps { cfg, deps: deps });
+    let stereotype = move |input, tx| f_c(s.clone(), input, tx);
+    Box::new(stereotype)
+}
+
 /// Returns a leaked static reference to async stereotype instance with refreshable configuration,
-/// for a transactional stereotype constructor.
-pub fn cfg_deps_boot_at_lr<'a, C, D, A, T, APPERR, FUT, ACFG, SCFG>(
+/// for a transactional stereotype constructor, executed withint a transaction.
+pub fn cfg_deps_boot_at_lr_txnl<'a, C, D, A, T, APPERR, FUT, ACFG, SCFG>(
     f_c: fn(&'static CfgDeps<C, D>, A, &'a Tx) -> FUT,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,

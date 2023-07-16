@@ -10,7 +10,6 @@ pub type FooASflT = PinFn<FooAIn, FooAOut>;
 
 pub type FooASflCfg = CfgArcSwapArc<FooASflCfgInfo>;
 
-// #[derive(Clone)]
 pub struct FooASflDeps {
     pub bar_a_bf: Box<BarABfT>,
 }

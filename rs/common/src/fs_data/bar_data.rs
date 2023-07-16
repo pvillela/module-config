@@ -23,6 +23,11 @@ pub type BarAiBfCfgInfo = BarBfCfgInfo;
 pub type BarAnBfCfgInfo = BarBfCfgInfo;
 
 ///////////////////
+// bar_at_bf
+
+pub type BarAtBfCfgInfo = BarBfCfgInfo;
+
+///////////////////
 // bar_aw_bf
 
 pub type BarAwBfCfgInfo = BarBfCfgInfo;
