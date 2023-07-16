@@ -8,6 +8,10 @@ use std::sync::OnceLock;
 pub type PinFn<S, T> = dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + Send + Sync>> + Send + Sync;
 
 /// Type of dynamic object of pinned wrapper of async closures.
+pub type PinFn2a<'a, S1, S2, T> =
+    dyn Fn(S1, &'a S2) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync + 'a;
+
+/// Type of dynamic object of pinned wrapper of async closures.
 pub type PinFn2r<S1, S2, T> =
     dyn for<'a> Fn(S1, &'a S2) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync;
 
