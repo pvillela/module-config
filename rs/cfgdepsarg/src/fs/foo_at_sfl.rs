@@ -1,10 +1,10 @@
 use super::BarAtBfT;
 use common::fs_data::{FooAtIn, FooAtOut, FooAtSflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, PinFn2a, PinFn2r, Tx};
-use futures::Future;
+use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, PinFn2r, Tx};
+
 use std::ops::Deref;
-use std::pin::Pin;
+
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -13,19 +13,21 @@ pub type FooAtSflT = PinFn2r<FooAtIn, Tx, Result<FooAtOut, AppErr>>;
 pub type FooAtSflCfg = CfgArcSwapArc<FooAtSflCfgInfo>;
 
 pub struct FooAtSflDeps {
-    pub bar_at_bf: Box<
-        dyn for<'a> Fn(
-            u64,
-            &'a Tx,
-        )
-            -> Pin<Box<dyn Future<Output = Result<String, AppErr>> + Send + Sync>>,
-    >,
+    pub bar_at_bf: Box<BarAtBfT>, // Box<
+                                  //     dyn for<'a> Fn(
+                                  //             u64,
+                                  //             &'a Tx,
+                                  //         )
+                                  //             -> Pin<Box<dyn Future<Output = Result<String, AppErr>> + Send + Sync>>
+                                  //         + Send
+                                  //         + Sync,
+                                  // >,
 }
 
 pub type FooAtSflS = CfgDeps<FooAtSflCfg, FooAtSflDeps>;
 
 pub async fn foo_at_sfl_c(
-    s: impl Deref<Target = FooAtSflS>,
+    s: impl Deref<Target = FooAtSflS> + Send + Sync,
     input: FooAtIn,
     tx: &Tx,
 ) -> Result<FooAtOut, AppErr> {

@@ -27,7 +27,7 @@ use std::ops::Deref;
 use std::pin::Pin;
 use std::sync::Arc;
 
-use super::{fn2_with_transaction, DbCfg, DbErr, Tx};
+use super::{fn2_with_transaction, AsyncBorrowFn001, DbCfg, DbErr, Tx};
 
 //=================
 // _boot
@@ -317,7 +317,7 @@ where
     Box::new(stereotype)
 }
 
-pub fn cfg_deps_boot_at_free_tx_box<C, D, A, T, APPERR, ACFG, SCFG, F>(
+pub fn cfg_deps_boot_at_free_tx_box_no_static<C, D, A, T, APPERR, ACFG, SCFG, F>(
     f_c: F,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -325,10 +325,9 @@ pub fn cfg_deps_boot_at_free_tx_box<C, D, A, T, APPERR, ACFG, SCFG, F>(
     refresh_mode: RefreshMode,
     deps: D,
 ) -> Box<
-    dyn for<'a> Fn(
-        A,
-        &'a Tx,
-    ) -> Pin<Box<dyn Future<Output = Result<T, APPERR>> + Send + Sync + 'a>>,
+    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = Result<T, APPERR>> + Send + Sync + 'a>>
+        + Send
+        + Sync,
 >
 where
     F: for<'a> Fn(
@@ -336,6 +335,8 @@ where
             A,
             &'a Tx,
         ) -> Pin<Box<dyn Future<Output = Result<T, APPERR>> + Send + Sync>>
+        + Send
+        + Sync
         + 'static,
     C: 'static + Send + Sync,
     D: 'static + Send + Sync,
@@ -351,6 +352,39 @@ where
             Box::pin(f_c(s.clone(), input, tx));
         x
     })
+}
+
+pub fn cfg_deps_boot_at_free_tx_no_box<C, D, A, T, APPERR, ACFG, SCFG>(
+    f_c: impl for<'a> AsyncBorrowFn001<'a, Arc<CfgDeps<C, D>>, A, Tx, Out = Result<T, APPERR>> + 'static,
+    // fn(Arc<CfgDeps<C, D>>, A, &Tx) -> Fut,
+    cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
+    cfg_adapter: fn(&ACFG) -> SCFG,
+    app_cfg: fn() -> Arc<ACFG>,
+    refresh_mode: RefreshMode,
+    deps: D,
+) -> impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = Result<T, APPERR>> + Send + Sync + 'a>>
+       + Send
+       + Sync
+where
+    // Fut: Future<Output = Result<T, APPERR>> + Send + Sync + 'static,
+    // F: for<'a> Fn(
+    //         Arc<CfgDeps<C, D>>,
+    //         A,
+    //         &'a Tx,
+    //     ) -> Pin<Box<dyn Future<Output = Result<T, APPERR>> + Send + Sync>>
+    //     + Send
+    //     + Sync
+    //     + 'static,
+    C: 'static + Send + Sync,
+    D: 'static + Send + Sync,
+    A: 'static + Send + Sync,
+    T: 'static + Send + Sync,
+    APPERR: From<DbErr> + Send + Sync + 'static,
+    ACFG: DbCfg,
+{
+    let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
+    let s = Arc::new(CfgDeps { cfg, deps: deps });
+    move |input, tx| Box::pin(f_c(s.clone(), input, tx))
 }
 
 pub fn cfg_deps_boot_at_free_tx_box_no_ss<C, D, A, T, APPERR, ACFG, SCFG, F>(
@@ -389,7 +423,7 @@ where
     })
 }
 
-pub fn cfg_deps_boot_at_free_tx_no_box<C, D, A, T, APPERR, ACFG, SCFG, F>(
+pub fn cfg_deps_boot_at_free_tx_no_box_old<C, D, A, T, APPERR, ACFG, SCFG, F>(
     f_c: F,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
