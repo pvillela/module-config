@@ -4,15 +4,13 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::OnceLock;
 
+use super::AsyncBorrowFn3a3;
+
 /// Type of dynamic object of pinned wrapper of async closures.
 pub type PinFn<S, T> = dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + Send + Sync>> + Send + Sync;
 
 /// Type of dynamic object of pinned wrapper of async closures.
-pub type PinFn2a<'a, S1, S2, T> =
-    dyn Fn(S1, &'a S2) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync + 'a;
-
-/// Type of dynamic object of pinned wrapper of async closures.
-pub type PinFn2r<S1, S2, T> =
+pub type PinBorrowFn2a2<S1, S2, T> =
     dyn for<'a> Fn(S1, &'a S2) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync;
 
 /// Type of Arced and pinned wrapper of async closures.
@@ -84,16 +82,22 @@ where
 }
 
 /// Transforms an async closure into a closure that returns a pinned-boxed future.
-pub fn pin_async_fn<S: 'static, T: 'static + Send + Sync, Fut>(
-    f: impl Fn(S) -> Fut + 'static + Send + Sync,
+pub fn pin_async_fn<S, T, Fut>(
+    f: impl Fn(S) -> Fut,
 ) -> impl Fn(S) -> Pin<Box<dyn Future<Output = T> + Send + Sync>>
 where
     Fut: 'static + Future<Output = T> + Send + Sync,
 {
-    move |s| {
-        let x = f(s);
-        let y: Pin<Box<dyn 'static + Future<Output = T> + Send + Sync>> = Box::pin(x);
-        y
+    move |s| Box::pin(f(s))
+}
+
+/// Transforms an async closure with a reference argument into a closure that returns a pinned-boxed future.
+pub fn pin_async_borrow_fn_3a3<S1, S2, S3, T>(
+    f: impl for<'a> AsyncBorrowFn3a3<'a, S1, S2, S3, Out = T>,
+) -> impl for<'a> Fn(S1, S2, &'a S3) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> {
+    move |s1, s2, s3| {
+        let x = f(s1, s2, s3);
+        Box::pin(x)
     }
 }
 

@@ -1,9 +1,7 @@
-use crate::fs::{bar_at_bf_c, BarAtBfCfg};
+use crate::fs::{bar_at_bf_c, BarAtBfCfg, BarAtBfTxT};
 use common::config::AppCfgInfo;
 use common::fs_data::BarAtBfCfgInfo;
-use common::fwk::{cfg_deps_boot_at_free_tx_no_box, AppErr, RefreshMode, Tx};
-use futures::Future;
-use std::pin::Pin;
+use common::fwk::{cfg_deps_boot_at_free_tx_no_box, RefreshMode};
 use std::sync::Arc;
 
 fn bar_at_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarAtBfCfgInfo {
@@ -13,25 +11,12 @@ fn bar_at_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarAtBfCfgInfo {
     }
 }
 
+/// Returns a boxed bar_at_bf closure with free Tx parameter.
 pub fn bar_at_bf_boot(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
-) -> Box<
-    dyn for<'a> Fn(
-            u64,
-            &'a Tx,
-        )
-            -> Pin<Box<dyn Future<Output = Result<String, AppErr>> + Send + Sync + 'a>>
-        + Send
-        + Sync,
-> {
+) -> Box<BarAtBfTxT> {
     let cfg_factory = BarAtBfCfg::new_boxed_with_cfg_adapter;
-
-    // let bar_at_bf_c = move |x, y, z| {
-    //     let d: Pin<Box<dyn Future<Output = Result<String, AppErr>> + Send + Sync>> =
-    //         Box::pin(bar_at_bf_c(x, y, z));
-    //     d
-    // };
 
     let x = cfg_deps_boot_at_free_tx_no_box(
         bar_at_bf_c,

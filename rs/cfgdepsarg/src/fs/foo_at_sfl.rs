@@ -1,25 +1,17 @@
-use super::BarAtBfT;
+use super::BarAtBfTxT;
 use common::fs_data::{FooAtIn, FooAtOut, FooAtSflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, PinFn2r, Tx};
+use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, PinBorrowFn2a2, Tx};
 use std::ops::Deref;
 use std::time::Duration;
 use tokio::time::sleep;
 
-pub type FooAtSflT = PinFn2r<FooAtIn, Tx, Result<FooAtOut, AppErr>>;
-// impl Fn(S1, &'a S2) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync + 'a
+pub type FooAtSflTxT = PinBorrowFn2a2<FooAtIn, Tx, Result<FooAtOut, AppErr>>;
+
 pub type FooAtSflCfg = CfgArcSwapArc<FooAtSflCfgInfo>;
 
 pub struct FooAtSflDeps {
-    pub bar_at_bf: Box<BarAtBfT>, // Box<
-                                  //     dyn for<'a> Fn(
-                                  //             u64,
-                                  //             &'a Tx,
-                                  //         )
-                                  //             -> Pin<Box<dyn Future<Output = Result<String, AppErr>> + Send + Sync>>
-                                  //         + Send
-                                  //         + Sync,
-                                  // >,
+    pub bar_at_bf: Box<BarAtBfTxT>,
 }
 
 pub type FooAtSflS = CfgDeps<FooAtSflCfg, FooAtSflDeps>;

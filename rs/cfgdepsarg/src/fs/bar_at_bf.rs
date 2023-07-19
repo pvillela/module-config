@@ -1,21 +1,11 @@
 use common::fs_data::BarAtBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, Tx};
+use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, PinBorrowFn2a2, Tx};
 use std::ops::Deref;
-use std::pin::Pin;
 use std::time::Duration;
 use tokio::time::sleep;
 
-// TODO: Is Tx Clone? Let's find out about popular Rust persistence packages.
-
-// pub type BarAtBfT = PinFn2r<u64, Tx, Result<String, AppErr>>;
-pub type BarAtBfT = dyn for<'a> std::ops::Fn(
-        u64,
-        &'a Tx,
-    ) -> Pin<
-        Box<(dyn futures::Future<Output = Result<String, AppErr>> + std::marker::Send + Sync + 'a)>,
-    > + Send
-    + Sync;
+pub type BarAtBfTxT = PinBorrowFn2a2<u64, Tx, Result<String, AppErr>>;
 
 pub type BarAtBfCfg = CfgArcSwapArc<BarAtBfCfgInfo>;
 
