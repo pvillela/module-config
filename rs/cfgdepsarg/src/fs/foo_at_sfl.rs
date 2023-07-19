@@ -2,9 +2,7 @@ use super::BarAtBfT;
 use common::fs_data::{FooAtIn, FooAtOut, FooAtSflCfgInfo};
 use common::fs_util::foo_core;
 use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, PinFn2r, Tx};
-
 use std::ops::Deref;
-
 use std::time::Duration;
 use tokio::time::sleep;
 
