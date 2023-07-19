@@ -27,7 +27,7 @@ use std::ops::Deref;
 use std::pin::Pin;
 use std::sync::Arc;
 
-use super::{fn2_with_transaction, AsyncBorrowFn001, DbCfg, DbErr, Tx};
+use super::{fn2_with_transaction, AsyncBorrowFn3a3, DbCfg, DbErr, Tx};
 
 //=================
 // _boot
@@ -355,7 +355,7 @@ where
 }
 
 pub fn cfg_deps_boot_at_free_tx_no_box<C, D, A, T, APPERR, ACFG, SCFG>(
-    f_c: impl for<'a> AsyncBorrowFn001<'a, Arc<CfgDeps<C, D>>, A, Tx, Out = Result<T, APPERR>> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3a3<'a, Arc<CfgDeps<C, D>>, A, Tx, Out = Result<T, APPERR>> + 'static,
     // fn(Arc<CfgDeps<C, D>>, A, &Tx) -> Fut,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -415,7 +415,7 @@ where
     ACFG: DbCfg,
 {
     let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
-    let s = Arc::new(CfgDeps { cfg, deps: deps });
+    let s = Arc::new(CfgDeps { cfg, deps });
     Box::new(move |input, tx| {
         let x: Pin<Box<dyn Future<Output = Result<T, APPERR>> + Send + Sync>> =
             Box::pin(f_c(s.clone(), input, tx));

@@ -33,3 +33,6 @@ pub use utils::*;
 
 mod with_transaction;
 pub use with_transaction::*;
+
+mod partial_apply;
+pub use partial_apply::*;

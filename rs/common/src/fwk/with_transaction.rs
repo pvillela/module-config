@@ -3,6 +3,7 @@ use std::{pin::Pin, sync::OnceLock};
 
 pub struct Db;
 
+#[derive(Debug)]
 pub struct DbErr;
 
 pub trait DbCfg {
