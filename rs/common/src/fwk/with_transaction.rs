@@ -62,25 +62,22 @@ where
     res
 }
 
-pub fn fn2_with_transaction<S1, S2, T, AppErr, Fut>(
+pub fn pin_fn2_with_transaction<A, T, AppErr>(
     db: &'static Db,
-    f: impl Fn(S1, S2, &'static Tx) -> Fut + Clone + Send + Sync + 'static,
-) -> impl Fn(S1, S2) -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'static>>
-       + Send
-       + Sync
-       + 'static
+    f: impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'a>>
+        + Send
+        + Sync
+        + Clone
+        + 'static,
+) -> impl Fn(A) -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync>> + Send + Sync
 where
-    S1: Send + Sync + 'static,
-    S2: Send + Sync + 'static,
+    A: Send + Sync + 'static,
     T: Send + Sync + 'static,
     AppErr: From<DbErr> + Send + Sync + 'static,
-    Fut: Future<Output = Result<T, AppErr>> + Send + Sync + 'static,
 {
-    // Type inferencer annotates `f_t` as `impl FnOnce` but that is obviously incorrect
-    // because the overall return type is satisfied.
-    let f_t = move |s, i| {
+    let f_t = move |a| {
         let f = f.clone();
-        let block = move |tx| f(s, i, tx);
+        let block = move |tx| f(a, tx);
         // Convert Pin<Box<impl> to Pin<Box<dyn>>:
         let res: Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'static>> =
             Box::pin(with_transaction(db, block));
