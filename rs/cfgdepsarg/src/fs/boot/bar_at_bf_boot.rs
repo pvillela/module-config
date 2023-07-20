@@ -1,7 +1,7 @@
 use crate::fs::{bar_at_bf_c, BarAtBfCfg, BarAtBfTxT};
 use common::config::AppCfgInfo;
 use common::fs_data::BarAtBfCfgInfo;
-use common::fwk::{cfg_deps_boot_at_free_tx_no_box, RefreshMode};
+use common::fwk::{cfg_deps_boot_at_free_tx, RefreshMode};
 use std::sync::Arc;
 
 fn bar_at_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarAtBfCfgInfo {
@@ -18,13 +18,12 @@ pub fn bar_at_bf_boot(
 ) -> Box<BarAtBfTxT> {
     let cfg_factory = BarAtBfCfg::new_boxed_with_cfg_adapter;
 
-    let x = cfg_deps_boot_at_free_tx_no_box(
+    cfg_deps_boot_at_free_tx(
         bar_at_bf_c,
         cfg_factory,
         bar_at_bf_cfg_adapter,
         app_cfg,
         refresh_mode.clone(),
         (),
-    );
-    Box::new(x)
+    )
 }

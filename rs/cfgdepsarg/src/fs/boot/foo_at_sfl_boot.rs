@@ -2,7 +2,7 @@ use super::bar_at_bf_boot;
 use crate::fs::{foo_at_sfl_c, FooAtSflCfg, FooAtSflDeps, FooAtSflTxT};
 use common::config::AppCfgInfo;
 use common::fs_data::FooAtSflCfgInfo;
-use common::fwk::{cfg_deps_boot_at_free_tx_no_box, RefreshMode};
+use common::fwk::{cfg_deps_boot_at_free_tx, RefreshMode};
 use std::sync::Arc;
 
 fn foo_at_sfl_cfg_atdapter(app_cfg: &AppCfgInfo) -> FooAtSflCfgInfo {
@@ -21,13 +21,12 @@ pub fn foo_at_sfl_boot(
     let b = bar_at_bf_boot(app_cfg, refresh_mode.clone());
     let deps = FooAtSflDeps { bar_at_bf: b };
 
-    let x = cfg_deps_boot_at_free_tx_no_box(
+    cfg_deps_boot_at_free_tx(
         foo_at_sfl_c,
         cfg_factory,
         foo_at_sfl_cfg_atdapter,
         app_cfg,
         refresh_mode.clone(),
         deps,
-    );
-    Box::new(x)
+    )
 }

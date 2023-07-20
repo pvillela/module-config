@@ -18,6 +18,7 @@
 //! - `app_cfg`: application config info or function that returns application config info
 //! - `refresh_mode`: cache refresh specification used in case of mutable configuration
 
+use super::{AsyncBorrowFn3a3, DbErr, Tx};
 use crate::fwk::{
     box_pin_async_fn, box_pin_async_fn_wss, ref_pin_async_fn, PinFn, PinFnWss, RefreshMode,
 };
@@ -26,8 +27,6 @@ use futures::Future;
 use std::ops::Deref;
 use std::pin::Pin;
 use std::sync::Arc;
-
-use super::{AsyncBorrowFn2a2, AsyncBorrowFn3a3, DbCfg, DbErr, PinBorrowFn2a2, Tx};
 
 //=================
 // _boot
@@ -235,7 +234,6 @@ where
 /// for a transactional stereotype constructor, executed within a transaction.
 pub fn cfg_deps_boot_at_free_tx_no_box<C, D, A, T, APPERR, ACFG, SCFG>(
     f_c: impl for<'a> AsyncBorrowFn3a3<'a, Arc<CfgDeps<C, D>>, A, Tx, Out = Result<T, APPERR>> + 'static,
-    // fn(Arc<CfgDeps<C, D>>, A, &Tx) -> Fut,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
     app_cfg: fn() -> Arc<ACFG>,
@@ -256,6 +254,94 @@ where
     move |input, tx| Box::pin(f_c(s.clone(), input, tx))
 }
 
-// TODO: cfg_deps_boot_at_free_tx
+/// Returns a boxed async stereotype instance with refreshable configuration,
+/// for a transactional stereotype constructor, executed within a transaction.
+pub fn cfg_deps_boot_at_free_tx<C, D, A, T, APPERR, ACFG, SCFG>(
+    f_c: impl for<'a> AsyncBorrowFn3a3<'a, Arc<CfgDeps<C, D>>, A, Tx, Out = Result<T, APPERR>> + 'static,
+    cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
+    cfg_adapter: fn(&ACFG) -> SCFG,
+    app_cfg: fn() -> Arc<ACFG>,
+    refresh_mode: RefreshMode,
+    deps: D,
+) -> Box<
+    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = Result<T, APPERR>> + Send + Sync + 'a>>
+        + Send
+        + Sync,
+>
+where
+    C: 'static + Send + Sync,
+    D: 'static + Send + Sync,
+    A: 'static + Send + Sync,
+    T: 'static + Send + Sync,
+    APPERR: From<DbErr> + Send + Sync + 'static,
+    ACFG: 'static,
+    SCFG: 'static,
+{
+    // // Code without using cfg_deps_boot_at_free_tx:
+    // let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
+    // let s = Arc::new(CfgDeps { cfg, deps: deps });
+    // Box::new(move |input, tx| Box::pin(f_c(s.clone(), input, tx)))
 
-// TODO: cfg_deps_boot_at_free_lr_tx
+    let stereotype =
+        cfg_deps_boot_at_free_tx_no_box(f_c, cfg_factory, cfg_adapter, app_cfg, refresh_mode, deps);
+    Box::new(stereotype)
+}
+
+fn cfg_deps_boot_at_free_tx_lr_no_box<C, D, A, T, APPERR, ACFG, SCFG>(
+    f_c: impl for<'a> AsyncBorrowFn3a3<'a, &'static CfgDeps<C, D>, A, Tx, Out = Result<T, APPERR>>
+        + 'static,
+    cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
+    cfg_adapter: fn(&ACFG) -> SCFG,
+    app_cfg: fn() -> Arc<ACFG>,
+    refresh_mode: RefreshMode,
+    deps: D,
+) -> impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = Result<T, APPERR>> + Send + Sync + 'a>>
+       + Send
+       + Sync
+where
+    C: 'static + Send + Sync,
+    D: 'static + Send + Sync,
+    A: 'static + Send + Sync,
+    T: 'static + Send + Sync,
+    APPERR: From<DbErr> + Send + Sync + 'static,
+{
+    let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
+    let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps: deps }));
+    move |input, tx| Box::pin(f_c(s_ref_leak, input, tx))
+}
+
+/// Returns an async stereotype instance with refreshable configuration,
+/// for a transactional stereotype constructor, executed within a transaction.
+pub fn cfg_deps_boot_at_free_tx_lr<C, D, A, T, APPERR, ACFG, SCFG>(
+    f_c: impl for<'a> AsyncBorrowFn3a3<'a, &'static CfgDeps<C, D>, A, Tx, Out = Result<T, APPERR>>
+        + 'static,
+    cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
+    cfg_adapter: fn(&ACFG) -> SCFG,
+    app_cfg: fn() -> Arc<ACFG>,
+    refresh_mode: RefreshMode,
+    deps: D,
+) -> &'static (dyn for<'a> Fn(
+    A,
+    &'a Tx,
+) -> Pin<Box<dyn Future<Output = Result<T, APPERR>> + Send + Sync + 'a>>
+                 + Send
+                 + Sync)
+where
+    C: 'static + Send + Sync,
+    D: 'static + Send + Sync,
+    A: 'static + Send + Sync,
+    T: 'static + Send + Sync,
+    APPERR: From<DbErr> + Send + Sync + 'static,
+    ACFG: 'static,
+    SCFG: 'static,
+{
+    let stereotype = cfg_deps_boot_at_free_tx_lr_no_box(
+        f_c,
+        cfg_factory,
+        cfg_adapter,
+        app_cfg,
+        refresh_mode,
+        deps,
+    );
+    Box::leak(Box::new(stereotype))
+}

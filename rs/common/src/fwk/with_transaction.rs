@@ -62,6 +62,8 @@ where
     res
 }
 
+/// Takes a closure `f` with a free `&'a Tx` parameter and returns a closure which, for each input,
+/// returns the result of executing `f` with the input and a `&Tx` in a transactional context.
 pub fn pin_fn2_with_transaction<A, T, AppErr>(
     db: &'static Db,
     f: impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'a>>
