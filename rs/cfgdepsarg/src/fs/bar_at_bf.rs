@@ -1,11 +1,11 @@
 use common::fs_data::BarAtBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, PinBorrowFn2a2, Tx};
+use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, PinBorrowFn2b2, Tx};
 use std::ops::Deref;
 use std::time::Duration;
 use tokio::time::sleep;
 
-pub type BarAtBfTxT = PinBorrowFn2a2<u64, Tx, Result<String, AppErr>>;
+pub type BarAtBfTxT = PinBorrowFn2b2<u64, Tx, Result<String, AppErr>>;
 
 pub type BarAtBfCfg = CfgArcSwapArc<BarAtBfCfgInfo>;
 

@@ -18,7 +18,7 @@
 //! - `app_cfg`: application config info or function that returns application config info
 //! - `refresh_mode`: cache refresh specification used in case of mutable configuration
 
-use super::{AsyncBorrowFn3a3, DbErr, Tx};
+use super::{AsyncBorrowFn3b3, DbErr, Tx};
 use crate::fwk::{
     box_pin_async_fn, box_pin_async_fn_wss, ref_pin_async_fn, PinFn, PinFnWss, RefreshMode,
 };
@@ -233,7 +233,7 @@ where
 /// Returns an async stereotype instance with refreshable configuration,
 /// for a transactional stereotype constructor, executed within a transaction.
 pub fn cfg_deps_boot_at_free_tx_no_box<C, D, A, T, APPERR, ACFG, SCFG>(
-    f_c: impl for<'a> AsyncBorrowFn3a3<'a, Arc<CfgDeps<C, D>>, A, Tx, Out = Result<T, APPERR>> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx, Out = Result<T, APPERR>> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
     app_cfg: fn() -> Arc<ACFG>,
@@ -257,7 +257,7 @@ where
 /// Returns a boxed async stereotype instance with refreshable configuration,
 /// for a transactional stereotype constructor, executed within a transaction.
 pub fn cfg_deps_boot_at_free_tx<C, D, A, T, APPERR, ACFG, SCFG>(
-    f_c: impl for<'a> AsyncBorrowFn3a3<'a, Arc<CfgDeps<C, D>>, A, Tx, Out = Result<T, APPERR>> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx, Out = Result<T, APPERR>> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
     cfg_adapter: fn(&ACFG) -> SCFG,
     app_cfg: fn() -> Arc<ACFG>,
@@ -288,7 +288,7 @@ where
 }
 
 fn cfg_deps_boot_at_free_tx_lr_no_box<C, D, A, T, APPERR, ACFG, SCFG>(
-    f_c: impl for<'a> AsyncBorrowFn3a3<'a, &'static CfgDeps<C, D>, A, Tx, Out = Result<T, APPERR>>
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, Tx, Out = Result<T, APPERR>>
         + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -313,7 +313,7 @@ where
 /// Returns an async stereotype instance with refreshable configuration,
 /// for a transactional stereotype constructor, executed within a transaction.
 pub fn cfg_deps_boot_at_free_tx_lr<C, D, A, T, APPERR, ACFG, SCFG>(
-    f_c: impl for<'a> AsyncBorrowFn3a3<'a, &'static CfgDeps<C, D>, A, Tx, Out = Result<T, APPERR>>
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, Tx, Out = Result<T, APPERR>>
         + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
     cfg_adapter: fn(&ACFG) -> SCFG,

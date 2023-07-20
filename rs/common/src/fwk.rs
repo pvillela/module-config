@@ -36,3 +36,6 @@ pub use with_transaction::*;
 
 mod partial_apply;
 pub use partial_apply::*;
+
+mod partial_application;
+pub use partial_application::*;
