@@ -1,5 +1,5 @@
 use futures::Future;
-use std::pin::Pin;
+use std::{pin::Pin, sync::Arc};
 
 pub struct DbClient;
 
@@ -74,8 +74,33 @@ where
     res
 }
 
-// TODO: This function is useless due to the Clone constraint on `f`.
-//
+async fn exec_fn2_arc_with_transaction<'p, A, T, AppErr>(
+    pool: &'p DbPool,
+    f: Arc<
+        dyn for<'a> Fn(
+                A,
+                &'a Tx<'a>,
+            )
+                -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'a>>
+            + Send
+            + Sync,
+    >,
+    input: A,
+) -> Result<T, AppErr>
+where
+    AppErr: From<DbErr>,
+{
+    let mut db = get_connection(pool).await?;
+    let tx: Tx = db.transaction().await?;
+    let res = f(input, &tx).await;
+    if res.is_ok() {
+        tx.commit().await?;
+    } else {
+        tx.rollback().await?;
+    }
+    res
+}
+
 /// Takes a pool source and a closure `f` with a free `&'a Tx` parameter,
 /// returns a closure which, for each input,
 /// returns the result of executing `f` with the input and a `&Tx` in a transactional context.
@@ -97,6 +122,32 @@ where
 {
     move |input| {
         let res = Box::pin(exec_fn2_with_transaction(pool, f.clone(), input));
+        res
+    }
+}
+
+/// Takes a pool source and a closure `f` with a free `&'a Tx` parameter,
+/// returns a closure which, for each input,
+/// returns the result of executing `f` with the input and a `&Tx` in a transactional context.
+pub fn fn2_arc_with_transaction<'p, A, T, AppErr>(
+    pool: &'p DbPool,
+    f: Arc<
+        dyn for<'a> Fn(
+                A,
+                &'a Tx<'a>,
+            )
+                -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'a>>
+            + Send
+            + Sync,
+    >,
+) -> impl Fn(A) -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'p>> + Send + Sync
+where
+    A: Send + Sync + 'static,
+    T: Send + Sync + 'static,
+    AppErr: From<DbErr> + Send + Sync + 'static,
+{
+    move |input| {
+        let res = Box::pin(exec_fn2_arc_with_transaction(pool, f.clone(), input));
         res
     }
 }

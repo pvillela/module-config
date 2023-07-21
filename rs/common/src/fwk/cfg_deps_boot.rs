@@ -281,6 +281,31 @@ where
     Box::new(stereotype)
 }
 
+/// Returns an arced async stereotype instance with refreshable configuration and a free transaction argument,
+/// for a transactional stereotype constructor.
+pub fn cfg_deps_boot_at_free_tx_arc<C, D, A, T, ACFG, SCFG>(
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx<'a>, Out = T> + 'static,
+    cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
+    cfg_adapter: fn(&ACFG) -> SCFG,
+    app_cfg: fn() -> Arc<ACFG>,
+    refresh_mode: RefreshMode,
+    deps: D,
+) -> Arc<
+    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+>
+where
+    C: 'static + Send + Sync,
+    D: 'static + Send + Sync,
+    A: 'static + Send + Sync,
+    T: 'static + Send + Sync,
+    ACFG: 'static,
+    SCFG: 'static,
+{
+    let stereotype =
+        cfg_deps_boot_at_free_tx_no_box(f_c, cfg_factory, cfg_adapter, app_cfg, refresh_mode, deps);
+    Arc::new(stereotype)
+}
+
 /// Returns an async stereotype instance with refreshable configuration, leaked CfgDeps,
 /// and a free transaction argument, for a transactional stereotype constructor.
 fn cfg_deps_boot_at_free_tx_lr_no_box<C, D, A, T, ACFG, SCFG>(
