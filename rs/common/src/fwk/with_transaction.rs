@@ -1,39 +1,44 @@
 use futures::Future;
 use std::{pin::Pin, sync::OnceLock};
 
-pub struct Db;
+pub struct DbClient;
+
+pub struct DbPool;
 
 #[derive(Debug)]
 pub struct DbErr;
 
 pub trait DbCfg {
-    fn get_db(&self) -> &'static Db;
+    fn get_db(&self) -> &'static DbPool;
 }
 
-pub struct Tx;
+pub async fn get_connection(pool: &DbPool) -> Result<DbClient, DbErr> {
+    // TODO: implement this properly
+    Ok(DbClient)
+}
 
-impl<'a> Tx {
-    pub async fn get(_db: &'a Db) -> Result<&'a Self, DbErr> {
+pub struct Tx<'a> {
+    db: &'a mut DbClient,
+}
+
+impl DbClient {
+    pub async fn transaction<'a>(&'a mut self) -> Result<Tx<'a>, DbErr> {
         // TODO: implement this properly
-        static TX: OnceLock<Tx> = OnceLock::new();
-        Ok(TX.get_or_init(|| Tx))
+        println!("Db.transaction() called");
+        Ok(Tx { db: self })
     }
+}
 
-    pub async fn begin(&self) -> Result<(), DbErr> {
-        // TODO: implement this properly
-        println!("Tx.begin() called");
-        Ok(())
-    }
-
-    pub async fn commit(&self) -> Result<(), DbErr> {
+impl<'a> Tx<'a> {
+    pub async fn commit(self) -> Result<(), DbErr> {
         // TODO: implement this properly
         println!("Tx.commit() called");
         Ok(())
     }
 
-    pub async fn abort(&self) -> Result<(), DbErr> {
+    pub async fn rollback(self) -> Result<(), DbErr> {
         // TODO: implement this properly
-        println!("Tx.abort() called");
+        println!("Tx.rollback() called");
         Ok(())
     }
 
@@ -44,28 +49,30 @@ impl<'a> Tx {
 }
 
 pub async fn with_transaction<'a, T, AppErr, Fut>(
-    db: &'a Db,
-    block: impl FnOnce(&'a Tx) -> Fut + Send + Sync,
+    get_pool: fn() -> &'static DbPool,
+    block: impl FnOnce(&Tx) -> Fut + Send + Sync,
 ) -> Result<T, AppErr>
 where
     AppErr: From<DbErr>,
     Fut: Future<Output = Result<T, AppErr>>,
 {
-    let tx = Tx::get(db).await?;
-    tx.begin().await?;
-    let res = block(tx).await;
+    let pool = get_pool();
+    let mut db = get_connection(pool).await?;
+    let tx = db.transaction().await?;
+    let res = block(&tx).await;
     if res.is_ok() {
         tx.commit().await?;
     } else {
-        tx.abort().await?;
+        tx.rollback().await?;
     }
     res
 }
 
-/// Takes a closure `f` with a free `&'a Tx` parameter and returns a closure which, for each input,
+/// Takes a pool source and a closure `f` with a free `&'a Tx` parameter,
+/// returns a closure which, for each input,
 /// returns the result of executing `f` with the input and a `&Tx` in a transactional context.
 pub fn pin_fn2_with_transaction<A, T, AppErr>(
-    db: &'static Db,
+    get_pool: fn() -> &'static DbPool,
     f: impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'a>>
         + Send
         + Sync
@@ -81,8 +88,8 @@ where
         let f = f.clone();
         let block = move |tx| f(a, tx);
         // Convert Pin<Box<impl> to Pin<Box<dyn>>:
-        let res: Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'static>> =
-            Box::pin(with_transaction(db, block));
+        let res: Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync>> =
+            Box::pin(with_transaction(get_pool, block));
         res
     };
     f_t

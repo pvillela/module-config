@@ -233,7 +233,7 @@ where
 /// Returns an async stereotype instance with refreshable configuration,
 /// for a transactional stereotype constructor, executed within a transaction.
 pub fn cfg_deps_boot_at_free_tx_no_box<C, D, A, T, ACFG, SCFG>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx, Out = T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
     app_cfg: fn() -> Arc<ACFG>,
@@ -254,7 +254,7 @@ where
 /// Returns a boxed async stereotype instance with refreshable configuration,
 /// for a transactional stereotype constructor, executed within a transaction.
 pub fn cfg_deps_boot_at_free_tx<C, D, A, T, ACFG, SCFG>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx, Out = T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
     cfg_adapter: fn(&ACFG) -> SCFG,
     app_cfg: fn() -> Arc<ACFG>,
@@ -282,7 +282,7 @@ where
 }
 
 fn cfg_deps_boot_at_free_tx_lr_no_box<C, D, A, T, ACFG, SCFG>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, Tx, Out = T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
     app_cfg: fn() -> Arc<ACFG>,
@@ -303,7 +303,7 @@ where
 /// Returns an async stereotype instance with refreshable configuration,
 /// for a transactional stereotype constructor, executed within a transaction.
 pub fn cfg_deps_boot_at_free_tx_lr<C, D, A, T, ACFG, SCFG>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, Tx, Out = T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
     cfg_adapter: fn(&ACFG) -> SCFG,
     app_cfg: fn() -> Arc<ACFG>,

@@ -1,4 +1,4 @@
-use crate::fwk::{Db, DbCfg};
+use crate::fwk::{DbCfg, DbClient};
 use arc_swap::{ArcSwap, ArcSwapAny};
 use std::sync::{
     atomic::{AtomicU32, Ordering},
@@ -54,9 +54,8 @@ pub fn get_app_configuration() -> Arc<AppCfgInfo> {
 }
 
 impl DbCfg for AppCfgInfo {
-    fn get_db(&self) -> &'static Db {
+    fn get_db(&self) -> DbClient {
         // TODO: implement this properly
-        static APP_CFG_INFO_DB: OnceLock<Db> = OnceLock::new();
-        APP_CFG_INFO_DB.get_or_init(|| Db)
+        DbClient
     }
 }
