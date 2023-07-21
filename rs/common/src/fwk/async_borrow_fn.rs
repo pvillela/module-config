@@ -1,7 +1,7 @@
 //! The trait defined here was recommended by https://github.com/rust-lang/rust/issues/113495#issuecomment-1627640952
 //! in response to my issue https://github.com/rust-lang/rust/issues/113495.
 
-use std::future::Future;
+use std::{future::Future, pin::Pin};
 
 /// Represents an async function with single argument that is a reference.
 pub trait AsyncBorrowFn1b1<'a, A: ?Sized + 'a>: Fn(&'a A) -> Self::Fut + Send + Sync {
@@ -55,42 +55,109 @@ where
     type Fut = Fut;
 }
 
+/// Partial application for async function, where the resulting closure returns a box-pinned future.
+pub fn partial_apply_async_borrow_fn_2b2_boxpin<A1, A2, T>(
+    f: impl for<'a> AsyncBorrowFn2b2<'a, A1, A2, Out = T>,
+    a1: A1,
+) -> impl for<'a> Fn(&'a A2) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
+where
+    A1: Clone + Send + Sync,
+    A2: ?Sized, // optional Sized relaxation
+{
+    move |a2| {
+        let y = f(a1.clone(), a2);
+        Box::pin(y)
+    }
+}
+
+// Code below doesn't compile
+//
+///Partial application for async function, where the result is an AsyncBorrowFn1a1.
+// pub fn partial_apply<A1, A2, T>(
+//     f: impl for<'a> AsyncBorrowFn2b2<'a, A1, &'a A2, Out = T> + 'static,
+//     a1: A1,
+// ) -> impl for<'a> AsyncBorrowFn1b1<'a, &'a A2, Out = T>
+// where
+//     A1: Clone + Send + Sync + 'static,
+//     A2: ?Sized + 'static,
+// {
+//     move |a2| f(a1.clone(), a2)
+// }
+
 #[cfg(test)]
 mod tests {
+    use super::*;
     use std::pin::Pin;
 
-    // Note this useful idiom: importing names from outer (for mod tests) scope.
-    use super::*;
-    trait Tx {}
-    impl Tx for u32 {}
+    trait Trt {
+        fn value(&self) -> u32;
+    }
 
-    async fn higher_order_tx(
-        f: impl for<'a> AsyncBorrowFn1b1<'a, dyn Tx + Send + Sync + 'a, Out = ()>,
+    impl Trt for u32 {
+        fn value(&self) -> u32 {
+            *self
+        }
+    }
+
+    async fn higher_order_dyn_trt(
+        f: impl for<'a> AsyncBorrowFn1b1<'a, dyn Trt + Send + Sync + 'a, Out = ()>,
     ) {
         f(&12u32).await;
     }
 
-    async fn f_tx(_input: &(dyn Tx + Send + Sync)) {}
+    async fn f_tx(_input: &(dyn Trt + Send + Sync)) {}
 
-    fn higher_order_tx2(
-        f: impl for<'a> AsyncBorrowFn2b2<'a, u32, dyn Tx + Send + Sync + 'a, Out = u32>,
+    fn higher_order_dyn_trt_2(
+        f: impl for<'a> AsyncBorrowFn2b2<'a, u32, dyn Trt + Send + Sync + 'a, Out = u32>,
         i: u32,
     ) -> impl for<'a> Fn(
-        &'a (dyn Tx + Send + Sync),
+        &'a (dyn Trt + Send + Sync),
     ) -> Pin<Box<dyn Future<Output = u32> + Send + Sync + 'a>> {
-        move |x: &(dyn Tx + Send + Sync)| {
+        move |x| {
             let y = f(i, x);
             Box::pin(y)
         }
     }
 
-    async fn f_tx2(_i: u32, _input: &(dyn Tx + Send + Sync)) -> u32 {
-        42
+    fn higher_order_dyn_trt_2_somewhat_generic<A1, T>(
+        f: impl for<'a> AsyncBorrowFn2b2<'a, A1, dyn Trt + Send + Sync + 'a, Out = T>,
+        i: A1,
+    ) -> impl for<'a> Fn(
+        &'a (dyn Trt + Send + Sync),
+    ) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>>
+    where
+        A1: Clone,
+    {
+        move |x| {
+            let y = f(i.clone(), x);
+            Box::pin(y)
+        }
+    }
+
+    #[allow(unused)]
+    fn higher_order_2_generic<A1, A2, T>(
+        f: impl for<'a> AsyncBorrowFn2b2<'a, A1, A2, Out = T>,
+        i: A1,
+    ) -> impl for<'a> Fn(&'a A2) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>>
+    where
+        A1: Clone,
+        A2: ?Sized,
+    {
+        move |x| {
+            let y = f(i.clone(), x);
+            Box::pin(y)
+        }
+    }
+
+    async fn f_tx2(i: u32, tx: &(dyn Trt + Send + Sync)) -> u32 {
+        i + tx.value()
     }
 
     #[test]
     fn test_all() {
-        _ = higher_order_tx(f_tx);
-        _ = higher_order_tx2(f_tx2, 1);
+        _ = higher_order_dyn_trt(f_tx);
+        _ = higher_order_dyn_trt_2(f_tx2, 1);
+        _ = higher_order_dyn_trt_2_somewhat_generic(f_tx2, 1);
+        // _ = higher_order_2_generic(f_tx2, 1); // doesn't compile
     }
 }
