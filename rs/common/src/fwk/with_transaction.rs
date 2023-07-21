@@ -50,7 +50,7 @@ impl<'a> Tx<'a> {
 }
 
 async fn exec_fn2_with_transaction<A, T, AppErr>(
-    get_pool: fn() -> &'static DbPool,
+    pool: &'static DbPool,
     f: impl for<'a> FnOnce(
             A,
             &'a Tx<'a>,
@@ -63,7 +63,6 @@ async fn exec_fn2_with_transaction<A, T, AppErr>(
 where
     AppErr: From<DbErr>,
 {
-    let pool = get_pool();
     let mut db = get_connection(pool).await?;
     let tx: Tx = db.transaction().await?;
     let res = f(input, &tx).await;
@@ -79,7 +78,7 @@ where
 /// returns a closure which, for each input,
 /// returns the result of executing `f` with the input and a `&Tx` in a transactional context.
 pub fn fn2_with_transaction<A, T, AppErr>(
-    get_pool: fn() -> &'static DbPool,
+    pool: &'static DbPool,
     f: impl for<'a> Fn(
             A,
             &'a Tx<'a>,
@@ -96,7 +95,7 @@ where
 {
     move |input| {
         let f = f.clone();
-        let res = Box::pin(exec_fn2_with_transaction(get_pool, f, input));
+        let res = Box::pin(exec_fn2_with_transaction(pool, f, input));
         res
     }
 }
