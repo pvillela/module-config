@@ -230,8 +230,8 @@ where
 //=================
 // _boot_at
 
-/// Returns an async stereotype instance with refreshable configuration,
-/// for a transactional stereotype constructor, executed within a transaction.
+/// Returns an async stereotype instance with refreshable configuration and a free transaction argument,
+/// for a transactional stereotype constructor.
 pub fn cfg_deps_boot_at_free_tx_no_box<C, D, A, T, ACFG, SCFG>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
@@ -251,8 +251,8 @@ where
     move |input, tx| Box::pin(f_c(s.clone(), input, tx))
 }
 
-/// Returns a boxed async stereotype instance with refreshable configuration,
-/// for a transactional stereotype constructor, executed within a transaction.
+/// Returns a boxed async stereotype instance with refreshable configuration and a free transaction argument,
+/// for a transactional stereotype constructor.
 pub fn cfg_deps_boot_at_free_tx<C, D, A, T, ACFG, SCFG>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
@@ -271,7 +271,7 @@ where
     ACFG: 'static,
     SCFG: 'static,
 {
-    // // Code without using cfg_deps_boot_at_free_tx:
+    // // Code without using cfg_deps_boot_at_free_tx_no_box:
     // let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
     // let s = Arc::new(CfgDeps { cfg, deps: deps });
     // Box::new(move |input, tx| Box::pin(f_c(s.clone(), input, tx)))
@@ -281,6 +281,8 @@ where
     Box::new(stereotype)
 }
 
+/// Returns an async stereotype instance with refreshable configuration, leaked CfgDeps,
+/// and a free transaction argument, for a transactional stereotype constructor.
 fn cfg_deps_boot_at_free_tx_lr_no_box<C, D, A, T, ACFG, SCFG>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
@@ -300,8 +302,8 @@ where
     move |input, tx| Box::pin(f_c(s_ref_leak, input, tx))
 }
 
-/// Returns an async stereotype instance with refreshable configuration,
-/// for a transactional stereotype constructor, executed within a transaction.
+/// Returns a leaked reference to an async stereotype instance with refreshable configuration, leaked CfgDeps,
+/// and a free transaction argument, for a transactional stereotype constructor.
 pub fn cfg_deps_boot_at_free_tx_lr<C, D, A, T, ACFG, SCFG>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
