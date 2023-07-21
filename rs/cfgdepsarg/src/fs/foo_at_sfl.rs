@@ -1,12 +1,12 @@
 use super::BarAtBfTxT;
 use common::fs_data::{FooAtIn, FooAtOut, FooAtSflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, PinBorrowFn2b2, Tx};
+use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, PinBorrowFn2b2Tx, Tx};
 use std::ops::Deref;
 use std::time::Duration;
 use tokio::time::sleep;
 
-pub type FooAtSflTxT = PinBorrowFn2b2<FooAtIn, Tx, Result<FooAtOut, AppErr>>;
+pub type FooAtSflTxT = PinBorrowFn2b2Tx<FooAtIn, Result<FooAtOut, AppErr>>;
 
 pub type FooAtSflCfg = CfgArcSwapArc<FooAtSflCfgInfo>;
 
@@ -19,7 +19,7 @@ pub type FooAtSflS = CfgDeps<FooAtSflCfg, FooAtSflDeps>;
 pub async fn foo_at_sfl_c(
     s: impl Deref<Target = FooAtSflS> + Send + Sync,
     input: FooAtIn,
-    tx: &Tx,
+    tx: &Tx<'_>,
 ) -> Result<FooAtOut, AppErr> {
     let c = s.cfg.get_cfg();
     let d = &s.deps;

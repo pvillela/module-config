@@ -1,10 +1,10 @@
+use super::AsyncBorrowFn3b3;
+use super::Tx;
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::OnceLock;
-
-use super::AsyncBorrowFn3b3;
 
 /// Type of dynamic object of pinned wrapper of async closures.
 pub type PinFn<S, T> = dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + Send + Sync>> + Send + Sync;
@@ -12,6 +12,10 @@ pub type PinFn<S, T> = dyn Fn(S) -> Pin<Box<dyn Future<Output = T> + Send + Sync
 /// Type of dynamic object of pinned wrapper of async closures.
 pub type PinBorrowFn2b2<S1, S2, T> =
     dyn for<'a> Fn(S1, &'a S2) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync;
+
+pub type PinBorrowFn2b2Tx<S1, T> = dyn for<'a> Fn(S1, &'a Tx<'a>) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>>
+    + Send
+    + Sync;
 
 /// Type of Arced and pinned wrapper of async closures.
 pub type ArcPinFn<S, T> = Arc<PinFn<S, T>>;

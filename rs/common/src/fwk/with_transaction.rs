@@ -1,5 +1,5 @@
 use futures::Future;
-use std::{pin::Pin, sync::OnceLock};
+use std::pin::Pin;
 
 pub struct DbClient;
 
@@ -9,15 +9,16 @@ pub struct DbPool;
 pub struct DbErr;
 
 pub trait DbCfg {
-    fn get_db(&self) -> &'static DbPool;
+    fn get_pool(&self) -> &'static DbPool;
 }
 
-pub async fn get_connection(pool: &DbPool) -> Result<DbClient, DbErr> {
+pub async fn get_connection(_pool: &DbPool) -> Result<DbClient, DbErr> {
     // TODO: implement this properly
     Ok(DbClient)
 }
 
 pub struct Tx<'a> {
+    #[allow(unused)]
     db: &'a mut DbClient,
 }
 
@@ -48,18 +49,24 @@ impl<'a> Tx<'a> {
     }
 }
 
-pub async fn with_transaction<'a, T, AppErr, Fut>(
+async fn exec_fn2_with_transaction<A, T, AppErr>(
     get_pool: fn() -> &'static DbPool,
-    block: impl FnOnce(&Tx) -> Fut + Send + Sync,
+    f: impl for<'a> FnOnce(
+            A,
+            &'a Tx<'a>,
+        )
+            -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'a>>
+        + Send
+        + Sync,
+    input: A,
 ) -> Result<T, AppErr>
 where
     AppErr: From<DbErr>,
-    Fut: Future<Output = Result<T, AppErr>>,
 {
     let pool = get_pool();
     let mut db = get_connection(pool).await?;
-    let tx = db.transaction().await?;
-    let res = block(&tx).await;
+    let tx: Tx = db.transaction().await?;
+    let res = f(input, &tx).await;
     if res.is_ok() {
         tx.commit().await?;
     } else {
@@ -71,9 +78,12 @@ where
 /// Takes a pool source and a closure `f` with a free `&'a Tx` parameter,
 /// returns a closure which, for each input,
 /// returns the result of executing `f` with the input and a `&Tx` in a transactional context.
-pub fn pin_fn2_with_transaction<A, T, AppErr>(
+pub fn fn2_with_transaction<A, T, AppErr>(
     get_pool: fn() -> &'static DbPool,
-    f: impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'a>>
+    f: impl for<'a> Fn(
+            A,
+            &'a Tx<'a>,
+        ) -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'a>>
         + Send
         + Sync
         + Clone
@@ -84,13 +94,9 @@ where
     T: Send + Sync + 'static,
     AppErr: From<DbErr> + Send + Sync + 'static,
 {
-    let f_t = move |a| {
+    move |input| {
         let f = f.clone();
-        let block = move |tx| f(a, tx);
-        // Convert Pin<Box<impl> to Pin<Box<dyn>>:
-        let res: Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync>> =
-            Box::pin(with_transaction(get_pool, block));
+        let res = Box::pin(exec_fn2_with_transaction(get_pool, f, input));
         res
-    };
-    f_t
+    }
 }
