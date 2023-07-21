@@ -1,12 +1,14 @@
 use super::BarAtBfTxT;
 use common::fs_data::{FooAtIn, FooAtOut, FooAtSflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, PinBorrowFn2b2Tx, Tx};
+use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, PinBorrowFn2b2Tx, PinFn, Tx};
 use std::ops::Deref;
 use std::time::Duration;
 use tokio::time::sleep;
 
 pub type FooAtSflTxT = PinBorrowFn2b2Tx<FooAtIn, Result<FooAtOut, AppErr>>;
+
+pub type FooAtSflT = PinFn<FooAtIn, Result<FooAtOut, AppErr>>;
 
 pub type FooAtSflCfg = CfgArcSwapArc<FooAtSflCfgInfo>;
 

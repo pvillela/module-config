@@ -9,7 +9,7 @@ pub struct DbPool;
 pub struct DbErr;
 
 pub trait DbCfg {
-    fn get_pool(&self) -> &'static DbPool;
+    fn get_pool(&self) -> &DbPool;
 }
 
 pub async fn get_connection(_pool: &DbPool) -> Result<DbClient, DbErr> {
@@ -74,6 +74,8 @@ where
     res
 }
 
+// TODO: This function is useless due to the Clone constraint on `f`.
+//
 /// Takes a pool source and a closure `f` with a free `&'a Tx` parameter,
 /// returns a closure which, for each input,
 /// returns the result of executing `f` with the input and a `&Tx` in a transactional context.
@@ -86,7 +88,7 @@ pub fn fn2_with_transaction<'p, A, T, AppErr>(
         + Send
         + Sync
         + Clone
-        + 'static,
+        + 'p,
 ) -> impl Fn(A) -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'p>> + Send + Sync
 where
     A: Send + Sync + 'static,
@@ -94,7 +96,31 @@ where
     AppErr: From<DbErr> + Send + Sync + 'static,
 {
     move |input| {
-        let f = f.clone();
+        let res = Box::pin(exec_fn2_with_transaction(pool, f.clone(), input));
+        res
+    }
+}
+
+/// Takes a pool source and a static reference to a  closure `f` with a free `&'a Tx` parameter,
+/// returns a closure which, for each input,
+/// returns the result of executing `f` with the input and a `&Tx` in a transactional context.
+pub fn fn2_static_ref_with_transaction<'p, A, T, AppErr>(
+    pool: &'p DbPool,
+    f: &'static (dyn for<'a> Fn(
+        A,
+        &'a Tx<'a>,
+    )
+        -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'a>>
+                  + Send
+                  + Sync),
+) -> impl Fn(A) -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'p>> + Send + Sync
+where
+    A: Send + Sync + 'static,
+    T: Send + Sync + 'static,
+    AppErr: From<DbErr> + Send + Sync + 'static,
+{
+    move |input| {
+        // let f = f.clone();
         let res = Box::pin(exec_fn2_with_transaction(pool, f, input));
         res
     }
