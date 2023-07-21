@@ -49,8 +49,8 @@ impl<'a> Tx<'a> {
     }
 }
 
-async fn exec_fn2_with_transaction<A, T, AppErr>(
-    pool: &'static DbPool,
+async fn exec_fn2_with_transaction<'p, A, T, AppErr>(
+    pool: &'p DbPool,
     f: impl for<'a> FnOnce(
             A,
             &'a Tx<'a>,
@@ -77,8 +77,8 @@ where
 /// Takes a pool source and a closure `f` with a free `&'a Tx` parameter,
 /// returns a closure which, for each input,
 /// returns the result of executing `f` with the input and a `&Tx` in a transactional context.
-pub fn fn2_with_transaction<A, T, AppErr>(
-    pool: &'static DbPool,
+pub fn fn2_with_transaction<'p, A, T, AppErr>(
+    pool: &'p DbPool,
     f: impl for<'a> Fn(
             A,
             &'a Tx<'a>,
@@ -87,7 +87,7 @@ pub fn fn2_with_transaction<A, T, AppErr>(
         + Sync
         + Clone
         + 'static,
-) -> impl Fn(A) -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync>> + Send + Sync
+) -> impl Fn(A) -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'p>> + Send + Sync
 where
     A: Send + Sync + 'static,
     T: Send + Sync + 'static,
