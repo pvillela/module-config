@@ -2,7 +2,7 @@ use super::bar_ai_bf_boot;
 use crate::fs::{foo_ai_sfl_c, FooAiSflDeps, FooAiSflS, FooAiSflT};
 use bar_ai_bf_boot::bar_ai_bf_boot_lr;
 use common::fs_data::FooAiSflCfgInfo;
-use common::fwk::{box_pin_async_fn, cfg_deps_boot_ai, cfg_deps_boot_ai_lr};
+use common::fwk::{box_pin_async_fn, cfg_deps_ai_boot, cfg_deps_ai_boot_lr};
 use common::{config::AppCfgInfo, fwk::ref_pin_async_fn};
 use std::sync::Arc;
 
@@ -30,7 +30,7 @@ pub fn foo_ai_sfl_boot(app_cfg: &AppCfgInfo) -> Box<FooAiSflT> {
     let deps = FooAiSflDeps {
         bar_ai_bf: bar_ai_bf_boot(app_cfg),
     };
-    cfg_deps_boot_ai(foo_ai_sfl_c, foo_ai_sfl_cfg_adapter, app_cfg, deps)
+    cfg_deps_ai_boot(foo_ai_sfl_c, foo_ai_sfl_cfg_adapter, app_cfg, deps)
 }
 
 /// Coded without use of [cfg_deps_boot_ai].
@@ -54,5 +54,5 @@ pub fn foo_ai_sfl_boot_lr(app_cfg: &AppCfgInfo) -> &'static FooAiSflT {
     let deps = FooAiSflDeps {
         bar_ai_bf: Box::new(bar_ai_bf_boot_lr(app_cfg)),
     };
-    cfg_deps_boot_ai_lr(foo_ai_sfl_c, foo_ai_sfl_cfg_adapter, app_cfg, deps)
+    cfg_deps_ai_boot_lr(foo_ai_sfl_c, foo_ai_sfl_cfg_adapter, app_cfg, deps)
 }

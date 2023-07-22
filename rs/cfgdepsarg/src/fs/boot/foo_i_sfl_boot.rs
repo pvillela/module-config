@@ -2,7 +2,7 @@ use super::{bar_i_bf_boot, bar_i_bf_boot_lr};
 use crate::fs::{foo_i_sfl_c, FooISflDeps, FooISflS, FooISflT};
 use common::config::AppCfgInfo;
 use common::fs_data::FooISflCfgInfo;
-use common::fwk::{cfg_deps_boot_i, cfg_deps_boot_i_lr};
+use common::fwk::{cfg_deps_i_boot, cfg_deps_i_boot_lr};
 
 fn foo_i_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooISflCfgInfo {
     FooISflCfgInfo {
@@ -28,7 +28,7 @@ pub fn foo_i_sfl_boot(app_cfg: &AppCfgInfo) -> Box<FooISflT> {
     let deps = FooISflDeps {
         bar_i_bf: bar_i_bf_boot(app_cfg),
     };
-    cfg_deps_boot_i(foo_i_sfl_c, foo_i_sfl_cfg_adapter, app_cfg, deps)
+    cfg_deps_i_boot(foo_i_sfl_c, foo_i_sfl_cfg_adapter, app_cfg, deps)
 }
 
 /// Coded without use of [cfg_deps_boot_i_lr].
@@ -50,5 +50,5 @@ pub fn foo_i_sfl_boot_lr(app_cfg: &AppCfgInfo) -> &'static FooISflT {
     let deps = FooISflDeps {
         bar_i_bf: Box::new(bar_i_bf_boot_lr(app_cfg)),
     };
-    cfg_deps_boot_i_lr(foo_i_sfl_c, foo_i_sfl_cfg_adapter, app_cfg, deps)
+    cfg_deps_i_boot_lr(foo_i_sfl_c, foo_i_sfl_cfg_adapter, app_cfg, deps)
 }
