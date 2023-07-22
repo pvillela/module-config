@@ -6,8 +6,8 @@ use common::{
     config::{get_pool, refresh_app_configuration},
     fs_data::{BarAtBfCfgInfo, FooAtSflCfgInfo},
     fwk::{
-        cfg_deps_at_partial_free_tx, cfg_deps_at_partial_free_tx_arc, fn2_arc_with_transaction,
-        RefreshMode, Src,
+        cfg_deps_at_partial_apply_free_tx_arc, cfg_deps_at_partial_apply_free_tx_box,
+        fn2_arc_with_transaction, RefreshMode, Src,
     },
     web::axum_handler::handler_of_pin,
 };
@@ -31,7 +31,7 @@ async fn main() {
         })
     };
 
-    let bar_at_bf_tx = cfg_deps_at_partial_free_tx(bar_at_bf_c, bar_at_s);
+    let bar_at_bf_tx = cfg_deps_at_partial_apply_free_tx_box(bar_at_bf_c, bar_at_s);
 
     let foo_at_s = {
         let foo_at_sfl_cfg_info = FooAtSflCfgInfo {
@@ -54,7 +54,7 @@ async fn main() {
         })
     };
 
-    let foo_at_sfl_tx_arc = cfg_deps_at_partial_free_tx_arc(foo_at_sfl_c, foo_at_s);
+    let foo_at_sfl_tx_arc = cfg_deps_at_partial_apply_free_tx_arc(foo_at_sfl_c, foo_at_s);
     let foo_at_sfl = fn2_arc_with_transaction(get_pool(), foo_at_sfl_tx_arc);
 
     let foo_at_sfl_hdlr = handler_of_pin(foo_at_sfl);

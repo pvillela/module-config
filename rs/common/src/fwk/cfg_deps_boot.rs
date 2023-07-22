@@ -232,7 +232,7 @@ where
 
 /// Returns an async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
-pub fn cfg_deps_at_partial_free_tx_no_box<CD, A, T>(
+pub fn cfg_deps_at_partial_apply_free_tx_impl<CD, A, T>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, CD, A, Tx<'a>, Out = T> + 'static,
     s: CD,
 ) -> impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
@@ -245,7 +245,7 @@ where
 
 /// Returns an async stereotype instance with refreshable configuration and a free transaction argument,
 /// for a transactional stereotype constructor.
-pub fn cfg_deps_at_boot_free_tx_no_box<C, D, A, T, ACFG, SCFG>(
+pub fn cfg_deps_at_boot_free_tx_impl<C, D, A, T, ACFG, SCFG>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -266,7 +266,7 @@ where
 
 /// Returns a boxed async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
-pub fn cfg_deps_at_partial_free_tx<CD, A, T>(
+pub fn cfg_deps_at_partial_apply_free_tx_box<CD, A, T>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, CD, A, Tx<'a>, Out = T> + 'static,
     s: CD,
 ) -> Box<
@@ -277,13 +277,13 @@ where
     A: 'static + Send + Sync,
     T: 'static + Send + Sync,
 {
-    let stereotype = cfg_deps_at_partial_free_tx_no_box(f_c, s);
+    let stereotype = cfg_deps_at_partial_apply_free_tx_impl(f_c, s);
     Box::new(stereotype)
 }
 
 /// Returns a boxed async stereotype instance with refreshable configuration and a free transaction argument,
 /// for a transactional stereotype constructor.
-pub fn cfg_deps_at_boot_free_tx<C, D, A, T, ACFG, SCFG>(
+pub fn cfg_deps_at_boot_free_tx_box<C, D, A, T, ACFG, SCFG>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -307,13 +307,13 @@ where
     // Box::new(move |input, tx| Box::pin(f_c(s.clone(), input, tx)))
 
     let stereotype =
-        cfg_deps_at_boot_free_tx_no_box(f_c, cfg_factory, cfg_adapter, app_cfg, refresh_mode, deps);
+        cfg_deps_at_boot_free_tx_impl(f_c, cfg_factory, cfg_adapter, app_cfg, refresh_mode, deps);
     Box::new(stereotype)
 }
 
 /// Returns an arced async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
-pub fn cfg_deps_at_partial_free_tx_arc<CD, A, T>(
+pub fn cfg_deps_at_partial_apply_free_tx_arc<CD, A, T>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, CD, A, Tx<'a>, Out = T> + 'static,
     s: CD,
 ) -> Arc<
@@ -324,7 +324,7 @@ where
     A: 'static + Send + Sync,
     T: 'static + Send + Sync,
 {
-    let stereotype = cfg_deps_at_partial_free_tx_no_box(f_c, s);
+    let stereotype = cfg_deps_at_partial_apply_free_tx_impl(f_c, s);
     Arc::new(stereotype)
 }
 
@@ -349,13 +349,13 @@ where
     SCFG: 'static,
 {
     let stereotype =
-        cfg_deps_at_boot_free_tx_no_box(f_c, cfg_factory, cfg_adapter, app_cfg, refresh_mode, deps);
+        cfg_deps_at_boot_free_tx_impl(f_c, cfg_factory, cfg_adapter, app_cfg, refresh_mode, deps);
     Arc::new(stereotype)
 }
 
 /// Returns an async stereotype instance with refreshable configuration, leaked CfgDeps,
 /// and a free transaction argument, for a transactional stereotype constructor.
-fn cfg_deps_at_boot_free_tx_lr_no_box<C, D, A, T, ACFG, SCFG>(
+fn cfg_deps_at_boot_free_tx_lr_impl<C, D, A, T, ACFG, SCFG>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -394,7 +394,7 @@ where
     ACFG: 'static,
     SCFG: 'static,
 {
-    let stereotype = cfg_deps_at_boot_free_tx_lr_no_box(
+    let stereotype = cfg_deps_at_boot_free_tx_lr_impl(
         f_c,
         cfg_factory,
         cfg_adapter,
