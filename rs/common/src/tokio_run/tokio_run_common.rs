@@ -1,13 +1,14 @@
 use crate::config::{initialize_app_configuration, refresh_app_configuration};
-use crate::fs_data::{FooAIn, FooAOut};
+use crate::fs_data::FooAIn;
 use crate::fwk::BoxPinFn;
 use futures::future::join_all;
+use std::fmt::Debug;
 use std::time::{Duration, Instant};
 use tokio;
 use tokio::time::sleep;
 
-pub struct RunIn {
-    pub make_foo_a_sfl: fn() -> BoxPinFn<FooAIn, FooAOut>,
+pub struct RunIn<T: Debug> {
+    pub make_foo_a_sfl: fn() -> BoxPinFn<FooAIn, T>,
     pub unit_time_millis: u64,
     pub app_cfg_first_refresh_units: u64,
     pub app_cfg_refresh_delta_units: u64,
@@ -18,7 +19,7 @@ pub struct RunIn {
     pub repeats: usize,
 }
 
-pub async fn run(input: RunIn) {
+pub async fn run<T: Debug + 'static>(input: RunIn<T>) {
     let RunIn {
         make_foo_a_sfl,
         unit_time_millis,
@@ -70,7 +71,7 @@ pub async fn run(input: RunIn) {
                     sleep_millis: per_call_sleep_units * unit_time_millis,
                 })
                 .await;
-                res = out.res.len();
+                res = format!("{:?}", out).len();
                 if i == 0 && j % increment_to_print == 0 {
                     println!(
                         "foo_a executed at {:?} elapsed, res={}, out={:?}",

@@ -26,7 +26,7 @@ pub struct Tx<'a> {
 impl DbClient {
     pub async fn transaction<'a>(&'a mut self) -> Result<Tx<'a>, DbErr> {
         // TODO: implement this properly
-        println!("Db.transaction() called");
+        // println!("Db.transaction() called");
         Ok(Tx { db: self })
     }
 }
@@ -34,13 +34,13 @@ impl DbClient {
 impl<'a> Tx<'a> {
     pub async fn commit(self) -> Result<(), DbErr> {
         // TODO: implement this properly
-        println!("Tx.commit() called");
+        // println!("Tx.commit() called");
         Ok(())
     }
 
     pub async fn rollback(self) -> Result<(), DbErr> {
         // TODO: implement this properly
-        println!("Tx.rollback() called");
+        // println!("Tx.rollback() called");
         Ok(())
     }
 
