@@ -389,6 +389,7 @@ dependencies = [
  "actix-web",
  "arc-swap",
  "axum",
+ "derive_more",
  "futures",
  "once_cell",
  "serde",
