@@ -1,7 +1,7 @@
 use crate::fs::{bar_aw_bf_c, BarAwBfCfg, BarAwBfS, BarAwBfT};
 use common::config::AppCfgInfo;
 use common::fs_data::BarAwBfCfgInfo;
-use common::fwk::{box_pin_async_fn_wss, cfg_deps_boot_aw, RefreshMode};
+use common::fwk::{box_pin_async_fn_wss, cfg_deps_aw_boot, RefreshMode};
 use std::sync::Arc;
 
 fn bar_aw_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarAwBfCfgInfo {
@@ -33,7 +33,7 @@ pub fn bar_aw_bf_boot(
     refresh_mode: RefreshMode,
 ) -> Box<BarAwBfT> {
     let cfg_factory = BarAwBfCfg::new_boxed_with_cfg_adapter;
-    cfg_deps_boot_aw(
+    cfg_deps_aw_boot(
         bar_aw_bf_c,
         cfg_factory,
         bar_aw_bf_cfg_adapter,

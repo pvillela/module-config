@@ -3,7 +3,7 @@ use crate::fs::{foo_a_sfl_c, FooASflCfg, FooASflDeps, FooASflS, FooASflT};
 use common::config::AppCfgInfo;
 use common::fs_data::FooASflCfgInfo;
 use common::fwk::{
-    box_pin_async_fn, cfg_deps_boot_a, cfg_deps_boot_a_lr, ref_pin_async_fn, RefreshMode,
+    box_pin_async_fn, cfg_deps_a_boot, cfg_deps_a_boot_lr, ref_pin_async_fn, RefreshMode,
 };
 use std::sync::Arc;
 
@@ -42,7 +42,7 @@ pub fn foo_a_sfl_boot(
     let deps = FooASflDeps {
         bar_a_bf: Box::new(bar_a_bf_boot(app_cfg, refresh_mode.clone())),
     };
-    cfg_deps_boot_a(
+    cfg_deps_a_boot(
         foo_a_sfl_c,
         cfg_factory,
         foo_a_sfl_cfg_adapter,
@@ -84,7 +84,7 @@ pub fn foo_a_sfl_boot_lr(
     let deps = FooASflDeps {
         bar_a_bf: Box::new(bar_a_bf_boot_lr(app_cfg, refresh_mode.clone())),
     };
-    cfg_deps_boot_a_lr(
+    cfg_deps_a_boot_lr(
         foo_a_sfl_c,
         cfg_factory,
         foo_a_sfl_cfg_adapter,

@@ -74,9 +74,9 @@ where
 }
 
 //=================
-// _boot_i
+// _i_boot
 
-pub fn cfg_deps_boot_i<C, D, A, T, ACFG>(
+pub fn cfg_deps_i_boot<C, D, A, T, ACFG>(
     f_c: fn(&CfgDeps<C, D>, A) -> T,
     cfg_aidapter: fn(&ACFG) -> C,
     app_cfg: impl Deref<Target = ACFG>,
@@ -95,7 +95,7 @@ where
     Box::new(stereotype)
 }
 
-pub fn cfg_deps_boot_i_lr<C, D, A, T, ACFG>(
+pub fn cfg_deps_i_boot_lr<C, D, A, T, ACFG>(
     f_c: fn(&CfgDeps<C, D>, A) -> T,
     cfg_aidapter: fn(&ACFG) -> C,
     app_cfg: impl Deref<Target = ACFG>,
@@ -114,10 +114,10 @@ where
 }
 
 //=================
-// _boot_a
+// _a_boot
 
 /// Returns a boxed async stereotype instance with refreshable configuration.
-pub fn cfg_deps_boot_a<C, D, A, T, FUT, ACFG, SCFG>(
+pub fn cfg_deps_a_boot<C, D, A, T, FUT, ACFG, SCFG>(
     f_c: fn(Arc<CfgDeps<C, D>>, A) -> FUT,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -139,7 +139,7 @@ where
 }
 
 /// Returns a leaked static reference to async stereotype instance with refreshable configuration.
-pub fn cfg_deps_boot_a_lr<C, D, A, T, FUT, ACFG, SCFG>(
+pub fn cfg_deps_a_boot_lr<C, D, A, T, FUT, ACFG, SCFG>(
     f_c: fn(&'static CfgDeps<C, D>, A) -> FUT,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -160,10 +160,10 @@ where
 }
 
 //=================
-// _boot_ai
+// _ai_boot
 
 /// Returns a boxed async stereotype instance with immutable configuration.
-pub fn cfg_deps_boot_ai<C, D, A, T, FUT, ACFG>(
+pub fn cfg_deps_ai_boot<C, D, A, T, FUT, ACFG>(
     f_c: fn(Arc<CfgDeps<C, D>>, A) -> FUT,
     cfg_aidapter: fn(&ACFG) -> C,
     app_cfg: &ACFG,
@@ -183,7 +183,7 @@ where
 }
 
 /// Returns a leaked static reference to async stereotype instance with immutable configuration.
-pub fn cfg_deps_boot_ai_lr<C, D, A, T, FUT, ACFG>(
+pub fn cfg_deps_ai_boot_lr<C, D, A, T, FUT, ACFG>(
     f_c: fn(&'static CfgDeps<C, D>, A) -> FUT,
     cfg_aidapter: fn(&ACFG) -> C,
     app_cfg: &ACFG,
@@ -203,10 +203,10 @@ where
 }
 
 //=================
-// _boot_aw
+// _aw_boot
 
 /// Returns a boxed async stereotype instance without Send/Sync, with refreshable configuration.
-pub fn cfg_deps_boot_aw<C, D, A, T, FUT, ACFG, SCFG>(
+pub fn cfg_deps_aw_boot<C, D, A, T, FUT, ACFG, SCFG>(
     f_c: fn(Arc<CfgDeps<C, D>>, A) -> FUT,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -228,11 +228,11 @@ where
 }
 
 //=================
-// _boot_at
+// _at_boot
 
 /// Returns an async stereotype instance with refreshable configuration and a free transaction argument,
 /// for a transactional stereotype constructor.
-pub fn cfg_deps_boot_at_free_tx_no_box<C, D, A, T, ACFG, SCFG>(
+pub fn cfg_deps_at_boot_free_tx_no_box<C, D, A, T, ACFG, SCFG>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -253,7 +253,7 @@ where
 
 /// Returns a boxed async stereotype instance with refreshable configuration and a free transaction argument,
 /// for a transactional stereotype constructor.
-pub fn cfg_deps_boot_at_free_tx<C, D, A, T, ACFG, SCFG>(
+pub fn cfg_deps_at_boot_free_tx<C, D, A, T, ACFG, SCFG>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -277,13 +277,13 @@ where
     // Box::new(move |input, tx| Box::pin(f_c(s.clone(), input, tx)))
 
     let stereotype =
-        cfg_deps_boot_at_free_tx_no_box(f_c, cfg_factory, cfg_adapter, app_cfg, refresh_mode, deps);
+        cfg_deps_at_boot_free_tx_no_box(f_c, cfg_factory, cfg_adapter, app_cfg, refresh_mode, deps);
     Box::new(stereotype)
 }
 
 /// Returns an arced async stereotype instance with refreshable configuration and a free transaction argument,
 /// for a transactional stereotype constructor.
-pub fn cfg_deps_boot_at_free_tx_arc<C, D, A, T, ACFG, SCFG>(
+pub fn cfg_deps_at_boot_free_tx_arc<C, D, A, T, ACFG, SCFG>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -302,13 +302,13 @@ where
     SCFG: 'static,
 {
     let stereotype =
-        cfg_deps_boot_at_free_tx_no_box(f_c, cfg_factory, cfg_adapter, app_cfg, refresh_mode, deps);
+        cfg_deps_at_boot_free_tx_no_box(f_c, cfg_factory, cfg_adapter, app_cfg, refresh_mode, deps);
     Arc::new(stereotype)
 }
 
 /// Returns an async stereotype instance with refreshable configuration, leaked CfgDeps,
 /// and a free transaction argument, for a transactional stereotype constructor.
-fn cfg_deps_boot_at_free_tx_lr_no_box<C, D, A, T, ACFG, SCFG>(
+fn cfg_deps_at_boot_free_tx_lr_no_box<C, D, A, T, ACFG, SCFG>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -329,7 +329,7 @@ where
 
 /// Returns a leaked reference to an async stereotype instance with refreshable configuration, leaked CfgDeps,
 /// and a free transaction argument, for a transactional stereotype constructor.
-pub fn cfg_deps_boot_at_free_tx_lr<C, D, A, T, ACFG, SCFG>(
+pub fn cfg_deps_at_boot_free_tx_lr<C, D, A, T, ACFG, SCFG>(
     f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, Tx<'a>, Out = T> + 'static,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
     cfg_adapter: fn(&ACFG) -> SCFG,
@@ -347,7 +347,7 @@ where
     ACFG: 'static,
     SCFG: 'static,
 {
-    let stereotype = cfg_deps_boot_at_free_tx_lr_no_box(
+    let stereotype = cfg_deps_at_boot_free_tx_lr_no_box(
         f_c,
         cfg_factory,
         cfg_adapter,
