@@ -230,6 +230,19 @@ where
 //=================
 // _at_boot
 
+/// Returns an async stereotype instance with a free transaction argument,
+/// for a transactional stereotype constructor.
+pub fn cfg_deps_at_partial_free_tx_no_box<CD, A, T>(
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, CD, A, Tx<'a>, Out = T> + 'static,
+    s: CD,
+) -> impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
+where
+    CD: 'static + Send + Sync + Clone,
+    T: 'static + Send + Sync,
+{
+    move |input, tx| Box::pin(f_c(s.clone(), input, tx))
+}
+
 /// Returns an async stereotype instance with refreshable configuration and a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_at_boot_free_tx_no_box<C, D, A, T, ACFG, SCFG>(
@@ -249,6 +262,23 @@ where
     let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
     let s = Arc::new(CfgDeps { cfg, deps: deps });
     move |input, tx| Box::pin(f_c(s.clone(), input, tx))
+}
+
+/// Returns a boxed async stereotype instance with a free transaction argument,
+/// for a transactional stereotype constructor.
+pub fn cfg_deps_at_partial_free_tx<CD, A, T>(
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, CD, A, Tx<'a>, Out = T> + 'static,
+    s: CD,
+) -> Box<
+    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+>
+where
+    CD: 'static + Send + Sync + Clone,
+    A: 'static + Send + Sync,
+    T: 'static + Send + Sync,
+{
+    let stereotype = cfg_deps_at_partial_free_tx_no_box(f_c, s);
+    Box::new(stereotype)
 }
 
 /// Returns a boxed async stereotype instance with refreshable configuration and a free transaction argument,
@@ -279,6 +309,23 @@ where
     let stereotype =
         cfg_deps_at_boot_free_tx_no_box(f_c, cfg_factory, cfg_adapter, app_cfg, refresh_mode, deps);
     Box::new(stereotype)
+}
+
+/// Returns an arced async stereotype instance with a free transaction argument,
+/// for a transactional stereotype constructor.
+pub fn cfg_deps_at_partial_free_tx_arc<CD, A, T>(
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, CD, A, Tx<'a>, Out = T> + 'static,
+    s: CD,
+) -> Arc<
+    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+>
+where
+    CD: 'static + Send + Sync + Clone,
+    A: 'static + Send + Sync,
+    T: 'static + Send + Sync,
+{
+    let stereotype = cfg_deps_at_partial_free_tx_no_box(f_c, s);
+    Arc::new(stereotype)
 }
 
 /// Returns an arced async stereotype instance with refreshable configuration and a free transaction argument,
