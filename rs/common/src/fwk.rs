@@ -31,8 +31,8 @@ pub use dep::*;
 mod utils;
 pub use utils::*;
 
-mod with_transaction;
-pub use with_transaction::*;
+mod tx;
+pub use tx::*;
 
 mod partial_apply;
 pub use partial_apply::*;
