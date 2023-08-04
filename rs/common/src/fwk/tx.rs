@@ -172,7 +172,6 @@ where
     AppErr: From<DbErr> + Send + Sync + 'static,
 {
     move |input| {
-        // let f = f.clone();
         let res = Box::pin(exec_fn2_with_transaction(pool, f, input));
         res
     }
