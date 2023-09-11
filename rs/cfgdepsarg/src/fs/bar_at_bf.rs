@@ -4,6 +4,7 @@ use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, PinBorrowFn2b2Tx, Tx};
 use std::ops::Deref;
 use std::time::Duration;
 use tokio::time::sleep;
+use tracing::instrument;
 
 pub type BarAtBfTxT = PinBorrowFn2b2Tx<u64, Result<String, AppErr>>;
 
@@ -11,6 +12,7 @@ pub type BarAtBfCfg = CfgArcSwapArc<BarAtBfCfgInfo>;
 
 pub type BarAtBfS = CfgDeps<BarAtBfCfg, ()>;
 
+#[instrument(level = "trace", skip(s, tx))]
 pub async fn bar_at_bf_c(
     s: impl Deref<Target = BarAtBfS> + Send + Sync,
     sleep_millis: u64,

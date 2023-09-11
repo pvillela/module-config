@@ -30,7 +30,7 @@ mod foo_a_data {
 
     pub type FooASflCfgInfo = FooSflCfgInfo;
 
-    #[derive(Clone, Deserialize)]
+    #[derive(Clone, Deserialize, Debug)]
     pub struct FooAIn {
         pub sleep_millis: u64,
     }

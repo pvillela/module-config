@@ -2,7 +2,6 @@ use cfgdepsarg::startup::make_foo_at_sfl_no_refresh;
 use common::fs_data::{FooAtIn, FooAtOut};
 use common::fwk::{AppErr, BoxPinFn};
 use common::tokio_run::{run, RunIn};
-use tokio;
 
 fn make_foo_at_sfl() -> BoxPinFn<FooAtIn, Result<FooAtOut, AppErr>> {
     make_foo_at_sfl_no_refresh()

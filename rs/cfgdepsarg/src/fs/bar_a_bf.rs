@@ -4,6 +4,7 @@ use common::fwk::{CfgArcSwapArc, CfgDeps, PinFn};
 use std::ops::Deref;
 use std::time::Duration;
 use tokio::time::sleep;
+use tracing::instrument;
 
 pub type BarABfT = PinFn<u64, String>;
 
@@ -11,6 +12,7 @@ pub type BarABfCfg = CfgArcSwapArc<BarABfCfgInfo>;
 
 pub type BarABfS = CfgDeps<BarABfCfg, ()>;
 
+#[instrument(level = "trace", skip(s))]
 pub async fn bar_a_bf_c(s: impl Deref<Target = BarABfS>, sleep_millis: u64) -> String {
     let cfg = s.cfg.get_cfg();
     sleep(Duration::from_millis(sleep_millis)).await;

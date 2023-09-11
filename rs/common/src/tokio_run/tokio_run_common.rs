@@ -66,7 +66,7 @@ pub async fn run<T: Debug + 'static>(input: RunIn<T>) {
         let foo_a_sfl = make_foo_a_sfl();
         tokio::spawn(async move {
             let mut res: usize = 0;
-            for j in 0..repeats - 1 {
+            for j in 0..repeats {
                 let out = foo_a_sfl(FooAIn {
                     sleep_millis: per_call_sleep_units * unit_time_millis,
                 })

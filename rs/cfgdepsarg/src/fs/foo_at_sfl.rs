@@ -5,6 +5,7 @@ use common::fwk::{AppErr, CfgArcSwapArc, CfgDeps, PinBorrowFn2b2Tx, PinFn, Tx};
 use std::ops::Deref;
 use std::time::Duration;
 use tokio::time::sleep;
+use tracing::{instrument, trace_span};
 
 pub type FooAtSflTxT = PinBorrowFn2b2Tx<FooAtIn, Result<FooAtOut, AppErr>>;
 
@@ -18,11 +19,15 @@ pub struct FooAtSflDeps {
 
 pub type FooAtSflS = CfgDeps<FooAtSflCfg, FooAtSflDeps>;
 
+#[instrument(level = "trace", skip(s, tx))]
 pub async fn foo_at_sfl_c(
     s: impl Deref<Target = FooAtSflS> + Send + Sync,
     input: FooAtIn,
     tx: &Tx<'_>,
 ) -> Result<FooAtOut, AppErr> {
+    trace_span!("empty").in_scope(|| {
+        // empty
+    });
     let c = s.cfg.get_cfg();
     let d = &s.deps;
     let FooAtIn { sleep_millis } = input;
