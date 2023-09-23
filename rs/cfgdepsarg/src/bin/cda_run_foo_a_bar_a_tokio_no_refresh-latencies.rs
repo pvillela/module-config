@@ -1,10 +1,7 @@
-mod print_latency_stats;
-
 use cfgdepsarg::fs::FooASflT;
 use cfgdepsarg::startup::make_foo_a_sfl_no_refresh;
 use common::tokio_run::{run, RunIn};
-use latency_trace::measure_latencies_tokio;
-use print_latency_stats::print_parents_means_medians;
+use latency_trace::LatencyTrace;
 
 fn make_foo_a_sfl() -> Box<FooASflT> {
     make_foo_a_sfl_no_refresh()
@@ -14,7 +11,7 @@ fn main() {
     // Set below value to "trace" to enable full library tracing.
     // set_var("RUST_LOG", "info");
 
-    let latencies = measure_latencies_tokio(|| async {
+    let latencies = LatencyTrace::default().measure_latencies_tokio(|| async {
         // Set env_logger only if `tracing_subsriber` hasn't pulled in `tracing_log` and already set a logger.
         // Otherwise, setting a second logger would panic.
         // _ = env_logger::try_init();
@@ -35,5 +32,8 @@ fn main() {
         .await;
     });
 
-    print_parents_means_medians(&latencies);
+    println!("\nLatency stats below are in microseconds");
+    for (span_group, stats) in latencies.summary_stats() {
+        println!("  * {:?}, {:?}", span_group, stats);
+    }
 }

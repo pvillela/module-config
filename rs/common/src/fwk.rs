@@ -7,6 +7,9 @@ pub mod async_borrow_fn0;
 mod async_borrow_fn;
 pub use async_borrow_fn::*;
 
+pub mod async_borrow_fn_pv;
+// pub use async_borrow_fn_::*;
+
 pub mod async_borrow_fn1;
 // pub use async_borrow_fn1::*;
 
@@ -39,9 +42,6 @@ pub use utils::*;
 
 mod tx;
 pub use tx::*;
-
-mod partial_apply;
-pub use partial_apply::*;
 
 mod partial_application;
 pub use partial_application::*;
