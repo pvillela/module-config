@@ -91,7 +91,7 @@ where
 
 /// Transforms an async closure with a reference argument into a closure that returns a pinned-boxed future.
 pub fn pin_async_borrow_fn_2b2<S1, S2, T>(
-    f: impl for<'a> AsyncBorrowFn2b2<'a, S1, S2, Out = T>,
+    f: impl for<'a> AsyncBorrowFn2b2<'a, S1, S2, T>,
 ) -> impl for<'a> Fn(S1, &'a S2) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> {
     move |s1, s2| {
         let x = f(s1, s2);
@@ -101,7 +101,7 @@ pub fn pin_async_borrow_fn_2b2<S1, S2, T>(
 
 /// Transforms an async closure with a reference argument into a closure that returns a pinned-boxed future.
 pub fn pin_async_borrow_fn_3b3<S1, S2, S3, T>(
-    f: impl for<'a> AsyncBorrowFn3b3<'a, S1, S2, S3, Out = T>,
+    f: impl for<'a> AsyncBorrowFn3b3<'a, S1, S2, S3, T>,
 ) -> impl for<'a> Fn(S1, S2, &'a S3) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> {
     move |s1, s2, s3| {
         let x = f(s1, s2, s3);

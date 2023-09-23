@@ -1,64 +1,58 @@
-//! The trait defined here was recommended by https://github.com/rust-lang/rust/issues/113495#issuecomment-1627640952
+//! The trait defined here was adapted from https://github.com/rust-lang/rust/issues/113495#issuecomment-1627640952
 //! in response to my issue https://github.com/rust-lang/rust/issues/113495;
 //! Enhanced by https://github.com/rust-lang/rust/issues/113495#issuecomment-1728150795.
 
 use std::{future::Future, pin::Pin};
 
 /// Represents an async function with single argument that is a reference.
-pub trait AsyncBorrowFn1b1<'a, A: ?Sized + 'a>: Fn(&'a A) -> Self::Fut + Send + Sync {
-    type Out;
-    type Fut: Future<Output = Self::Out> + Send + Sync + 'a;
+pub trait AsyncBorrowFn1b1<'a, A: ?Sized + 'a, Out>: Fn(&'a A) -> Self::Fut + Send + Sync {
+    type Fut: Future<Output = Out> + Send + Sync + 'a;
 }
 
-impl<'a, A, F, Fut> AsyncBorrowFn1b1<'a, A> for F
+impl<'a, A, Out, F, Fut> AsyncBorrowFn1b1<'a, A, Out> for F
 where
     A: ?Sized + 'a,
     F: Fn(&'a A) -> Fut + Send + Sync + 'a,
-    Fut: Future + Send + Sync + 'a,
+    Fut: Future<Output = Out> + Send + Sync + 'a,
 {
-    type Out = Fut::Output;
     type Fut = Fut;
 }
 
 /// Represents an async function with 2 arguments; the first is not a reference, the last is a reference.
-pub trait AsyncBorrowFn2b2<'a, A1, A2: ?Sized + 'a>:
+pub trait AsyncBorrowFn2b2<'a, A1, A2: ?Sized + 'a, Out>:
     Fn(A1, &'a A2) -> Self::Fut + Send + Sync
 {
-    type Out;
-    type Fut: Future<Output = Self::Out> + Send + Sync + 'a;
+    type Fut: Future<Output = Out> + Send + Sync + 'a;
 }
 
-impl<'a, A1, A2, F, Fut> AsyncBorrowFn2b2<'a, A1, A2> for F
+impl<'a, A1, A2, Out, F, Fut> AsyncBorrowFn2b2<'a, A1, A2, Out> for F
 where
     A2: ?Sized + 'a,
     F: Fn(A1, &'a A2) -> Fut + Send + Sync + 'a,
-    Fut: Future + Send + Sync + 'a,
+    Fut: Future<Output = Out> + Send + Sync + 'a,
 {
-    type Out = Fut::Output;
     type Fut = Fut;
 }
 
 /// Represents an async function with 3 arguments; the first 2 are not references, the last is a reference.
-pub trait AsyncBorrowFn3b3<'a, A1, A2, A3: ?Sized + 'a>:
+pub trait AsyncBorrowFn3b3<'a, A1, A2, A3: ?Sized + 'a, Out>:
     Fn(A1, A2, &'a A3) -> Self::Fut + Send + Sync
 {
-    type Out;
-    type Fut: Future<Output = Self::Out> + Send + Sync + 'a;
+    type Fut: Future<Output = Out> + Send + Sync + 'a;
 }
 
-impl<'a, A1, A2, A3, F, Fut> AsyncBorrowFn3b3<'a, A1, A2, A3> for F
+impl<'a, A1, A2, A3, Out, F, Fut> AsyncBorrowFn3b3<'a, A1, A2, A3, Out> for F
 where
     A3: ?Sized + 'a,
     F: Fn(A1, A2, &'a A3) -> Fut + Send + Sync + 'a,
-    Fut: Future + Send + Sync + 'a,
+    Fut: Future<Output = Out> + Send + Sync + 'a,
 {
-    type Out = Fut::Output;
     type Fut = Fut;
 }
 
 /// Partial application for async function, where the resulting closure returns a box-pinned future.
 pub fn partial_apply_async_borrow_fn_2b2_boxpin<A1, A2, T>(
-    f: impl for<'a> AsyncBorrowFn2b2<'a, A1, A2, Out = T>,
+    f: impl for<'a> AsyncBorrowFn2b2<'a, A1, A2, T>,
     a1: A1,
 ) -> impl for<'a> Fn(&'a A2) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
 where
@@ -91,11 +85,11 @@ where
 pub fn partial_apply_async_borrow_fn_2b2<A1, A2, F, T>(
     f: F,
     a1: A1,
-) -> impl for<'a> AsyncBorrowFn1b1<'a, A2, Out = T>
+) -> impl for<'a> AsyncBorrowFn1b1<'a, A2, T>
 where
     A1: Clone + Send + Sync + 'static,
     A2: ?Sized + 'static,
-    F: for<'a> AsyncBorrowFn2b2<'a, A1, A2, Out = T> + 'static,
+    F: for<'a> AsyncBorrowFn2b2<'a, A1, A2, T> + 'static,
 {
     fn nudge_inference<A1, A2, F, T, C>(closure: C) -> C
     where
@@ -103,11 +97,11 @@ where
         // (get imbued with) the right higher-order fn signature.
         // See https://docs.rs/higher-order-closure for more info
         // v
-        C: Fn(&A2) -> <F as AsyncBorrowFn2b2<'_, A1, A2>>::Fut,
+        C: Fn(&A2) -> <F as AsyncBorrowFn2b2<'_, A1, A2, T>>::Fut,
 
         A1: Clone + 'static,
         A2: ?Sized + 'static,
-        F: for<'a> AsyncBorrowFn2b2<'a, A1, A2, Out = T> + 'static,
+        F: for<'a> AsyncBorrowFn2b2<'a, A1, A2, T> + 'static,
     {
         closure
     }

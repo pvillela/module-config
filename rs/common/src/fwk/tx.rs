@@ -183,7 +183,7 @@ pub type PinBorrowFn2b2Tx<S1, T> = dyn for<'a> Fn(S1, &'a Tx<'a>) -> Pin<Box<dyn
 
 /// Transforms an async closure with a `Tx` reference argument into a closure that returns a pinned-boxed future.
 pub fn pin_async_borrow_fn_2b2_tx<S, T>(
-    f: impl for<'a> AsyncBorrowFn2b2<'a, S, Tx<'a>, Out = T>,
+    f: impl for<'a> AsyncBorrowFn2b2<'a, S, Tx<'a>, T>,
 ) -> impl for<'a> Fn(S, &'a Tx<'a>) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> {
     move |s, tx| {
         let x = f(s, tx);
