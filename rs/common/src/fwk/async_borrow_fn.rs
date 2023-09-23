@@ -1,5 +1,6 @@
 //! The trait defined here was recommended by https://github.com/rust-lang/rust/issues/113495#issuecomment-1627640952
-//! in response to my issue https://github.com/rust-lang/rust/issues/113495.
+//! in response to my issue https://github.com/rust-lang/rust/issues/113495;
+//! Enhanced by https://github.com/rust-lang/rust/issues/113495#issuecomment-1728150795.
 
 use std::{future::Future, pin::Pin};
 
@@ -70,24 +71,54 @@ where
     }
 }
 
-// Code below doesn't compile
-//
 ///Partial application for async function, where the result is an AsyncBorrowFn1a1.
-// pub fn partial_apply<A1, A2, T>(
-//     f: impl for<'a> AsyncBorrowFn2b2<'a, A1, &'a A2, Out = T> + 'static,
-//     a1: A1,
-// ) -> impl for<'a> AsyncBorrowFn1b1<'a, &'a A2, Out = T>
-// where
-//     A1: Clone + Send + Sync + 'static,
-//     A2: ?Sized + 'static,
-// {
-//     move |a2| f(a1.clone(), a2)
-// }
+///
+/// The code below doesn't compile, thus the need for `nudge_inference`
+/// (see https://github.com/rust-lang/rust/issues/113495#issuecomment-1728150795)
+/// in this function.
+/// ```
+/// pub fn partial_apply<A1, A2, T>(
+///     f: impl for<'a> AsyncBorrowFn2b2<'a, A1, &'a A2, Out = T> + 'static,
+///     a1: A1,
+/// ) -> impl for<'a> AsyncBorrowFn1b1<'a, &'a A2, Out = T>
+/// where
+///     A1: Clone + Send + Sync + 'static,
+///     A2: ?Sized + 'static,
+/// {
+///     move |a2| f(a1.clone(), a2)
+/// }
+/// ```
+pub fn partial_apply_async_borrow_fn_2b2<A1, A2, F, T>(
+    f: F,
+    a1: A1,
+) -> impl for<'a> AsyncBorrowFn1b1<'a, A2, Out = T>
+where
+    A1: Clone + Send + Sync + 'static,
+    A2: ?Sized + 'static,
+    F: for<'a> AsyncBorrowFn2b2<'a, A1, A2, Out = T> + 'static,
+{
+    fn nudge_inference<A1, A2, F, T, C>(closure: C) -> C
+    where
+        // this promotes the literal `|a2| …` closure to "infer"
+        // (get imbued with) the right higher-order fn signature.
+        // See https://docs.rs/higher-order-closure for more info
+        // v
+        C: Fn(&A2) -> <F as AsyncBorrowFn2b2<'_, A1, A2>>::Fut,
+
+        A1: Clone + 'static,
+        A2: ?Sized + 'static,
+        F: for<'a> AsyncBorrowFn2b2<'a, A1, A2, Out = T> + 'static,
+    {
+        closure
+    }
+
+    nudge_inference::<A1, A2, F, T, _>(move |a2| f(a1.clone(), a2))
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::pin::Pin;
+    use std::time::Duration;
 
     trait Trt {
         fn value(&self) -> u32;
@@ -99,65 +130,61 @@ mod tests {
         }
     }
 
-    async fn higher_order_dyn_trt(
-        f: impl for<'a> AsyncBorrowFn1b1<'a, dyn Trt + Send + Sync + 'a, Out = ()>,
-    ) {
-        f(&12u32).await;
+    type DynTrt = dyn Trt + Send + Sync;
+
+    async fn f(i: u32, j: &DynTrt) -> u32 {
+        i + j.value()
     }
 
-    async fn f_tx(_input: &(dyn Trt + Send + Sync)) {}
-
-    fn higher_order_dyn_trt_2(
-        f: impl for<'a> AsyncBorrowFn2b2<'a, u32, dyn Trt + Send + Sync + 'a, Out = u32>,
-        i: u32,
-    ) -> impl for<'a> Fn(
-        &'a (dyn Trt + Send + Sync),
-    ) -> Pin<Box<dyn Future<Output = u32> + Send + Sync + 'a>> {
-        move |x| {
-            let y = f(i, x);
-            Box::pin(y)
-        }
+    async fn f0(i: u32, j: &u32) -> u32 {
+        tokio::time::sleep(Duration::from_millis(10)).await;
+        i + j
     }
 
-    fn higher_order_dyn_trt_2_somewhat_generic<A1, T>(
-        f: impl for<'a> AsyncBorrowFn2b2<'a, A1, dyn Trt + Send + Sync + 'a, Out = T>,
-        i: A1,
-    ) -> impl for<'a> Fn(
-        &'a (dyn Trt + Send + Sync),
-    ) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>>
+    /// Specialization of [partial_apply_async_borrow_fn_2b2_boxpin] with A2 = DynTrt.
+    /// Needed because type inference fails when [partial_apply_async_borrow_fn_2b2_boxpin] is called with
+    /// an `f` whose second argument's type is `&dyn`.
+    fn partial_apply_async_borrow_fn_2b2_boxpin_dyntrt<A1, T>(
+        f: impl for<'a> AsyncBorrowFn2b2<'a, A1, DynTrt, Out = T>,
+        a1: A1,
+    ) -> impl for<'a> Fn(&'a DynTrt) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
     where
-        A1: Clone,
+        A1: Clone + Send + Sync,
     {
-        move |x| {
-            let y = f(i.clone(), x);
-            Box::pin(y)
-        }
+        partial_apply_async_borrow_fn_2b2_boxpin(f, a1)
     }
 
-    #[allow(unused)]
-    fn higher_order_2_generic<A1, A2, T>(
-        f: impl for<'a> AsyncBorrowFn2b2<'a, A1, A2, Out = T>,
-        i: A1,
-    ) -> impl for<'a> Fn(&'a A2) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>>
+    /// Specialization of [partial_apply_async_borrow_fn_2b2] with A2 = DynTrt.
+    /// Needed because type inference fails when [partial_apply_async_borrow_fn_2b2] is called with
+    /// an `f` whose second argument's type is `&dyn`.
+    fn partial_apply_async_borrow_fn_2b2_dyntrt<A1, F, T>(
+        f: F,
+        a1: A1,
+    ) -> impl for<'a> AsyncBorrowFn1b1<'a, DynTrt, Out = T>
     where
-        A1: Clone,
-        A2: ?Sized,
+        A1: Clone + Send + Sync + 'static,
+        F: for<'a> AsyncBorrowFn2b2<'a, A1, DynTrt, Out = T> + 'static,
     {
-        move |x| {
-            let y = f(i.clone(), x);
-            Box::pin(y)
-        }
+        partial_apply_async_borrow_fn_2b2(f, a1)
     }
 
-    async fn f_tx2(i: u32, tx: &(dyn Trt + Send + Sync)) -> u32 {
-        i + tx.value()
-    }
+    #[tokio::test]
+    async fn test_all() {
+        let f_part = partial_apply_async_borrow_fn_2b2_boxpin(f0, 40);
+        assert_eq!(42, f_part(&2).await);
 
-    #[test]
-    fn test_all() {
-        _ = higher_order_dyn_trt(f_tx);
-        _ = higher_order_dyn_trt_2(f_tx2, 1);
-        _ = higher_order_dyn_trt_2_somewhat_generic(f_tx2, 1);
-        // _ = higher_order_2_generic(f_tx2, 1); // doesn't compile
+        let f_part = partial_apply_async_borrow_fn_2b2(f0, 40);
+        println!("{}", f_part(&2).await);
+
+        // The commented-out lines below don't compile
+        // let g = |x, y: &u32| f0(x, y);
+        // let f_part = partial_apply_async_borrow_fn_2b2_boxpin(f, 40);
+        // let f_part = partial_apply_async_borrow_fn_2b2(f, 40);
+
+        let f_part = partial_apply_async_borrow_fn_2b2_boxpin_dyntrt(f, 40);
+        assert_eq!(42, f_part(&2).await);
+
+        let f_part = partial_apply_async_borrow_fn_2b2_dyntrt(f, 40);
+        assert_eq!(42, f_part(&2).await);
     }
 }
