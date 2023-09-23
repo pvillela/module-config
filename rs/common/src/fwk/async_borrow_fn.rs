@@ -130,42 +130,21 @@ mod tests {
         }
     }
 
-    type DynTrt = dyn Trt + Send + Sync;
-
-    async fn f(i: u32, j: &DynTrt) -> u32 {
-        i + j.value()
-    }
-
     async fn f0(i: u32, j: &u32) -> u32 {
         tokio::time::sleep(Duration::from_millis(10)).await;
         i + j
     }
 
-    /// Specialization of [partial_apply_async_borrow_fn_2b2_boxpin] with A2 = DynTrt.
-    /// Needed because type inference fails when [partial_apply_async_borrow_fn_2b2_boxpin] is called with
-    /// an `f` whose second argument's type is `&dyn`.
-    fn partial_apply_async_borrow_fn_2b2_boxpin_dyntrt<A1, T>(
-        f: impl for<'a> AsyncBorrowFn2b2<'a, A1, DynTrt, Out = T>,
-        a1: A1,
-    ) -> impl for<'a> Fn(&'a DynTrt) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
-    where
-        A1: Clone + Send + Sync,
-    {
-        partial_apply_async_borrow_fn_2b2_boxpin(f, a1)
+    async fn f1<'a>(i: u32, j: &(dyn Trt + Send + Sync + 'a)) -> u32 {
+        i + j.value() + 1
     }
 
-    /// Specialization of [partial_apply_async_borrow_fn_2b2] with A2 = DynTrt.
-    /// Needed because type inference fails when [partial_apply_async_borrow_fn_2b2] is called with
-    /// an `f` whose second argument's type is `&dyn`.
-    fn partial_apply_async_borrow_fn_2b2_dyntrt<A1, F, T>(
-        f: F,
-        a1: A1,
-    ) -> impl for<'a> AsyncBorrowFn1b1<'a, DynTrt, Out = T>
-    where
-        A1: Clone + Send + Sync + 'static,
-        F: for<'a> AsyncBorrowFn2b2<'a, A1, DynTrt, Out = T> + 'static,
-    {
-        partial_apply_async_borrow_fn_2b2(f, a1)
+    /// With a type alias, there is no need to add a lifetime parameter, unlike
+    /// what had to be done for `f1` above, for the partial_apply functions to accept `f2`. Why?
+    type DynTrt = dyn Trt + Send + Sync;
+
+    async fn f2(i: u32, j: &DynTrt) -> u32 {
+        i + j.value() + 2
     }
 
     #[tokio::test]
@@ -174,17 +153,21 @@ mod tests {
         assert_eq!(42, f_part(&2).await);
 
         let f_part = partial_apply_async_borrow_fn_2b2(f0, 40);
-        println!("{}", f_part(&2).await);
+        assert_eq!(42, f_part(&2).await);
 
         // The commented-out lines below don't compile
         // let g = |x, y: &u32| f0(x, y);
-        // let f_part = partial_apply_async_borrow_fn_2b2_boxpin(f, 40);
-        // let f_part = partial_apply_async_borrow_fn_2b2(f, 40);
 
-        let f_part = partial_apply_async_borrow_fn_2b2_boxpin_dyntrt(f, 40);
-        assert_eq!(42, f_part(&2).await);
+        let f_part = partial_apply_async_borrow_fn_2b2_boxpin(f1, 40);
+        assert_eq!(43, f_part(&2).await);
 
-        let f_part = partial_apply_async_borrow_fn_2b2_dyntrt(f, 40);
-        assert_eq!(42, f_part(&2).await);
+        let f_part = partial_apply_async_borrow_fn_2b2(f1, 40);
+        assert_eq!(43, f_part(&2).await);
+
+        let f_part = partial_apply_async_borrow_fn_2b2_boxpin(f2, 40);
+        assert_eq!(44, f_part(&2).await);
+
+        let f_part = partial_apply_async_borrow_fn_2b2(f2, 40);
+        assert_eq!(44, f_part(&2).await);
     }
 }
