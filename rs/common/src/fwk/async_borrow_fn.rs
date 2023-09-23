@@ -72,9 +72,9 @@ where
 /// in this function.
 /// ```
 /// pub fn partial_apply<A1, A2, T>(
-///     f: impl for<'a> AsyncBorrowFn2b2<'a, A1, &'a A2, Out = T> + 'static,
+///     f: impl for<'a> AsyncBorrowFn2b2<'a, A1, &'a A2, T> + 'static,
 ///     a1: A1,
-/// ) -> impl for<'a> AsyncBorrowFn1b1<'a, &'a A2, Out = T>
+/// ) -> impl for<'a> AsyncBorrowFn1b1<'a, &'a A2, T>
 /// where
 ///     A1: Clone + Send + Sync + 'static,
 ///     A2: ?Sized + 'static,
@@ -82,7 +82,7 @@ where
 ///     move |a2| f(a1.clone(), a2)
 /// }
 /// ```
-pub fn partial_apply_async_borrow_fn_2b2<A1, A2, F, T>(
+pub fn partial_apply_async_borrow_fn_2b2<A1, A2, T, F>(
     f: F,
     a1: A1,
 ) -> impl for<'a> AsyncBorrowFn1b1<'a, A2, T>
@@ -91,22 +91,21 @@ where
     A2: ?Sized + 'static,
     F: for<'a> AsyncBorrowFn2b2<'a, A1, A2, T> + 'static,
 {
-    fn nudge_inference<A1, A2, F, T, C>(closure: C) -> C
+    fn nudge_inference<A1, A2, T, F, C>(closure: C) -> C
     where
-        // this promotes the literal `|a2| …` closure to "infer"
-        // (get imbued with) the right higher-order fn signature.
-        // See https://docs.rs/higher-order-closure for more info
-        // v
-        C: Fn(&A2) -> <F as AsyncBorrowFn2b2<'_, A1, A2, T>>::Fut,
-
         A1: Clone + 'static,
         A2: ?Sized + 'static,
         F: for<'a> AsyncBorrowFn2b2<'a, A1, A2, T> + 'static,
+
+        // this promotes the literal `|a2| …` closure to "infer"
+        // (get imbued with) the right higher-order fn signature.
+        // See https://docs.rs/higher-order-closure for more info
+        C: Fn(&A2) -> <F as AsyncBorrowFn2b2<'_, A1, A2, T>>::Fut,
     {
         closure
     }
 
-    nudge_inference::<A1, A2, F, T, _>(move |a2| f(a1.clone(), a2))
+    nudge_inference::<A1, A2, T, F, _>(move |a2| f(a1.clone(), a2))
 }
 
 #[cfg(test)]
