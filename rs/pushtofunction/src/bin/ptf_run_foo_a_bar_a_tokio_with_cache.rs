@@ -4,11 +4,11 @@ use common::config::get_app_configuration;
 use common::fs_data::{FooAIn, FooAOut};
 use common::fwk::{BoxPinFn, RefreshMode};
 use common::tokio_run::{run, RunIn};
-use pushtofunction::fs::boot::foo_a_sfl_boot;
+use pushtofunction::fs;
 use tokio;
 
 fn make_foo_a_sfl() -> BoxPinFn<FooAIn, FooAOut> {
-    foo_a_sfl_boot(
+    fs::foo_a_sfl_boot(
         get_app_configuration,
         RefreshMode::Refreshable(Duration::from_millis(160)),
     )

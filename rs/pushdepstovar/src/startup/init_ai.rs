@@ -1,4 +1,4 @@
-use crate::fs::{boot::get_foo_ai_sfl_with_app_cfg, FooAiSflT};
+use crate::fs::{get_foo_ai_sfl_with_app_cfg, FooAiSflT};
 use common::config::get_app_configuration;
 
 pub fn get_foo_ai_sfl() -> FooAiSflT {

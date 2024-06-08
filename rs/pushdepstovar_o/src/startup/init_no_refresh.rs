@@ -1,4 +1,4 @@
-use crate::fs::boot::foo_sfl_init_no_refresh;
+use crate::fs::foo_sfl_init_no_refresh;
 
 /// Initialize service flows, let stereotypes initialize their dependencies.
 pub fn init_no_refresh() {

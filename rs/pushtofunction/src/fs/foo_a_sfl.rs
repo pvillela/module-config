@@ -1,6 +1,9 @@
+use crate::fs;
+use common::config::AppCfgInfo;
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{box_pin_async_fn, ArcPinFn, BoxPinFn, CfgArcSwapArc};
+use common::fwk::{box_pin_async_fn, ArcPinFn, BoxPinFn, CfgArcSwapArc, RefreshMode};
+use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -28,4 +31,23 @@ pub fn foo_a_sfl_c(cfg: FooASflCfg, deps: FooASflDeps) -> FooASflT {
         }
     };
     box_pin_async_fn(f)
+}
+
+fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
+    FooASflCfgInfo {
+        a: app_cfg.x.clone(),
+        b: app_cfg.y,
+    }
+}
+
+pub fn foo_a_sfl_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> FooASflT {
+    let foo_a_sfl_cfg = FooASflCfg::new_boxed_with_cfg_adapter(
+        app_cfg,
+        foo_a_sfl_cfg_adapter,
+        refresh_mode.clone(),
+    );
+    let foo_a_sfl_deps = FooASflDeps {
+        bar_a_bf: fs::bar_a_bf_boot(app_cfg, refresh_mode),
+    };
+    foo_a_sfl_c(foo_a_sfl_cfg, foo_a_sfl_deps)
 }

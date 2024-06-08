@@ -1,3 +1,5 @@
+use crate::fs::bar_i_bf::get_bar_i_bf_with_app_cfg;
+use common::config::AppCfgInfo;
 use common::{fs_data::FooISflCfgInfo, fs_util::foo_core, fwk::CfgDepsS};
 use std::rc::Rc;
 
@@ -29,4 +31,18 @@ pub fn get_foo_i_sfl_raw(cfg: FooISflCfgInfo, deps: FooISflDeps) -> FooISflT {
     let _ = FOO_I_SFL_CFG_DEPS.set_cfg_lenient(cfg);
     let _ = FOO_I_SFL_CFG_DEPS.set_deps_lenient(deps);
     foo_i_sfl
+}
+
+fn foo_i_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooISflCfgInfo {
+    FooISflCfgInfo {
+        a: app_cfg.x.clone(),
+        b: app_cfg.y,
+    }
+}
+
+pub fn get_foo_i_sfl_with_app_cfg(app_cfg: &AppCfgInfo) -> FooISflT {
+    // A stereotype should initialize its dependencies.
+    let bar_i_bf = get_bar_i_bf_with_app_cfg(app_cfg);
+    let deps = FooISflDeps { bar_i_bf };
+    get_foo_i_sfl_raw(foo_i_sfl_cfg_adapter(app_cfg), deps)
 }

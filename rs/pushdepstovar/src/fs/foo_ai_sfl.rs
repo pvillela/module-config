@@ -1,9 +1,12 @@
+use crate::fs::get_bar_ai_bf_with_app_cfg;
+use common::config::AppCfgInfo;
 use common::{
     fs_data::{FooAiIn, FooAiOut, FooAiSflCfgInfo},
     fs_util::foo_core,
     fwk::{CfgDepsS, Pinfn},
     pin_async_fn,
 };
+use std::sync::Arc;
 use std::{rc::Rc, time::Duration};
 use tokio::time::sleep;
 
@@ -42,4 +45,18 @@ pub fn get_foo_ai_sfl_raw(cfg: FooAiSflCfgInfo, deps: FooAiSflDeps) -> FooAiSflT
     let _ = FOO_AI_SFL_CFG_DEPS.set_cfg_lenient(cfg);
     let _ = FOO_AI_SFL_CFG_DEPS.set_deps_lenient(deps);
     pin_async_fn!(foo_ai_sfl)
+}
+
+fn foo_ai_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooAiSflCfgInfo {
+    FooAiSflCfgInfo {
+        a: app_cfg.x.clone(),
+        b: app_cfg.y,
+    }
+}
+
+pub fn get_foo_ai_sfl_with_app_cfg(app_cfg_src: fn() -> Arc<AppCfgInfo>) -> FooAiSflT {
+    // A stereotype should initialize its dependencies.
+    let bar_ai_bf = get_bar_ai_bf_with_app_cfg(app_cfg_src);
+    let deps = FooAiSflDeps { bar_ai_bf };
+    get_foo_ai_sfl_raw(foo_ai_sfl_cfg_adapter(&app_cfg_src()), deps)
 }

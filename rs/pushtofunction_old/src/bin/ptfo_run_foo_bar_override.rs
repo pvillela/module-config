@@ -1,8 +1,8 @@
 use common::config::{get_app_configuration, refresh_app_configuration};
-use pushtofunction_old::fs::boot::{
-    foo_sfl_boot, BAR_BF_CFG_INFO_OVERRIDE, FOO_SFL_CFG_INFO_OVERRIDE,
+use pushtofunction_old::fs;
+use pushtofunction_old::fs::{
+    BarBfCfgInfo, FooSflCfgInfo, BAR_BF_CFG_INFO_OVERRIDE, FOO_SFL_CFG_INFO_OVERRIDE,
 };
-use pushtofunction_old::fs::{BarBfCfgInfo, FooSflCfgInfo};
 use pushtofunction_old::fwk::nil_app_cfg;
 use std::thread;
 
@@ -23,7 +23,7 @@ fn main() {
 
     {
         println!("Running foo_sfl with config info override in 2 threads, using nil_app_cfg.");
-        let foo_sfl = foo_sfl_boot(nil_app_cfg);
+        let foo_sfl = fs::foo_sfl_boot(nil_app_cfg);
         let foo_sfl_clone = foo_sfl.clone();
 
         let handle = thread::spawn(move || foo_sfl());
@@ -40,7 +40,7 @@ fn main() {
 
     {
         println!("Running foo_sfl with config info override in 2 threads, using get_app_configuration. There should be no change from nil_app_cfg.");
-        let foo_sfl = foo_sfl_boot(get_app_configuration);
+        let foo_sfl = fs::foo_sfl_boot(get_app_configuration);
         let foo_sfl_clone = foo_sfl.clone();
 
         let handle = thread::spawn(move || foo_sfl());

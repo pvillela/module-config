@@ -1,7 +1,9 @@
+use common::config::AppCfgInfo;
 use common::fs_data::BarABfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc, Pinfn};
+use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc, Pinfn, RefreshMode};
 use common::pin_async_fn;
+use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -30,4 +32,22 @@ thread_local! {
 pub fn get_bar_a_bf_raw(cfg: BarABfCfg) -> BarABfT {
     let _ = BAR_A_BF_CFG.set_cfg_lenient(cfg);
     pin_async_fn!(bar_a_bf)
+}
+
+fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarABfCfgInfo {
+    BarABfCfgInfo {
+        u: app_cfg.y,
+        v: app_cfg.x.clone(),
+    }
+}
+
+pub fn get_bar_a_bf_with_app_cfg(
+    app_cfg_src: fn() -> Arc<AppCfgInfo>,
+    refresh_mode: RefreshMode,
+) -> BarABfT {
+    get_bar_a_bf_raw(BarABfCfg::new_boxed_with_cfg_adapter(
+        app_cfg_src,
+        bar_a_bf_cfg_adapter,
+        refresh_mode,
+    ))
 }

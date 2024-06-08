@@ -1,8 +1,10 @@
+use common::config::AppCfgInfo;
 use common::fs_data::BarAiBfCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::{CfgDepsS, Pinfn};
 use common::pin_async_fn;
 use std::rc::Rc;
+use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -29,4 +31,15 @@ thread_local! {
 pub fn get_bar_ai_bf_raw(cfg: BarAiBfCfgInfo) -> BarAiBfT {
     let _ = BAR_AI_BF_CFG.set_cfg_lenient(cfg);
     pin_async_fn!(bar_ai_bf)
+}
+
+fn bar_ai_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarAiBfCfgInfo {
+    BarAiBfCfgInfo {
+        u: app_cfg.y,
+        v: app_cfg.x.clone(),
+    }
+}
+
+pub fn get_bar_ai_bf_with_app_cfg(app_cfg_src: fn() -> Arc<AppCfgInfo>) -> BarAiBfT {
+    get_bar_ai_bf_raw(bar_ai_bf_cfg_adapter(&app_cfg_src()))
 }

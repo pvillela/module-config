@@ -1,4 +1,5 @@
-use crate::fs::boot::{bar_a_bf_init_refreshable, foo_a_sfl_init_refreshable};
+use crate::fs::bar_a_bf_init_refreshable;
+use crate::fs::foo_a_sfl_init_refreshable;
 use common::config::get_app_configuration;
 use std::time::Duration;
 

@@ -1,10 +1,10 @@
-use crate::fs::boot::foo_sfl_boot;
+use crate::fs;
 use crate::fs::FooSflT;
 use common::config::{get_app_configuration, AppCfgInfo};
 use std::sync::Arc;
 
 pub fn make_foo_sfl() -> FooSflT {
-    foo_sfl_boot(get_app_configuration)
+    fs::foo_sfl_boot(get_app_configuration)
 }
 
 pub fn make_foo_sfl1() -> FooSflT {
@@ -15,5 +15,5 @@ pub fn make_foo_sfl1() -> FooSflT {
             z: true,
         })
     };
-    foo_sfl_boot(app_cfg_src1)
+    fs::foo_sfl_boot(app_cfg_src1)
 }

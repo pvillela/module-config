@@ -2,7 +2,7 @@ use common::config::get_app_configuration;
 use common::fs_data::{FooAIn, FooAOut};
 use common::fwk::{BoxPinFn, RefreshMode};
 use common::tokio_run::{run, RunIn};
-use pushdepstovar::fs::boot::get_foo_a_sfl_with_app_cfg;
+use pushdepstovar::fs::get_foo_a_sfl_with_app_cfg;
 use std::time::Duration;
 use tokio;
 

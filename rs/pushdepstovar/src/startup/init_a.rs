@@ -1,4 +1,4 @@
-use crate::fs::{boot::get_foo_a_sfl_with_app_cfg, FooASflT};
+use crate::fs::{get_foo_a_sfl_with_app_cfg, FooASflT};
 use common::{config::get_app_configuration, fwk::RefreshMode};
 use std::time::Duration;
 

@@ -1,4 +1,5 @@
-use crate::fs::boot::{bar_bf_init_refreshable, foo_sfl_init_refreshable};
+use crate::fs::bar_bf_init_refreshable;
+use crate::fs::foo_sfl_init_refreshable;
 use common::config::get_app_configuration;
 
 /// Sould only initialize service flows and let stereotypes initialize their dependencies,

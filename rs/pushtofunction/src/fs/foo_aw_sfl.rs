@@ -1,6 +1,9 @@
+use crate::fs;
+use common::config::AppCfgInfo;
 use common::fs_data::{FooAwIn, FooAwOut, FooAwSflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{rc_pin_async_fn_wss, CfgRefCellId, RcPinFnWss};
+use common::fwk::{rc_pin_async_fn_wss, CfgRefCellId, RcPinFnWss, RefreshMode};
+use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -28,4 +31,23 @@ pub fn foo_aw_sfl_c(cfg: FooAwSflCfg, deps: FooAwSflDeps) -> FooAwSflT {
         }
     };
     rc_pin_async_fn_wss(f)
+}
+
+fn foo_aw_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooAwSflCfgInfo {
+    FooAwSflCfgInfo {
+        a: app_cfg.x.clone(),
+        b: app_cfg.y,
+    }
+}
+
+pub fn foo_aw_sfl_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> FooAwSflT {
+    let foo_aw_sfl_cfg = FooAwSflCfg::new_boxed_with_cfg_adapter(
+        app_cfg,
+        foo_aw_sfl_cfg_adapter,
+        refresh_mode.clone(),
+    );
+    let foo_aw_sfl_deps = FooAwSflDeps {
+        bar_aw_bf: fs::bar_aw_bf_boot(app_cfg, refresh_mode),
+    };
+    foo_aw_sfl_c(foo_aw_sfl_cfg, foo_aw_sfl_deps)
 }

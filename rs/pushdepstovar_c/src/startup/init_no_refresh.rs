@@ -1,4 +1,4 @@
-use crate::fs::boot::foo_sfl_init_cached;
+use crate::fs::foo_sfl_init_cached;
 use common::config::get_app_configuration;
 
 /// Initialize service flows, let stereotypes initialize their dependencies.

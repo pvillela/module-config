@@ -2,7 +2,8 @@ use common::{
     config::{refresh_app_configuration, AppCfgInfo},
     fwk::RefreshMode,
 };
-use pushtofunction::fs::{boot::foo_sfl_boot, FooSflT};
+use pushtofunction::fs;
+use pushtofunction::fs::FooSflT;
 use std::{sync::Arc, thread};
 
 fn make_foo_sfl1() -> FooSflT {
@@ -13,7 +14,7 @@ fn make_foo_sfl1() -> FooSflT {
             z: true,
         })
     };
-    foo_sfl_boot(app_cfg_src1, RefreshMode::NoRefresh)
+    fs::foo_sfl_boot(app_cfg_src1, RefreshMode::NoRefresh)
 }
 
 fn main() {

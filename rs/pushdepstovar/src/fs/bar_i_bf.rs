@@ -1,3 +1,4 @@
+use common::config::AppCfgInfo;
 use common::fs_data::BarIBfCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::CfgDepsS;
@@ -24,4 +25,15 @@ thread_local! {
 pub fn get_bar_i_bf_raw(cfg: BarIBfCfgInfo) -> BarIBfT {
     let _ = BAR_I_BF_CFG.set_cfg_lenient(cfg);
     bar_i_bf
+}
+
+fn bar_i_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarIBfCfgInfo {
+    BarIBfCfgInfo {
+        u: app_cfg.y,
+        v: app_cfg.x.clone(),
+    }
+}
+
+pub fn get_bar_i_bf_with_app_cfg(app_cfg: &AppCfgInfo) -> BarIBfT {
+    get_bar_i_bf_raw(bar_i_bf_cfg_adapter(app_cfg))
 }

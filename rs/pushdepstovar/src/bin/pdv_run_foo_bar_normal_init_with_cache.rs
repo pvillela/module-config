@@ -2,7 +2,7 @@ use common::{
     config::{get_app_configuration, refresh_app_configuration},
     fwk::RefreshMode,
 };
-use pushdepstovar::fs::boot::get_foo_sfl_with_app_cfg;
+use pushdepstovar::fs::get_foo_sfl_with_app_cfg;
 use std::{thread, time::Duration};
 
 fn main() {

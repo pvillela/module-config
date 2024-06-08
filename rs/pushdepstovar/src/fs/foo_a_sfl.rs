@@ -1,9 +1,13 @@
+use crate::fs::get_bar_a_bf_with_app_cfg;
+use common::config::AppCfgInfo;
+use common::fwk::RefreshMode;
 use common::{
     fs_data::{FooAIn, FooAOut, FooASflCfgInfo},
     fs_util::foo_core,
     fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc, Pinfn},
     pin_async_fn,
 };
+use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -44,4 +48,24 @@ pub fn get_foo_a_sfl_raw(cfg: FooASflCfg, deps: FooASflDeps) -> FooASflT {
     let _ = FOO_A_SFL_CFG_DEPS.set_cfg_lenient(cfg);
     let _ = FOO_A_SFL_CFG_DEPS.set_deps_lenient(deps);
     pin_async_fn!(foo_a_sfl)
+}
+
+fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
+    FooASflCfgInfo {
+        a: app_cfg.x.clone(),
+        b: app_cfg.y,
+    }
+}
+
+pub fn get_foo_a_sfl_with_app_cfg(
+    app_cfg_src: fn() -> Arc<AppCfgInfo>,
+    refresh_mode: RefreshMode,
+) -> FooASflT {
+    // A stereotype should initialize its dependencies.
+    let bar_a_bf = get_bar_a_bf_with_app_cfg(app_cfg_src, refresh_mode.clone());
+    let deps = FooASflDeps { bar_a_bf };
+    get_foo_a_sfl_raw(
+        FooASflCfg::new_boxed_with_cfg_adapter(app_cfg_src, foo_a_sfl_cfg_adapter, refresh_mode),
+        deps,
+    )
 }

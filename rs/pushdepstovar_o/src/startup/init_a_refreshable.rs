@@ -1,6 +1,7 @@
+use crate::fs::bar_a_bf_init_refreshable;
 use std::time::Duration;
 
-use crate::fs::boot::{bar_a_bf_init_refreshable, foo_a_sfl_init_refreshable};
+use crate::fs::foo_a_sfl_init_refreshable;
 
 /// Sould only initialize service flows and let stereotypes initialize their dependencies,
 /// but here we initialize bar_a_bf redundantly to show it's OK to do so.
