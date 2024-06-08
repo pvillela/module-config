@@ -63,15 +63,13 @@ async fn main() {
 
     let app = Router::new().route("/", post(foo_a_sfl_hdlr));
 
-    let addr = ([127, 0, 0, 1], 8080).into();
-
     let _ = thread::spawn(|| loop {
         thread::sleep(Duration::from_millis(500));
         refresh_app_configuration();
     });
 
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:8080")
         .await
         .unwrap();
+    axum::serve(listener, app).await.unwrap();
 }
