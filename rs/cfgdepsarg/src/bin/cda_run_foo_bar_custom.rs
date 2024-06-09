@@ -1,6 +1,7 @@
-use cfgdepsarg::fs::{boot::foo_sfl_boot, FooSflT};
+use cfgdepsarg::fs;
+use cfgdepsarg::fs::FooSflT;
 use common::{
-    config::{refresh_app_configuration, AppCfgInfo},
+    config::{refresh_app_configuration, AppCfg, AppCfgInfo},
     fwk::RefreshMode,
 };
 use std::{sync::Arc, thread};
@@ -13,7 +14,10 @@ fn make_foo_sfl1() -> Box<FooSflT> {
             z: true,
         })
     };
-    foo_sfl_boot(app_cfg_src1, RefreshMode::NoRefresh)
+    fs::foo_sfl_boot(AppCfg {
+        app_src: app_cfg_src1,
+        refresh_mode: RefreshMode::NoRefresh,
+    })
 }
 
 fn main() {

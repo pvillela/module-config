@@ -1,12 +1,15 @@
-use cfgdepsarg::fs::boot::foo_a_sfl_boot;
-use common::config::get_app_configuration;
+use cfgdepsarg::fs;
+use common::config::{get_app_configuration, AppCfg};
 use common::fs_data::{FooAIn, FooAOut};
 use common::fwk::{BoxPinFn, RefreshMode};
 use common::tokio_run::{run, RunIn};
 use tokio;
 
 fn make_foo_a_sfl() -> BoxPinFn<FooAIn, FooAOut> {
-    foo_a_sfl_boot(get_app_configuration, RefreshMode::NoRefresh)
+    fs::foo_a_sfl_boot(AppCfg {
+        app_src: get_app_configuration,
+        refresh_mode: RefreshMode::NoRefresh,
+    })
 }
 
 #[tokio::main]

@@ -1,5 +1,4 @@
-use crate::fs::boot::{foo_at_sfl_boot_arc, foo_at_sfl_boot_lr};
-use crate::fs::FooAtSflT;
+use crate::fs::{foo_at_sfl_boot_arc, foo_at_sfl_boot_lr, FooAtSflT};
 use common::config::{get_app_configuration, get_pool};
 use common::fwk::{fn2_arc_with_transaction, fn2_static_ref_with_transaction, RefreshMode};
 use std::sync::OnceLock;

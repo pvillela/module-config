@@ -1,9 +1,8 @@
-use common::config::AppCfgInfo;
+use common::config::{AppCfg, AppCfgInfo};
 use common::fs_data::BarBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{CfgRefCellRc, RefreshMode};
+use common::fwk::CfgRefCellRc;
 use std::rc::Rc;
-use std::sync::Arc;
 
 pub type BarBfT = Rc<dyn Fn() -> String>;
 
@@ -26,8 +25,11 @@ fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
     }
 }
 
-pub fn bar_bf_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> BarBfT {
-    let bar_bf_cfg =
-        BarBfCfg::new_boxed_with_cfg_adapter(app_cfg, bar_bf_cfg_adapter, refresh_mode);
+pub fn bar_bf_boot(app_cfg: AppCfg<AppCfgInfo>) -> BarBfT {
+    let bar_bf_cfg = BarBfCfg::new_boxed_with_cfg_adapter(
+        app_cfg.app_src,
+        bar_bf_cfg_adapter,
+        app_cfg.refresh_mode,
+    );
     bar_bf_c(bar_bf_cfg)
 }

@@ -1,10 +1,9 @@
 use crate::fs;
-use common::config::AppCfgInfo;
+use common::config::{AppCfg, AppCfgInfo};
 use common::fs_data::FooSflCfgInfo;
 use common::fs_util::foo_core;
-use common::fwk::{CfgRefCellRc, RefreshMode};
+use common::fwk::CfgRefCellRc;
 use std::rc::Rc;
-use std::sync::Arc;
 
 pub type FooSflT = Rc<dyn Fn() -> String>;
 
@@ -34,11 +33,15 @@ fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
     }
 }
 
-pub fn foo_sfl_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> FooSflT {
-    let cfg =
-        FooSflCfg::new_boxed_with_cfg_adapter(app_cfg, foo_sfl_cfg_adapter, refresh_mode.clone());
+pub fn foo_sfl_boot(app_cfg: AppCfg<AppCfgInfo>) -> FooSflT {
+    let app_cfg1 = app_cfg.clone();
+    let cfg = FooSflCfg::new_boxed_with_cfg_adapter(
+        app_cfg.app_src,
+        foo_sfl_cfg_adapter,
+        app_cfg1.refresh_mode,
+    );
     let deps = FooSflDeps {
-        bar_bf: fs::bar_bf_boot(app_cfg, refresh_mode),
+        bar_bf: fs::bar_bf_boot(app_cfg),
     };
     foo_sfl_c(cfg, deps)
 }

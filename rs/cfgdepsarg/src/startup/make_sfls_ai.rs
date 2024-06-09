@@ -1,11 +1,11 @@
 use std::sync::OnceLock;
 
-use crate::fs::boot::{foo_ai_sfl_boot, foo_ai_sfl_boot_lr};
-use crate::fs::FooAiSflT;
+use crate::fs;
+use crate::fs::{foo_ai_sfl_boot_lr, FooAiSflT};
 use common::config::get_app_configuration;
 
 pub fn make_foo_ai_sfl() -> Box<FooAiSflT> {
-    foo_ai_sfl_boot(&get_app_configuration())
+    fs::foo_ai_sfl_boot(&get_app_configuration())
 }
 
 pub fn get_foo_ai_sfl() -> &'static FooAiSflT {

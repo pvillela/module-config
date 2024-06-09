@@ -19,6 +19,7 @@
 //! - `refresh_mode`: cache refresh specification used in case of mutable configuration
 
 use super::{AsyncBorrowFn3b3, Tx};
+use crate::config::AppCfg;
 use crate::fwk::{
     box_pin_async_fn, box_pin_async_fn_wss, ref_pin_async_fn, PinFn, PinFnWss, RefreshMode,
 };
@@ -36,8 +37,7 @@ pub fn cfg_deps_boot<C, D, A, T, ACFG, SCFG>(
     f_c: fn(&CfgDeps<C, D>, A) -> T,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfgdapter: fn(&ACFG) -> SCFG,
-    app_cfg: fn() -> Arc<ACFG>,
-    refresh_mode: RefreshMode,
+    app_cfg: AppCfg<ACFG>,
     deps: D,
 ) -> Box<dyn Fn(A) -> T + Send + Sync>
 where
@@ -46,7 +46,7 @@ where
     A: 'static,
     T: 'static,
 {
-    let cfg = cfg_factory(app_cfg, cfgdapter, refresh_mode);
+    let cfg = cfg_factory(app_cfg.app_src, cfgdapter, app_cfg.refresh_mode);
     let s = Arc::new(CfgDeps { cfg, deps: deps });
     let stereotype = move |input| f_c(&s, input);
     Box::new(stereotype)
@@ -57,8 +57,7 @@ pub fn cfg_deps_boot_lr<C, D, A, T, ACFG, SCFG>(
     f_c: fn(&CfgDeps<C, D>, A) -> T,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfgdapter: fn(&ACFG) -> SCFG,
-    app_cfg: fn() -> Arc<ACFG>,
-    refresh_mode: RefreshMode,
+    app_cfg: AppCfg<ACFG>,
     deps: D,
 ) -> &'static (dyn Fn(A) -> T + Send + Sync)
 where
@@ -67,7 +66,7 @@ where
     A: 'static,
     T: 'static,
 {
-    let cfg = cfg_factory(app_cfg, cfgdapter, refresh_mode);
+    let cfg = cfg_factory(app_cfg.app_src, cfgdapter, app_cfg.refresh_mode);
     let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps: deps }));
     let stereotype = move |input| f_c(s_ref_leak, input);
     Box::leak(Box::new(stereotype))
@@ -121,8 +120,7 @@ pub fn cfg_deps_a_boot<C, D, A, T, FUT, ACFG, SCFG>(
     f_c: fn(Arc<CfgDeps<C, D>>, A) -> FUT,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
-    app_cfg: fn() -> Arc<ACFG>,
-    refresh_mode: RefreshMode,
+    app_cfg: AppCfg<ACFG>,
     deps: D,
 ) -> BoxPinFn<A, T>
 where
@@ -132,7 +130,7 @@ where
     T: 'static + Send + Sync,
     FUT: Future<Output = T> + Send + Sync + 'static,
 {
-    let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
+    let cfg = cfg_factory(app_cfg.app_src, cfg_adapter, app_cfg.refresh_mode);
     let s = Arc::new(CfgDeps { cfg, deps: deps });
     let stereotype = move |input| f_c(s.clone(), input);
     box_pin_async_fn(stereotype)
@@ -143,8 +141,7 @@ pub fn cfg_deps_a_boot_lr<C, D, A, T, FUT, ACFG, SCFG>(
     f_c: fn(&'static CfgDeps<C, D>, A) -> FUT,
     cfg_factory: impl Fn(fn() -> Arc<ACFG>, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
-    app_cfg: fn() -> Arc<ACFG>,
-    refresh_mode: RefreshMode,
+    app_cfg: AppCfg<ACFG>,
     deps: D,
 ) -> &'static PinFn<A, T>
 where
@@ -153,7 +150,7 @@ where
     T: Send + Sync,
     FUT: Future<Output = T> + Send + Sync + 'static,
 {
-    let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
+    let cfg = cfg_factory(app_cfg.app_src, cfg_adapter, app_cfg.refresh_mode);
     let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps: deps }));
     let stereotype = move |input| f_c(s_ref_leak, input);
     ref_pin_async_fn(stereotype)

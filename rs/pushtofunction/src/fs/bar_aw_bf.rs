@@ -1,8 +1,7 @@
-use common::config::AppCfgInfo;
+use common::config::{AppCfg, AppCfgInfo};
 use common::fs_data::{BarABfCfgInfo, BarAwBfCfgInfo};
 use common::fs_util::bar_core;
-use common::fwk::{rc_pin_async_fn_wss, CfgRefCellId, RcPinFnWss, RefreshMode};
-use std::sync::Arc;
+use common::fwk::{rc_pin_async_fn_wss, CfgRefCellId, RcPinFnWss};
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -30,8 +29,11 @@ fn bar_aw_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarAwBfCfgInfo {
     }
 }
 
-pub fn bar_aw_bf_boot(app_cfg: fn() -> Arc<AppCfgInfo>, refresh_mode: RefreshMode) -> BarAwBfT {
-    let bar_aw_bf_cfg =
-        BarAwBfCfg::new_boxed_with_cfg_adapter(app_cfg, bar_aw_bf_cfg_adapter, refresh_mode);
+pub fn bar_aw_bf_boot(app_cfg: AppCfg<AppCfgInfo>) -> BarAwBfT {
+    let bar_aw_bf_cfg = BarAwBfCfg::new_boxed_with_cfg_adapter(
+        app_cfg.app_src,
+        bar_aw_bf_cfg_adapter,
+        app_cfg.refresh_mode,
+    );
     bar_aw_bf_c(bar_aw_bf_cfg)
 }

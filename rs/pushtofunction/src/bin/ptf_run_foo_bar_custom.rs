@@ -1,5 +1,5 @@
 use common::{
-    config::{refresh_app_configuration, AppCfgInfo},
+    config::{refresh_app_configuration, AppCfg, AppCfgInfo},
     fwk::RefreshMode,
 };
 use pushtofunction::fs;
@@ -14,7 +14,10 @@ fn make_foo_sfl1() -> FooSflT {
             z: true,
         })
     };
-    fs::foo_sfl_boot(app_cfg_src1, RefreshMode::NoRefresh)
+    fs::foo_sfl_boot(AppCfg {
+        app_src: app_cfg_src1,
+        refresh_mode: RefreshMode::NoRefresh,
+    })
 }
 
 fn main() {

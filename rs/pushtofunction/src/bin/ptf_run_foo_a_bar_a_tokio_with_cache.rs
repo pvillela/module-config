@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use common::config::get_app_configuration;
+use common::config::{get_app_configuration, AppCfg};
 use common::fs_data::{FooAIn, FooAOut};
 use common::fwk::{BoxPinFn, RefreshMode};
 use common::tokio_run::{run, RunIn};
@@ -8,10 +8,10 @@ use pushtofunction::fs;
 use tokio;
 
 fn make_foo_a_sfl() -> BoxPinFn<FooAIn, FooAOut> {
-    fs::foo_a_sfl_boot(
-        get_app_configuration,
-        RefreshMode::Refreshable(Duration::from_millis(160)),
-    )
+    fs::foo_a_sfl_boot(AppCfg {
+        app_src: get_app_configuration,
+        refresh_mode: RefreshMode::Refreshable(Duration::from_millis(160)),
+    })
 }
 
 #[tokio::main]
