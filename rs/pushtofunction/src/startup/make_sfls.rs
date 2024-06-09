@@ -1,7 +1,7 @@
 use crate::fs;
 use crate::fs::{FooASflT, FooAwSflT, FooSflT};
-use common::config::{get_app_configuration, AppCfg};
-use common::fwk::RefreshMode;
+use common::config::get_app_configuration;
+use common::fwk::{AppCfg, RefreshMode};
 use std::time::Duration;
 
 pub fn make_foo_sfl_refreshable() -> FooSflT {

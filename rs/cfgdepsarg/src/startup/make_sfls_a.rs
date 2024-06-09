@@ -1,7 +1,7 @@
 use crate::fs;
 use crate::fs::{foo_a_sfl_boot_lr, FooASflT};
-use common::config::{get_app_configuration, AppCfg};
-use common::fwk::RefreshMode;
+use common::config::get_app_configuration;
+use common::fwk::{AppCfg, RefreshMode};
 use std::sync::OnceLock;
 use std::time::Duration;
 

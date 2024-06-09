@@ -1,9 +1,9 @@
 use super::{bar_bf_boot_lr, BarBfT};
 use crate::fs;
-use common::config::{AppCfg, AppCfgInfo};
+use common::config::AppCfgInfo;
 use common::fs_data::FooSflCfgInfo;
 use common::fs_util::foo_core;
-use common::fwk::{cfg_deps_boot, cfg_deps_boot_lr, CfgArcSwapArc, CfgDeps};
+use common::fwk::{cfg_deps_boot, cfg_deps_boot_lr, AppCfg, CfgArcSwapArc, CfgDeps};
 
 pub type FooSflT = dyn Fn(()) -> String + Send + Sync;
 

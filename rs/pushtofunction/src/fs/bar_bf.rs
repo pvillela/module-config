@@ -1,7 +1,7 @@
-use common::config::{AppCfg, AppCfgInfo};
+use common::config::AppCfgInfo;
 use common::fs_data::BarBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::CfgRefCellRc;
+use common::fwk::{AppCfg, CfgRefCellRc};
 use std::rc::Rc;
 
 pub type BarBfT = Rc<dyn Fn() -> String>;

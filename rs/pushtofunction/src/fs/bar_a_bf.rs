@@ -1,7 +1,7 @@
-use common::config::{AppCfg, AppCfgInfo};
+use common::config::AppCfgInfo;
 use common::fs_data::BarABfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{arc_pin_async_fn, ArcPinFn, CfgArcSwapArc};
+use common::fwk::{arc_pin_async_fn, AppCfg, ArcPinFn, CfgArcSwapArc};
 use std::time::Duration;
 use tokio::time::sleep;
 

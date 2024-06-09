@@ -19,7 +19,7 @@
 //! - `refresh_mode`: cache refresh specification used in case of mutable configuration
 
 use super::{AsyncBorrowFn3b3, Tx};
-use crate::config::AppCfg;
+use crate::fwk::cfg::AppCfg;
 use crate::fwk::{
     box_pin_async_fn, box_pin_async_fn_wss, ref_pin_async_fn, PinFn, PinFnWss, RefreshMode,
 };

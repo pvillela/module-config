@@ -1,7 +1,7 @@
-use common::config::{AppCfg, AppCfgInfo};
+use common::config::AppCfgInfo;
 use common::fs_data::{BarABfCfgInfo, BarAwBfCfgInfo};
 use common::fs_util::bar_core;
-use common::fwk::{rc_pin_async_fn_wss, CfgRefCellId, RcPinFnWss};
+use common::fwk::{rc_pin_async_fn_wss, AppCfg, CfgRefCellId, RcPinFnWss};
 use std::time::Duration;
 use tokio::time::sleep;
 

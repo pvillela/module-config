@@ -1,8 +1,8 @@
 use crate::fs;
-use common::config::{AppCfg, AppCfgInfo};
+use common::config::AppCfgInfo;
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
-use common::fwk::{box_pin_async_fn, ArcPinFn, BoxPinFn, CfgArcSwapArc};
+use common::fwk::{box_pin_async_fn, AppCfg, ArcPinFn, BoxPinFn, CfgArcSwapArc};
 use std::time::Duration;
 use tokio::time::sleep;
 

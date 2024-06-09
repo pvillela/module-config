@@ -1,5 +1,6 @@
+use common::fwk::AppCfg;
 use common::{
-    config::{refresh_app_configuration, AppCfg, AppCfgInfo},
+    config::{refresh_app_configuration, AppCfgInfo},
     fwk::RefreshMode,
 };
 use pushtofunction::fs;

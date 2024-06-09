@@ -1,7 +1,8 @@
 use cfgdepsarg::fs;
 use cfgdepsarg::fs::FooSflT;
+use common::fwk::AppCfg;
 use common::{
-    config::{refresh_app_configuration, AppCfg, AppCfgInfo},
+    config::{refresh_app_configuration, AppCfgInfo},
     fwk::RefreshMode,
 };
 use std::{sync::Arc, thread};

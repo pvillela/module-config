@@ -1,10 +1,10 @@
 use super::{bar_a_bf_boot_lr, BarABfT};
 use crate::fs;
-use common::config::{AppCfg, AppCfgInfo};
+use common::config::AppCfgInfo;
 use common::fs_data::{FooAIn, FooAOut, FooASflCfgInfo};
 use common::fs_util::foo_core;
 use common::fwk::{
-    box_pin_async_fn, cfg_deps_a_boot, cfg_deps_a_boot_lr, ref_pin_async_fn, CfgArcSwapArc,
+    box_pin_async_fn, cfg_deps_a_boot, cfg_deps_a_boot_lr, ref_pin_async_fn, AppCfg, CfgArcSwapArc,
     CfgDeps, PinFn,
 };
 use std::ops::Deref;

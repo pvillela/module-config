@@ -9,6 +9,12 @@ use std::time::{Duration, Instant};
 //=================
 // Types
 
+#[derive(Clone)]
+pub struct AppCfg<T> {
+    pub app_src: fn() -> Arc<T>,
+    pub refresh_mode: RefreshMode,
+}
+
 #[derive(Clone, Debug)]
 pub enum RefreshMode {
     NoRefresh,

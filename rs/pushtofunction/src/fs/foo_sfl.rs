@@ -1,8 +1,8 @@
 use crate::fs;
-use common::config::{AppCfg, AppCfgInfo};
+use common::config::AppCfgInfo;
 use common::fs_data::FooSflCfgInfo;
 use common::fs_util::foo_core;
-use common::fwk::CfgRefCellRc;
+use common::fwk::{AppCfg, CfgRefCellRc};
 use std::rc::Rc;
 
 pub type FooSflT = Rc<dyn Fn() -> String>;

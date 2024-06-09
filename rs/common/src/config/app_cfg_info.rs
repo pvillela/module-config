@@ -1,4 +1,4 @@
-use crate::fwk::{DbCfg, DbPool, RefreshMode};
+use crate::fwk::{DbCfg, DbPool};
 use arc_swap::{ArcSwap, ArcSwapAny};
 use std::{
     ops::Deref,
@@ -7,12 +7,6 @@ use std::{
         Arc, OnceLock,
     },
 };
-
-#[derive(Clone)]
-pub struct AppCfg<T> {
-    pub app_src: fn() -> Arc<T>,
-    pub refresh_mode: RefreshMode,
-}
 
 #[derive(Debug, Clone)]
 pub struct AppCfgInfo {

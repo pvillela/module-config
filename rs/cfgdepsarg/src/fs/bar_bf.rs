@@ -1,7 +1,7 @@
-use common::config::{AppCfg, AppCfgInfo};
+use common::config::AppCfgInfo;
 use common::fs_data::BarBfCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{cfg_deps_boot, cfg_deps_boot_lr, CfgArcSwapArc, CfgDeps};
+use common::fwk::{cfg_deps_boot, cfg_deps_boot_lr, AppCfg, CfgArcSwapArc, CfgDeps};
 
 pub type BarBfT = dyn Fn(()) -> String + Send + Sync;
 
