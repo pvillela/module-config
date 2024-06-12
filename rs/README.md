@@ -1,4 +1,27 @@
-# Observations on Different `pushdepstovar` Configuration Injection Approaches
+# Notes on Rust Code
+
+## Rust Workspaces
+
+These are the Rust workspaces:
+
+- cfgdepsarg -- A version of "Push-to-function" that demonstrates:
+  - How to write the stereotype constructor in a simple style that takes configuration and dependencies as an additional parameter and uses a transformation to lift the constructor into a higher-order function.
+  - How to include a transaction context argument in stereotype functions, leveraging appropriate transformation functions.
+- common -- Common code used by other workspaces.
+- pullcfgwithoverride -- Implementation of "Pull config, with push override".
+- pulldepswithoverride -- Implementation of "Pull config and dependencies, with push override".
+- pushcfgtovar -- Implementation of "Push config to variable".
+- pushdepstovar -- Implementation of "Push config and dependencies to variable".
+- pushdepstovar_c -- A variant implementation of "Push config and dependencies to variable".
+- pushdepstovar_o -- Another variant implementation of "Push config and dependencies to variable".
+- pushtofunction -- Implementation of "Push-to-function".
+- pushtofunction_old -- Older, deprecated implementation of "Push-to-function".
+
+## File Naming Convention
+
+- 
+
+## Observations on Different `pushdepstovar` Configuration Injection Approaches
 
 `pushdepstovar` and `pushdepstovar_o` demonstrate configuration and dependency injection approaches that are intermediate between `pushtofunction` and `pushtovar`. The advantage of this kind of approach is that it provides a level of decoupling comparable to that of `pushtofunction` with simpler usage as higher-order functions and their resulting closures are avoided and coding can be done directly with normal functions.
 
