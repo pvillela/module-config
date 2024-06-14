@@ -57,13 +57,12 @@ pub fn foo_at_sfl_boot_arc(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
 ) -> Arc<FooAtSflTxT> {
-    let cfg_factory = FooAtSflCfg::new_boxed_with_cfg_adapter;
     let b = fs::bar_at_bf_boot(app_cfg, refresh_mode.clone());
     let deps = FooAtSflDeps { bar_at_bf: b };
 
     cfg_deps_at_boot_free_tx_arc(
         foo_at_sfl_c,
-        cfg_factory,
+        FooAtSflCfg::new_boxed_with_cfg_adapter,
         foo_at_sfl_cfg_atdapter,
         app_cfg,
         refresh_mode.clone(),
@@ -76,13 +75,12 @@ pub fn foo_at_sfl_boot_lr(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
 ) -> &'static FooAtSflTxT {
-    let cfg_factory = FooAtSflCfg::new_boxed_with_cfg_adapter;
     let b = Box::new(bar_at_bf_boot_lr(app_cfg, refresh_mode.clone()));
     let deps = FooAtSflDeps { bar_at_bf: b };
 
     cfg_deps_at_boot_free_tx_lr(
         foo_at_sfl_c,
-        cfg_factory,
+        FooAtSflCfg::new_boxed_with_cfg_adapter,
         foo_at_sfl_cfg_atdapter,
         app_cfg,
         refresh_mode.clone(),

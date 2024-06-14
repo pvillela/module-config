@@ -65,13 +65,14 @@ pub fn foo_a_sfl_boot_by_hand(app_cfg: AppCfg<AppCfgInfo>) -> Box<FooASflT> {
 
 /// Returns a boxed foo_a_sfl closure.
 pub fn foo_a_sfl_boot(app_cfg: AppCfg<AppCfgInfo>) -> Box<FooASflT> {
-    let cfg_factory = FooASflCfg::new_boxed_with_cfg_adapter;
+    // Using variable definition below in cfg_deps_a_boot call causes rust-analyzer VSCode plugin "inlayHint failed".
+    // let cfg_factory = FooASflCfg::new_boxed_with_cfg_adapter;
     let deps = FooASflDeps {
         bar_a_bf: Box::new(fs::bar_a_bf_boot(app_cfg.clone())),
     };
     cfg_deps_a_boot(
         foo_a_sfl_c,
-        cfg_factory,
+        FooASflCfg::new_boxed_with_cfg_adapter,
         foo_a_sfl_cfg_adapter,
         app_cfg,
         deps,
@@ -101,13 +102,12 @@ pub fn foo_a_sfl_boot_lr_by_hand(app_cfg: AppCfg<AppCfgInfo>) -> &'static FooASf
 /// The benefit of this version over _boot is that it saves an Arc clone for this and its dependencies
 /// for each call to the returned function.
 pub fn foo_a_sfl_boot_lr(app_cfg: AppCfg<AppCfgInfo>) -> &'static FooASflT {
-    let cfg_factory = FooASflCfg::new_boxed_with_cfg_adapter;
     let deps = FooASflDeps {
         bar_a_bf: Box::new(bar_a_bf_boot_lr(app_cfg.clone())),
     };
     cfg_deps_a_boot_lr(
         foo_a_sfl_c,
-        cfg_factory,
+        FooASflCfg::new_boxed_with_cfg_adapter,
         foo_a_sfl_cfg_adapter,
         app_cfg,
         deps,

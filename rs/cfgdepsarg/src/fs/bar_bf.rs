@@ -38,8 +38,13 @@ pub fn bar_bf_boot_by_hand(app_cfg: AppCfg<AppCfgInfo>) -> Box<BarBfT> {
 
 /// Returns a boxed bar_bf closure.
 pub fn bar_bf_boot(app_cfg: AppCfg<AppCfgInfo>) -> Box<BarBfT> {
-    let cfg_factory = BarBfCfg::new_boxed_with_cfg_adapter;
-    cfg_deps_boot(bar_bf_c, cfg_factory, bar_bf_cfg_adapter, app_cfg, ())
+    cfg_deps_boot(
+        bar_bf_c,
+        BarBfCfg::new_boxed_with_cfg_adapter,
+        bar_bf_cfg_adapter,
+        app_cfg,
+        (),
+    )
 }
 
 /// Coded without use of [cfg_deps_boot_lr].
@@ -52,6 +57,11 @@ pub fn bar_bf_boot_lr_by_hand(app_cfg: AppCfg<AppCfgInfo>) -> &'static BarBfT {
 /// Returns a leaked static reference to a bar_bf closure.
 /// Since bar_bf has no dependencies, there is no benefit over _boot.
 pub fn bar_bf_boot_lr(app_cfg: AppCfg<AppCfgInfo>) -> &'static BarBfT {
-    let cfg_factory = BarBfCfg::new_boxed_with_cfg_adapter;
-    cfg_deps_boot_lr(bar_bf_c, cfg_factory, bar_bf_cfg_adapter, app_cfg, ())
+    cfg_deps_boot_lr(
+        bar_bf_c,
+        BarBfCfg::new_boxed_with_cfg_adapter,
+        bar_bf_cfg_adapter,
+        app_cfg,
+        (),
+    )
 }

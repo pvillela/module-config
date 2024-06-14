@@ -43,11 +43,9 @@ pub fn bar_at_bf_boot(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
 ) -> Box<BarAtBfTxT> {
-    let cfg_factory = BarAtBfCfg::new_boxed_with_cfg_adapter;
-
     cfg_deps_at_boot_free_tx_box(
         bar_at_bf_c,
-        cfg_factory,
+        BarAtBfCfg::new_boxed_with_cfg_adapter,
         bar_at_bf_cfg_adapter,
         app_cfg,
         refresh_mode.clone(),
@@ -60,11 +58,9 @@ pub fn bar_at_bf_boot_lr(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
 ) -> &'static BarAtBfTxT {
-    let cfg_factory = BarAtBfCfg::new_boxed_with_cfg_adapter;
-
     cfg_deps_at_boot_free_tx_lr(
         bar_at_bf_c,
-        cfg_factory,
+        BarAtBfCfg::new_boxed_with_cfg_adapter,
         bar_at_bf_cfg_adapter,
         app_cfg,
         refresh_mode.clone(),

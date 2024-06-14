@@ -51,10 +51,9 @@ pub fn bar_aw_bf_boot(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
 ) -> Box<BarAwBfT> {
-    let cfg_factory = BarAwBfCfg::new_boxed_with_cfg_adapter;
     cfg_deps_aw_boot(
         bar_aw_bf_c,
-        cfg_factory,
+        BarAwBfCfg::new_boxed_with_cfg_adapter,
         bar_aw_bf_cfg_adapter,
         app_cfg,
         refresh_mode.clone(),

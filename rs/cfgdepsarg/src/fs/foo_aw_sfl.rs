@@ -65,13 +65,12 @@ pub fn foo_aw_sfl_boot(
     app_cfg: fn() -> Arc<AppCfgInfo>,
     refresh_mode: RefreshMode,
 ) -> Box<FooAwSflT> {
-    let cfg_factory = FooAwSflCfg::new_boxed_with_cfg_adapter;
     let deps = FooAwSflDeps {
         bar_aw_bf: fs::bar_aw_bf_boot(app_cfg, refresh_mode.clone()),
     };
     cfg_deps_aw_boot(
         foo_aw_sfl_c,
-        cfg_factory,
+        FooAwSflCfg::new_boxed_with_cfg_adapter,
         foo_aw_sfl_cfg_adapter,
         app_cfg,
         refresh_mode.clone(),

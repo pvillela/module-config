@@ -50,11 +50,16 @@ pub fn foo_sfl_boot_by_hand(app_cfg: AppCfg<AppCfgInfo>) -> Box<FooSflT> {
 
 /// Returns a boxed foo_sfl closure.
 pub fn foo_sfl_boot(app_cfg: AppCfg<AppCfgInfo>) -> Box<FooSflT> {
-    let cfg_factory = FooSflCfg::new_boxed_with_cfg_adapter;
     let deps = FooSflDeps {
         bar_bf: fs::bar_bf_boot(app_cfg.clone()),
     };
-    cfg_deps_boot(foo_sfl_c, cfg_factory, foo_sfl_cfg_adapter, app_cfg, deps)
+    cfg_deps_boot(
+        foo_sfl_c,
+        FooSflCfg::new_boxed_with_cfg_adapter,
+        foo_sfl_cfg_adapter,
+        app_cfg,
+        deps,
+    )
 }
 
 /// Coded without use of [cfg_deps_boot_lr].
@@ -78,9 +83,14 @@ pub fn foo_sfl_boot_lr_by_hand(app_cfg: AppCfg<AppCfgInfo>) -> &'static FooSflT 
 /// Returns a leaked static reference to a foo_sfl closure.
 /// Since bar_bf has no dependencies, there is no benefit over _boot.
 pub fn foo_sfl_boot_lr(app_cfg: AppCfg<AppCfgInfo>) -> &'static FooSflT {
-    let cfg_factory = FooSflCfg::new_boxed_with_cfg_adapter;
     let deps = FooSflDeps {
         bar_bf: Box::new(bar_bf_boot_lr(app_cfg.clone())),
     };
-    cfg_deps_boot_lr(foo_sfl_c, cfg_factory, foo_sfl_cfg_adapter, app_cfg, deps)
+    cfg_deps_boot_lr(
+        foo_sfl_c,
+        FooSflCfg::new_boxed_with_cfg_adapter,
+        foo_sfl_cfg_adapter,
+        app_cfg,
+        deps,
+    )
 }
