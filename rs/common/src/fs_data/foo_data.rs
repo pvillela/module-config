@@ -1,6 +1,7 @@
 pub use foo_a_data::*;
 pub use foo_ai_data::*;
 pub use foo_an_data::*;
+pub use foo_ast_data::*;
 pub use foo_at_data::*;
 pub use foo_aw_data::*;
 pub use foo_data::*;
@@ -60,9 +61,7 @@ mod foo_an_data {
     use super::{FooAIn, FooAOut, FooASflCfgInfo};
 
     pub type FooAnSflCfgInfo = FooASflCfgInfo;
-
     pub type FooAnIn = FooAIn;
-
     pub type FooAnOut = FooAOut;
 }
 
@@ -70,9 +69,7 @@ mod foo_ai_data {
     use super::{FooAIn, FooAOut, FooASflCfgInfo};
 
     pub type FooAiSflCfgInfo = FooASflCfgInfo;
-
     pub type FooAiIn = FooAIn;
-
     pub type FooAiOut = FooAOut;
 }
 
@@ -80,9 +77,7 @@ mod foo_aw_data {
     use super::{FooAIn, FooAOut, FooASflCfgInfo};
 
     pub type FooAwSflCfgInfo = FooASflCfgInfo;
-
     pub type FooAwIn = FooAIn;
-
     pub type FooAwOut = FooAOut;
 }
 
@@ -90,8 +85,13 @@ mod foo_at_data {
     use super::{FooAIn, FooAOut, FooASflCfgInfo};
 
     pub type FooAtSflCfgInfo = FooASflCfgInfo;
-
     pub type FooAtIn = FooAIn;
-
     pub type FooAtOut = FooAOut;
+}
+
+mod foo_ast_data {
+    use super::{FooAIn, FooAOut};
+
+    pub type FooAstIn = FooAIn;
+    pub type FooAstOut = FooAOut;
 }

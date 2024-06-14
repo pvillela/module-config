@@ -261,6 +261,23 @@ where
     move |input, tx| Box::pin(f_c(s.clone(), input, tx))
 }
 
+/// Returns an async stereotype instance with simple configuration and a free transaction argument,
+/// for a transactional stereotype constructor.
+pub fn cfg_deps_ast_boot_free_tx_impl<D, A, T, ACFG>(
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<ACFG, D>>, A, Tx<'a>, T> + 'static,
+    app_cfg: ACFG,
+    deps: D,
+) -> impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
+where
+    D: 'static + Send + Sync,
+    A: 'static + Send + Sync,
+    T: 'static + Send + Sync,
+    ACFG: Send + Sync,
+{
+    let s = Arc::new(CfgDeps { cfg: app_cfg, deps });
+    move |input, tx| Box::pin(f_c(s.clone(), input, tx))
+}
+
 /// Returns a boxed async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_at_partial_apply_free_tx_box<CD, A, T>(
@@ -323,8 +340,8 @@ where
     T: 'static + Send + Sync,
     ACFG: 'static + Send + Sync + Clone,
 {
-    let s = Arc::new(CfgDeps { cfg: app_cfg, deps });
-    Box::new(move |input, tx| Box::pin(f_c(s.clone(), input, tx)))
+    let stereotype = cfg_deps_ast_boot_free_tx_impl(f_c, app_cfg, deps);
+    Box::new(stereotype)
 }
 
 /// Returns an arced async stereotype instance with a free transaction argument,
@@ -366,6 +383,25 @@ where
 {
     let stereotype =
         cfg_deps_at_boot_free_tx_impl(f_c, cfg_factory, cfg_adapter, app_cfg, refresh_mode, deps);
+    Arc::new(stereotype)
+}
+
+/// Returns an arced async stereotype instance with simple configuration and a free transaction argument,
+/// for a transactional stereotype constructor.
+pub fn cfg_deps_ast_boot_free_tx_arc<D, A, T, ACFG>(
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<ACFG, D>>, A, Tx<'a>, T> + 'static,
+    app_cfg: ACFG,
+    deps: D,
+) -> Arc<
+    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+>
+where
+    D: 'static + Send + Sync,
+    A: 'static + Send + Sync,
+    T: 'static + Send + Sync,
+    ACFG: 'static + Send + Sync + Clone,
+{
+    let stereotype = cfg_deps_ast_boot_free_tx_impl(f_c, app_cfg, deps);
     Arc::new(stereotype)
 }
 

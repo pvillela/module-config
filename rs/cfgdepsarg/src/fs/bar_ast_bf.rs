@@ -28,7 +28,7 @@ pub async fn bar_ast_bf_c(
 }
 
 /// Returns a boxed bar_ast_bf closure with free Tx parameter.
-pub fn bar_ast_bf_boot(app_cfg: AppCfgInfo) -> Box<BarAstBfTxT> {
+pub fn bar_ast_bf_boot_box(app_cfg: AppCfgInfo) -> Box<BarAstBfTxT> {
     cfg_deps_ast_boot_free_tx_box(bar_ast_bf_c, app_cfg, ())
 }
 

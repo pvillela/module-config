@@ -38,7 +38,10 @@ fn bar_at_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarAtBfCfgInfo {
 }
 
 /// Returns a boxed bar_at_bf closure with free Tx parameter.
-pub fn bar_at_bf_boot(app_cfg: fn() -> AppCfgInfo, refresh_mode: RefreshMode) -> Box<BarAtBfTxT> {
+pub fn bar_at_bf_boot_box(
+    app_cfg: fn() -> AppCfgInfo,
+    refresh_mode: RefreshMode,
+) -> Box<BarAtBfTxT> {
     cfg_deps_at_boot_free_tx_box(
         bar_at_bf_c,
         BarAtBfCfg::new_boxed_with_cfg_adapter,

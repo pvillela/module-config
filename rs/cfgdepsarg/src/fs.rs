@@ -25,6 +25,9 @@ pub use foo_a_sfl::*;
 mod foo_ai_sfl;
 pub use foo_ai_sfl::*;
 
+mod foo_ast_sfl;
+pub use foo_ast_sfl::*;
+
 mod foo_at_sfl;
 pub use foo_at_sfl::*;
 

@@ -11,7 +11,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
-use tracing::{instrument, trace_span};
+use tracing::instrument;
 
 pub type FooAtSflTxT = PinBorrowFn2b2Tx<FooAtIn, Result<FooAtOut, AppErr>>;
 
@@ -31,9 +31,6 @@ pub async fn foo_at_sfl_c(
     input: FooAtIn,
     tx: &Tx<'_>,
 ) -> Result<FooAtOut, AppErr> {
-    trace_span!("empty").in_scope(|| {
-        // empty
-    });
     let c = s.cfg.get_cfg();
     let d = &s.deps;
     let FooAtIn { sleep_millis } = input;
@@ -57,7 +54,7 @@ pub fn foo_at_sfl_boot_arc(
     app_cfg: fn() -> AppCfgInfo,
     refresh_mode: RefreshMode,
 ) -> Arc<FooAtSflTxT> {
-    let b = fs::bar_at_bf_boot(app_cfg, refresh_mode.clone());
+    let b = fs::bar_at_bf_boot_box(app_cfg, refresh_mode.clone());
     let deps = FooAtSflDeps { bar_at_bf: b };
 
     cfg_deps_at_boot_free_tx_arc(
