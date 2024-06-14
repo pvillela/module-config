@@ -13,7 +13,7 @@ type FooAcIn = common::fs_data::FooAIn;
 
 type FooAcOut = common::fs_data::FooAOut;
 
-pub static FOO_AC_SFL_CFG_INFO: FooAcSflCfgInfo = FooAcSflCfgInfo {
+pub const FOO_AC_SFL_CFG_INFO: FooAcSflCfgInfo = FooAcSflCfgInfo {
     a: "constant_config_info",
     b: 84,
 };

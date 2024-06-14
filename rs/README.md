@@ -19,7 +19,14 @@ These are the Rust workspaces:
 
 ## File Naming Convention
 
-- 
+Meaning of infix letters:
+
+- `_a_` -- async version
+- `_i_` -- immediate, , i.e., the stereotype's `CfgInfo` struct is injected directly instead of a `Cfg` object
+- `_ai_` -- async + immediate.
+- `_aw_` -- async using `CfgRefCellId` instead of `CfgArcSwapArc`. Can be used with Axum but not Actix.
+- `_at_` -- async with additional transaction handle argument passed by reference.
+- `_ac_` -- async with `const` configuration.
 
 ## Observations on Different `pushdepstovar` Configuration Injection Approaches
 

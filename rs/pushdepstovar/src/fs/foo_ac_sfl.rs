@@ -21,7 +21,7 @@ pub struct FooAcOut {
     pub res: String,
 }
 
-pub static FOO_AC_SFL_CFG_INFO: FooAcSflCfgInfo = FooAcSflCfgInfo {
+pub const FOO_AC_SFL_CFG_INFO: FooAcSflCfgInfo = FooAcSflCfgInfo {
     a: "constant_config_info",
     b: 84,
 };

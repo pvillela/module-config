@@ -7,7 +7,7 @@ pub struct BarAcBfCfgInfo {
     pub v: &'static str,
 }
 
-pub static BAR_AC_BF_CFG_INFO: BarAcBfCfgInfo = BarAcBfCfgInfo {
+pub const BAR_AC_BF_CFG_INFO: BarAcBfCfgInfo = BarAcBfCfgInfo {
     u: 84,
     v: "constant_config_info",
 };
