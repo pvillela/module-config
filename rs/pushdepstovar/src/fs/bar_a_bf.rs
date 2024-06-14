@@ -3,7 +3,6 @@ use common::fs_data::BarABfCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc, Pinfn, RefreshMode};
 use common::pin_async_fn;
-use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -42,7 +41,7 @@ fn bar_a_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarABfCfgInfo {
 }
 
 pub fn get_bar_a_bf_with_app_cfg(
-    app_cfg_src: fn() -> Arc<AppCfgInfo>,
+    app_cfg_src: fn() -> AppCfgInfo,
     refresh_mode: RefreshMode,
 ) -> BarABfT {
     get_bar_a_bf_raw(BarABfCfg::new_boxed_with_cfg_adapter(

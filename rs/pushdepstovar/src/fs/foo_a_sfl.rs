@@ -7,7 +7,6 @@ use common::{
     fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc, Pinfn},
     pin_async_fn,
 };
-use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -58,7 +57,7 @@ fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
 }
 
 pub fn get_foo_a_sfl_with_app_cfg(
-    app_cfg_src: fn() -> Arc<AppCfgInfo>,
+    app_cfg_src: fn() -> AppCfgInfo,
     refresh_mode: RefreshMode,
 ) -> FooASflT {
     // A stereotype should initialize its dependencies.

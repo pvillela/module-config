@@ -6,7 +6,6 @@ use common::{
     fwk::{CfgDepsS, Pinfn},
     pin_async_fn,
 };
-use std::sync::Arc;
 use std::{rc::Rc, time::Duration};
 use tokio::time::sleep;
 
@@ -54,7 +53,7 @@ fn foo_ai_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooAiSflCfgInfo {
     }
 }
 
-pub fn get_foo_ai_sfl_with_app_cfg(app_cfg_src: fn() -> Arc<AppCfgInfo>) -> FooAiSflT {
+pub fn get_foo_ai_sfl_with_app_cfg(app_cfg_src: fn() -> AppCfgInfo) -> FooAiSflT {
     // A stereotype should initialize its dependencies.
     let bar_ai_bf = get_bar_ai_bf_with_app_cfg(app_cfg_src);
     let deps = FooAiSflDeps { bar_ai_bf };

@@ -2,7 +2,6 @@ use common::config::AppCfgInfo;
 use common::fs_data::BarBfCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc, RefreshMode};
-use std::sync::Arc;
 
 pub type BarBfCfg = CfgArcSwapArc<BarBfCfgInfo>;
 
@@ -37,7 +36,7 @@ fn bar_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarBfCfgInfo {
 }
 
 pub fn get_bar_bf_with_app_cfg(
-    app_cfg_src: fn() -> Arc<AppCfgInfo>,
+    app_cfg_src: fn() -> AppCfgInfo,
     refresh_mode: RefreshMode,
 ) -> BarBfT {
     get_bar_bf_raw(BarBfCfg::new_boxed_with_cfg_adapter(

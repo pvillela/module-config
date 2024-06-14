@@ -2,7 +2,7 @@ use crate::fs::{bar_a_bf, bar_a_bf_init_no_refresh, bar_a_bf_init_refreshable};
 use crate::fwk::{box_pin_async_fn, BoxPinFn, CfgDeps, RefreshMode};
 use common::config::AppCfgInfo;
 use serde::{Deserialize, Serialize};
-use std::sync::{Arc, OnceLock};
+use std::sync::OnceLock;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -47,7 +47,7 @@ fn foo_a_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooASflCfgInfo {
 }
 
 fn foo_a_sfl_adapt_cfg_src(
-    origin: impl Fn() -> Arc<AppCfgInfo> + 'static + Send + Sync,
+    origin: impl Fn() -> AppCfgInfo + 'static + Send + Sync,
     refresh_mode: RefreshMode,
     deps: FooASflDeps,
 ) {
@@ -60,7 +60,7 @@ fn foo_a_sfl_adapt_cfg_src(
     );
 }
 
-pub fn foo_a_sfl_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>, cache_ttl: Duration) {
+pub fn foo_a_sfl_init_refreshable(app_cfg_src: fn() -> AppCfgInfo, cache_ttl: Duration) {
     // A stereotype should initialize its dependencies.
     bar_a_bf_init_refreshable(app_cfg_src, cache_ttl);
     foo_a_sfl_adapt_cfg_src(
@@ -72,7 +72,7 @@ pub fn foo_a_sfl_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>, cache_tt
     );
 }
 
-pub fn foo_a_sfl_init_no_refresh(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
+pub fn foo_a_sfl_init_no_refresh(app_cfg_src: fn() -> AppCfgInfo) {
     // A stereotype should initialize its dependencies.
     bar_a_bf_init_no_refresh(app_cfg_src);
     foo_a_sfl_adapt_cfg_src(

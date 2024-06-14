@@ -44,7 +44,7 @@ fn foo_aw_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooAwSflCfgInfo {
 /// Coded without use of [cfg_deps_boot_aw].
 /// Returns a foo_aw_sfl stereotype instance.
 pub fn foo_aw_sfl_boot_by_hand(
-    app_cfg: fn() -> Arc<AppCfgInfo>,
+    app_cfg: fn() -> AppCfgInfo,
     refresh_mode: RefreshMode,
 ) -> Box<FooAwSflT> {
     let cfg = FooAwSflCfg::new_boxed_with_cfg_adapter(
@@ -61,10 +61,7 @@ pub fn foo_aw_sfl_boot_by_hand(
 }
 
 /// Returns a foo_aw_sfl stereotype instance.
-pub fn foo_aw_sfl_boot(
-    app_cfg: fn() -> Arc<AppCfgInfo>,
-    refresh_mode: RefreshMode,
-) -> Box<FooAwSflT> {
+pub fn foo_aw_sfl_boot(app_cfg: fn() -> AppCfgInfo, refresh_mode: RefreshMode) -> Box<FooAwSflT> {
     let deps = FooAwSflDeps {
         bar_aw_bf: fs::bar_aw_bf_boot(app_cfg, refresh_mode.clone()),
     };

@@ -1,6 +1,6 @@
 use common::fwk::AppCfg;
 use common::{
-    config::{refresh_app_configuration, AppCfgInfo},
+    config::{refresh_app_configuration, AppCfgInfo0},
     fwk::RefreshMode,
 };
 use pushtofunction::fs;
@@ -9,7 +9,7 @@ use std::{sync::Arc, thread};
 
 fn make_foo_sfl1() -> FooSflT {
     let app_cfg_src1 = move || {
-        Arc::new(AppCfgInfo {
+        Arc::new(AppCfgInfo0 {
             x: "custom".to_owned(),
             y: 84,
             z: true,

@@ -4,7 +4,6 @@ use common::fs_util::bar_core;
 use common::fwk::{CfgDepsS, Pinfn};
 use common::pin_async_fn;
 use std::rc::Rc;
-use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -40,6 +39,6 @@ fn bar_ai_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarAiBfCfgInfo {
     }
 }
 
-pub fn get_bar_ai_bf_with_app_cfg(app_cfg_src: fn() -> Arc<AppCfgInfo>) -> BarAiBfT {
+pub fn get_bar_ai_bf_with_app_cfg(app_cfg_src: fn() -> AppCfgInfo) -> BarAiBfT {
     get_bar_ai_bf_raw(bar_ai_bf_cfg_adapter(&app_cfg_src()))
 }

@@ -1,6 +1,6 @@
 use crate::fwk::{CfgDeps, RefreshMode};
 use common::config::AppCfgInfo;
-use std::sync::{Arc, OnceLock};
+use std::sync::OnceLock;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -28,7 +28,7 @@ fn bar_abf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarABfCfgInfo {
 }
 
 fn bar_abf_adapt_cfg_src(
-    origin: impl Fn() -> Arc<AppCfgInfo> + 'static + Send + Sync,
+    origin: impl Fn() -> AppCfgInfo + 'static + Send + Sync,
     refresh_mode: RefreshMode,
     deps: (),
 ) {
@@ -41,10 +41,10 @@ fn bar_abf_adapt_cfg_src(
     );
 }
 
-pub fn bar_a_bf_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>, cache_ttl: Duration) {
+pub fn bar_a_bf_init_refreshable(app_cfg_src: fn() -> AppCfgInfo, cache_ttl: Duration) {
     bar_abf_adapt_cfg_src(app_cfg_src, RefreshMode::Refreshable(cache_ttl), ());
 }
 
-pub fn bar_a_bf_init_no_refresh(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
+pub fn bar_a_bf_init_no_refresh(app_cfg_src: fn() -> AppCfgInfo) {
     bar_abf_adapt_cfg_src(app_cfg_src, RefreshMode::NoRefresh, ());
 }

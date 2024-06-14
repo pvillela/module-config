@@ -1,4 +1,4 @@
-use std::{ops::Deref, sync::Arc};
+use std::sync::Arc;
 
 /// Transforms a value into a nullary closure that returns the value.
 pub fn const_closure<T: Clone + Send + Sync>(x: T) -> impl Fn() -> T + Send + Sync {
@@ -7,17 +7,17 @@ pub fn const_closure<T: Clone + Send + Sync>(x: T) -> impl Fn() -> T + Send + Sy
 
 /// Function that can be used as a placeholder for a configuration source during development.
 /// Supports any configuration info type and panics if called.
-pub fn nil_app_cfg<T>() -> Arc<T> {
+pub fn nil_app_cfg<T>() -> T {
     todo!("Configuration source not provided.")
 }
 
 /// Composes an application info source f with an adapter g for a particular module.
 pub fn adapt_by_ref<S, T: Clone, F, G>(f: F, g: G) -> Box<dyn Fn() -> Arc<T> + Send + Sync>
 where
-    F: 'static + Fn() -> Arc<S> + Send + Sync,
+    F: 'static + Fn() -> S + Send + Sync,
     G: 'static + Fn(&S) -> T + Send + Sync,
 {
-    let h = move || Arc::new(g(f().deref()));
+    let h = move || Arc::new(g(&f()));
     Box::new(h)
 }
 
@@ -29,7 +29,7 @@ pub fn const_or_adapt_by_ref<S, T: 'static + Clone + Send + Sync, F, G>(
     g: G,
 ) -> Box<dyn Fn() -> Arc<T> + Send + Sync>
 where
-    F: 'static + Fn() -> Arc<S> + Send + Sync,
+    F: 'static + Fn() -> S + Send + Sync,
     G: 'static + Fn(&S) -> T + Send + Sync,
 {
     match k {

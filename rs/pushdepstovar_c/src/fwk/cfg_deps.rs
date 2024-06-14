@@ -1,6 +1,5 @@
 use arc_swap::ArcSwap;
 use core::panic;
-use std::ops::Deref;
 use std::sync::Arc;
 use std::sync::OnceLock;
 use std::time::{Duration, SystemTime};
@@ -68,12 +67,12 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
         refresh_mode: RefreshMode,
         deps: U,
     ) where
-        F: 'static + Fn() -> Arc<S> + Send + Sync,
+        F: 'static + Fn() -> S + Send + Sync,
         G: 'static + Fn(&S) -> T + Send + Sync,
     {
         let cache_cell = ArcSwap::new(Arc::new(Cache {
             last_refresh: SystemTime::now(),
-            value: Arc::new(g(f().deref())),
+            value: Arc::new(g(&f())),
         }));
 
         let h = move || {
@@ -82,7 +81,7 @@ impl<T: 'static + Clone + Send + Sync, U: 'static> CfgDeps<T, U> {
                     if elapsed > cache_ttl {
                         cache_cell.store(Arc::new(Cache {
                             last_refresh: SystemTime::now(),
-                            value: Arc::new(g(f().deref())),
+                            value: Arc::new(g(&f())),
                         }));
                     }
                 }

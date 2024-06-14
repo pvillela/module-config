@@ -16,7 +16,7 @@ impl<T: 'static> CfgSrc<T> {
     }
 
     pub fn from_adapter(adapter: fn(&AppCfgInfo) -> T) -> Self {
-        Self::new(move || adapter(get_app_configuration().as_ref()))
+        Self::new(move || adapter(&get_app_configuration()))
     }
 
     pub fn nil() -> Self {

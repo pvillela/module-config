@@ -6,7 +6,6 @@ use common::{
     fs_util::foo_core,
     fwk::{cfg_to_thread_local, CfgArcSwapArc, CfgDepsS, CfgRefCellRc},
 };
-use std::sync::Arc;
 
 pub type FooSflCfg = CfgArcSwapArc<FooSflCfgInfo>;
 
@@ -48,7 +47,7 @@ fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
 }
 
 pub fn get_foo_sfl_with_app_cfg(
-    app_cfg_src: fn() -> Arc<AppCfgInfo>,
+    app_cfg_src: fn() -> AppCfgInfo,
     refresh_mode: RefreshMode,
 ) -> FooSflT {
     // A stereotype should initialize its dependencies.

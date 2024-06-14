@@ -54,7 +54,7 @@ fn foo_at_sfl_cfg_atdapter(app_cfg: &AppCfgInfo) -> FooAtSflCfgInfo {
 
 /// Returns an arced foo_at_sfl closure with free Tx parameter.
 pub fn foo_at_sfl_boot_arc(
-    app_cfg: fn() -> Arc<AppCfgInfo>,
+    app_cfg: fn() -> AppCfgInfo,
     refresh_mode: RefreshMode,
 ) -> Arc<FooAtSflTxT> {
     let b = fs::bar_at_bf_boot(app_cfg, refresh_mode.clone());
@@ -72,7 +72,7 @@ pub fn foo_at_sfl_boot_arc(
 
 /// Returns a leaked static reference to a foo_at_sfl closure with free Tx parameter.
 pub fn foo_at_sfl_boot_lr(
-    app_cfg: fn() -> Arc<AppCfgInfo>,
+    app_cfg: fn() -> AppCfgInfo,
     refresh_mode: RefreshMode,
 ) -> &'static FooAtSflTxT {
     let b = Box::new(bar_at_bf_boot_lr(app_cfg, refresh_mode.clone()));

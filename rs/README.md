@@ -22,11 +22,14 @@ These are the Rust workspaces:
 Meaning of infix letters:
 
 - `_a_` -- async version
-- `_i_` -- immediate, , i.e., the stereotype's `CfgInfo` struct is injected directly instead of a `Cfg` object
+- `_i_` -- immediate, i.e., the stereotype's `CfgInfo` struct is injected directly instead of a `Cfg` object
 - `_ai_` -- async + immediate.
 - `_aw_` -- async using `CfgRefCellId` instead of `CfgArcSwapArc`. Can be used with Axum but not Actix.
-- `_at_` -- async with additional transaction handle argument passed by reference.
+- `_t_` -- transactional, i.e., additional transaction handle argument passed by reference.
+- `_at_` -- async + transactional.
 - `_ac_` -- async with `const` configuration.
+- `_s_` -- simple configuration, i.e., the stereotype uses the application-level configuration info directly and the latter is injected into the stereotype constructor function.
+- `_ast_` -- async + simple + transactional.
 
 ## Observations on Different `pushdepstovar` Configuration Injection Approaches
 

@@ -7,6 +7,9 @@ pub use bar_ai_bf::*;
 mod bar_aw_bf;
 pub use bar_aw_bf::*;
 
+mod bar_ast_bf;
+pub use bar_ast_bf::*;
+
 mod bar_at_bf;
 pub use bar_at_bf::*;
 

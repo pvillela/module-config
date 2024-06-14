@@ -1,10 +1,7 @@
 use super::{bar_bf, bar_bf_init_cached, bar_bf_init_refreshable};
 use crate::fwk::{CfgDeps, RefreshMode};
 use common::config::AppCfgInfo;
-use std::{
-    sync::{Arc, OnceLock},
-    time::Duration,
-};
+use std::{sync::OnceLock, time::Duration};
 
 #[derive(Debug, Clone)]
 pub struct FooSflCfgInfo {
@@ -33,7 +30,7 @@ fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
 }
 
 fn foo_sfl_adapt_cfg_src(
-    origin: impl Fn() -> Arc<AppCfgInfo> + 'static + Send + Sync,
+    origin: impl Fn() -> AppCfgInfo + 'static + Send + Sync,
     refresh_mode: RefreshMode,
     deps: FooSflDeps,
 ) {
@@ -46,7 +43,7 @@ fn foo_sfl_adapt_cfg_src(
     );
 }
 
-pub fn foo_sfl_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
+pub fn foo_sfl_init_refreshable(app_cfg_src: fn() -> AppCfgInfo) {
     // A stereotype should initialize its dependencies.
     bar_bf_init_refreshable(app_cfg_src);
     foo_sfl_adapt_cfg_src(
@@ -56,7 +53,7 @@ pub fn foo_sfl_init_refreshable(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
     );
 }
 
-pub fn foo_sfl_init_cached(app_cfg_src: fn() -> Arc<AppCfgInfo>) {
+pub fn foo_sfl_init_cached(app_cfg_src: fn() -> AppCfgInfo) {
     // A stereotype should initialize its dependencies.
     bar_bf_init_cached(app_cfg_src);
     foo_sfl_adapt_cfg_src(app_cfg_src, RefreshMode::NoRefresh, FooSflDeps { bar_bf });

@@ -36,7 +36,7 @@ fn foo_sfl_cfg_adapter(app_cfg: &AppCfgInfo) -> FooSflCfgInfo {
 
 pub static FOO_SFL_CFG_INFO_OVERRIDE: OnceLock<FooSflCfgInfo> = OnceLock::new();
 
-pub fn foo_sfl_boot(app_cfg: fn() -> Arc<AppCfgInfo>) -> FooSflT {
+pub fn foo_sfl_boot(app_cfg: fn() -> AppCfgInfo) -> FooSflT {
     let get = const_or_adapt_by_ref(
         FOO_SFL_CFG_INFO_OVERRIDE.get(),
         app_cfg,

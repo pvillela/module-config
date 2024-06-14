@@ -6,7 +6,6 @@ use common::fwk::{
     PinBorrowFn2b2Tx, RefreshMode, Tx,
 };
 use std::ops::Deref;
-use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 use tracing::instrument;
@@ -39,10 +38,7 @@ fn bar_at_bf_cfg_adapter(app_cfg: &AppCfgInfo) -> BarAtBfCfgInfo {
 }
 
 /// Returns a boxed bar_at_bf closure with free Tx parameter.
-pub fn bar_at_bf_boot(
-    app_cfg: fn() -> Arc<AppCfgInfo>,
-    refresh_mode: RefreshMode,
-) -> Box<BarAtBfTxT> {
+pub fn bar_at_bf_boot(app_cfg: fn() -> AppCfgInfo, refresh_mode: RefreshMode) -> Box<BarAtBfTxT> {
     cfg_deps_at_boot_free_tx_box(
         bar_at_bf_c,
         BarAtBfCfg::new_boxed_with_cfg_adapter,
@@ -55,7 +51,7 @@ pub fn bar_at_bf_boot(
 
 /// Returns a leaked static reference to a bar_at_bf closure with free Tx parameter.
 pub fn bar_at_bf_boot_lr(
-    app_cfg: fn() -> Arc<AppCfgInfo>,
+    app_cfg: fn() -> AppCfgInfo,
     refresh_mode: RefreshMode,
 ) -> &'static BarAtBfTxT {
     cfg_deps_at_boot_free_tx_lr(

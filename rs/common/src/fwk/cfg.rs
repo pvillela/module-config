@@ -1,4 +1,4 @@
-use super::compose_static_0_arc;
+use super::compose_static_0;
 use arc_swap::ArcSwap;
 use std::cell::RefCell;
 use std::marker::PhantomData;
@@ -11,7 +11,7 @@ use std::time::{Duration, Instant};
 
 #[derive(Clone)]
 pub struct AppCfg<T> {
-    pub app_src: fn() -> Arc<T>,
+    pub app_src: fn() -> T,
     pub refresh_mode: RefreshMode,
 }
 
@@ -138,11 +138,11 @@ impl<T> Src<T> {
         Self::Boxed(Arc::new(f))
     }
 
-    pub fn new_ref_with_cfg_adapter<S: 'static>(f: fn() -> Arc<S>, g: fn(&S) -> T) -> Self {
-        Src::new_ref(compose_static_0_arc(f, g))
+    pub fn new_ref_with_cfg_adapter<S: 'static>(f: fn() -> S, g: fn(&S) -> T) -> Self {
+        Src::new_ref(compose_static_0(f, g))
     }
 
-    pub fn new_boxed_with_cfg_adapter<S: 'static>(f: fn() -> Arc<S>, g: fn(&S) -> T) -> Self {
+    pub fn new_boxed_with_cfg_adapter<S: 'static>(f: fn() -> S, g: fn(&S) -> T) -> Self {
         Src::new_boxed(move || g(&f()))
     }
 
@@ -254,7 +254,7 @@ where
     }
 
     pub fn new_ref_with_cfg_adapter<S: 'static>(
-        f: fn() -> Arc<S>,
+        f: fn() -> S,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
     ) -> Self {
@@ -264,7 +264,7 @@ where
     }
 
     pub fn new_boxed_with_cfg_adapter<S: 'static>(
-        f: fn() -> Arc<S>,
+        f: fn() -> S,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
     ) -> Self {
@@ -282,7 +282,7 @@ where
 {
     pub fn new_ref_with_const_or_cfg_adapter<S: 'static>(
         k: Option<&'static T>,
-        f: fn() -> Arc<S>,
+        f: fn() -> S,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
     ) -> Self {
@@ -297,7 +297,7 @@ where
 
     pub fn new_boxed_with_const_or_cfg_adapter<S: 'static>(
         k: Option<&'static T>,
-        f: fn() -> Arc<S>,
+        f: fn() -> S,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
     ) -> Self {

@@ -3,7 +3,7 @@ use super::{
     InnerMut, RefreshMode, Src,
 };
 use once_cell::sync::Lazy;
-use std::sync::{Arc, OnceLock};
+use std::sync::OnceLock;
 
 impl<T, TX, IM> Cfg<T, TX, IM>
 where
@@ -30,7 +30,7 @@ where
 
     pub fn set_once_cell_with_cfg_adapter<S: 'static>(
         cell: &OnceLock<Self>,
-        f: fn() -> Arc<S>,
+        f: fn() -> S,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
     ) {

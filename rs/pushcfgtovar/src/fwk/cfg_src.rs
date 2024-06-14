@@ -1,5 +1,4 @@
 use core::panic;
-use std::ops::Deref;
 use std::sync::Arc;
 use std::sync::OnceLock;
 
@@ -46,17 +45,17 @@ pub fn adapt_by_ref<S, T: Clone + Send + Sync, F, G>(
     refresh_mode: RefreshMode,
     mod_cfg_src: &OnceLock<CfgSrc<T>>,
 ) where
-    F: 'static + Fn() -> Arc<S> + Send + Sync,
+    F: 'static + Fn() -> S + Send + Sync,
     G: 'static + Fn(&S) -> T + Send + Sync,
 {
     let cache: Option<Arc<T>> = match refresh_mode {
-        RefreshMode::Cached => Some(Arc::new(g(f().deref()))),
+        RefreshMode::Cached => Some(Arc::new(g(&f()))),
         RefreshMode::Refreshable => None,
     };
 
     let h = move || match cache.clone() {
         Some(v) => v,
-        None => Arc::new(g(f().deref())),
+        None => Arc::new(g(&f())),
     };
 
     if let Err(_) = mod_cfg_src.set(CfgSrc { src: Box::new(h) }) {

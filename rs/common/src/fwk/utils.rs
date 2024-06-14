@@ -202,9 +202,9 @@ pub fn static_ref_with_override<T>(ovd: Option<&'static T>, value: T) -> &'stati
     }
 }
 
-pub fn compose_static_0_arc<S: 'static, T>(
-    f: impl Fn() -> Arc<S> + 'static + Send + Sync, //fn() -> Arc<S>,
-    g: impl Fn(&S) -> T + 'static + Send + Sync,    //fn(&S) -> T,
+pub fn compose_static_0<S: 'static, T>(
+    f: impl Fn() -> S + 'static + Send + Sync,
+    g: impl Fn(&S) -> T + 'static + Send + Sync,
 ) -> &'static (dyn Fn() -> T + Send + Sync) {
     Box::leak(Box::new(move || g(&f())))
 }

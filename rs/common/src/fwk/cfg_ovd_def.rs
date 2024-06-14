@@ -1,5 +1,4 @@
 use super::{set_once_lock, Cache, Cfg, InnerMut, RefreshMode, Src};
-use std::sync::Arc;
 use std::sync::OnceLock;
 
 pub struct CfgOvd<T: 'static> {
@@ -37,7 +36,7 @@ impl<T> CfgDef<T> {
     }
 
     pub fn new_ref_with_cfg_adapter<S: 'static>(
-        f: fn() -> Arc<S>,
+        f: fn() -> S,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
     ) -> Self {
@@ -55,7 +54,7 @@ impl<T> CfgDef<T> {
 
     pub fn set_once_cell_with_cfg_adapter<S: 'static>(
         cell: &OnceLock<Self>,
-        f: fn() -> Arc<S>,
+        f: fn() -> S,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
     ) {
@@ -79,7 +78,7 @@ where
 
     pub fn new_ref_with_cfg_adapter_and_override<S: 'static>(
         ovd: Option<&CfgOvd<T>>,
-        f: fn() -> Arc<S>,
+        f: fn() -> S,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
     ) -> Self {
@@ -100,7 +99,7 @@ where
 
     pub fn new_boxed_with_cfg_adapter_and_override<S: 'static>(
         ovd: Option<&CfgOvd<T>>,
-        f: fn() -> Arc<S>,
+        f: fn() -> S,
         g: fn(&S) -> T,
         refresh_mode: RefreshMode,
     ) -> Self {
