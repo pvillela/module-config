@@ -4,6 +4,9 @@ pub use bar_a_bf::*;
 mod bar_ai_bf;
 pub use bar_ai_bf::*;
 
+mod bar_ar_bf;
+pub use bar_ar_bf::*;
+
 mod bar_aw_bf;
 pub use bar_aw_bf::*;
 
