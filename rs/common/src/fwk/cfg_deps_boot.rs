@@ -47,7 +47,7 @@ where
     T: 'static,
 {
     let cfg = cfg_factory(app_cfg.app_src, cfgdapter, app_cfg.refresh_mode);
-    let s = Arc::new(CfgDeps { cfg, deps: deps });
+    let s = CfgDeps { cfg, deps: deps };
     let stereotype = move |input| f_c(&s, input);
     Box::new(stereotype)
 }
@@ -89,7 +89,7 @@ where
     ACFG: 'static + Send + Sync,
 {
     let cfg = cfg_aidapter(&app_cfg);
-    let s = Arc::new(CfgDeps { cfg, deps: deps });
+    let s = CfgDeps { cfg, deps: deps };
     let stereotype = move |input| f_c(&s, input);
     Box::new(stereotype)
 }

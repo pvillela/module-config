@@ -3,7 +3,7 @@ use crate::fs;
 use common::config::AppCfgInfo;
 use common::fs_data::{FooArIn, FooArOut};
 use common::fs_util::foo_core;
-use common::fwk::{box_pin_async_fn, CfgDeps, GetCfg, GetCfg0, MakeAppCfg, PinFn};
+use common::fwk::{box_pin_async_fn, CfgDeps, FromRef, Make, PinFn};
 use std::ops::Deref;
 use std::sync::Arc;
 use std::time::Duration;
@@ -21,17 +21,8 @@ pub struct FooArSflDeps {
     pub bar_ar_bf: Box<BarArBfT>,
 }
 
-impl<'a> GetCfg0<'a, AppCfgInfo, FooArSflCfgInfo<'a>> for fn() -> AppCfgInfo {
-    fn get_cfg(&self, app_cfg: &'a AppCfgInfo) -> FooArSflCfgInfo<'a> {
-        FooArSflCfgInfo {
-            a: &app_cfg.x,
-            b: app_cfg.y,
-        }
-    }
-}
-
-impl<'a> GetCfg<'a, FooArSflCfgInfo<'a>> for AppCfgInfo {
-    fn get_cfg(&'a self) -> FooArSflCfgInfo<'a> {
+impl<'a> FromRef<'a, FooArSflCfgInfo<'a>> for AppCfgInfo {
+    fn from_ref(&'a self) -> FooArSflCfgInfo<'a> {
         FooArSflCfgInfo {
             a: &self.x,
             b: self.y,
@@ -46,11 +37,11 @@ pub async fn foo_ar_sfl_c<MACFG, ACFG>(
     input: FooArIn,
 ) -> FooArOut
 where
-    MACFG: MakeAppCfg<ACFG>,
-    ACFG: for<'a> GetCfg<'a, FooArSflCfgInfo<'a>>,
+    MACFG: Make<ACFG>,
+    ACFG: for<'a> FromRef<'a, FooArSflCfgInfo<'a>>,
 {
-    let app_cfg_info = s.cfg.make_app_cfg();
-    let c = app_cfg_info.get_cfg();
+    let app_cfg_info = s.cfg.make();
+    let c = app_cfg_info.from_ref();
     let d = &s.deps;
     let FooArIn { sleep_millis } = input;
     sleep(Duration::from_millis(sleep_millis)).await;
@@ -64,12 +55,12 @@ where
 /// Coded without use of [cfg_deps_boot_ar].
 /// Returns a boxed foo_ar_sfl_closure.
 pub fn foo_ar_sfl_boot_by_hand<ACFG>(
-    app_cfg: impl MakeAppCfg<ACFG> + Send + Sync + Clone + 'static,
+    app_cfg: impl Make<ACFG> + Send + Sync + Clone + 'static,
 ) -> Box<FooArSflT>
 where
     ACFG: Send + Sync + 'static,
-    ACFG: for<'a> GetCfg<'a, FooArSflCfgInfo<'a>>,
-    ACFG: for<'a> GetCfg<'a, BarArBfCfgInfo<'a>>,
+    ACFG: for<'a> FromRef<'a, FooArSflCfgInfo<'a>>,
+    ACFG: for<'a> FromRef<'a, BarArBfCfgInfo<'a>>,
 {
     let deps = FooArSflDeps {
         bar_ar_bf: fs::bar_ar_bf_boot_by_hand(app_cfg.clone()),
