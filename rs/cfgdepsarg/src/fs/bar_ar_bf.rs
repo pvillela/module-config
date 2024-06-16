@@ -15,10 +15,11 @@ pub struct BarArBfCfgInfo<'a> {
     pub v: &'a str,
 }
 
-pub type BarArBfS = CfgDeps<AppCfgInfo, ()>;
+pub type BarArBfS = CfgDeps<fn() -> AppCfgInfo, ()>;
 
 pub async fn bar_ar_bf_c(s: impl Deref<Target = BarArBfS>, sleep_millis: u64) -> String {
-    let cfg = bar_ar_bf_cfg_adapter(&s.cfg);
+    let app_cfg_info = (s.cfg)();
+    let cfg = bar_ar_bf_cfg_adapter(&app_cfg_info);
     sleep(Duration::from_millis(sleep_millis)).await;
     let u = cfg.u;
     let v = cfg.v.to_owned();
@@ -35,7 +36,7 @@ fn bar_ar_bf_cfg_adapter<'a>(app_cfg: &'a AppCfgInfo) -> BarArBfCfgInfo<'a> {
 /// Coded without use of [cfg_deps_boot_ar].
 /// Returns a boxed bar_ar_bf_closure.
 pub fn bar_ar_bf_boot_by_hand0(
-    app_cfg: AppCfgInfo,
+    app_cfg: fn() -> AppCfgInfo,
 ) -> impl Fn(u64) -> Pin<Box<dyn Future<Output = String> + Send + Sync>> + Send + Sync {
     let bar_ar_bf_s = Arc::new(BarArBfS {
         cfg: app_cfg,
@@ -52,7 +53,7 @@ pub fn bar_ar_bf_boot_by_hand0(
 
 /// Coded without use of [cfg_deps_boot_ar].
 /// Returns a boxed bar_ar_bf_closure.
-pub fn bar_ar_bf_boot_by_hand(app_cfg: AppCfgInfo) -> Box<BarArBfT> {
+pub fn bar_ar_bf_boot_by_hand(app_cfg: fn() -> AppCfgInfo) -> Box<BarArBfT> {
     let bar_ar_bf_s = Arc::new(BarArBfS {
         cfg: app_cfg,
         deps: (),
