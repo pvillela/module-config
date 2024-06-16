@@ -21,6 +21,8 @@ pub struct FooArSflDeps {
     pub bar_ar_bf: Box<BarArBfT>,
 }
 
+pub type FooArSflS<MACFG> = CfgDeps<MACFG, FooArSflDeps>;
+
 impl<'a> FromRef<'a, FooArSflCfgInfo<'a>> for AppCfgInfo {
     fn from_ref(&'a self) -> FooArSflCfgInfo<'a> {
         FooArSflCfgInfo {
@@ -29,8 +31,6 @@ impl<'a> FromRef<'a, FooArSflCfgInfo<'a>> for AppCfgInfo {
         }
     }
 }
-
-pub type FooArSflS<MACFG> = CfgDeps<MACFG, FooArSflDeps>;
 
 pub async fn foo_ar_sfl_c<MACFG, ACFG>(
     s: impl Deref<Target = FooArSflS<MACFG>>,
@@ -64,6 +64,17 @@ where
 {
     let deps = FooArSflDeps {
         bar_ar_bf: fs::bar_ar_bf_boot_by_hand(app_cfg.clone()),
+    };
+    let foo_ar_sfl_s = Arc::new(FooArSflS { cfg: app_cfg, deps });
+    let f = move |input| foo_ar_sfl_c(foo_ar_sfl_s.clone(), input);
+    box_pin_async_fn(f)
+}
+
+/// Coded without use of [cfg_deps_boot_ar].
+/// Returns a boxed foo_ar_sfl_closure.
+pub fn foo_ar_sfl_boot_by_hand_mono(app_cfg: fn() -> AppCfgInfo) -> Box<FooArSflT> {
+    let deps = FooArSflDeps {
+        bar_ar_bf: fs::bar_ar_bf_boot_by_hand_mono(app_cfg),
     };
     let foo_ar_sfl_s = Arc::new(FooArSflS { cfg: app_cfg, deps });
     let f = move |input| foo_ar_sfl_c(foo_ar_sfl_s.clone(), input);

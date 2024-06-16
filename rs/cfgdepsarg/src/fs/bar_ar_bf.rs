@@ -1,3 +1,4 @@
+use common::config::AppCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::{box_pin_async_fn, CfgDeps, FromRef, Make, PinFn};
 use futures::Future;
@@ -13,6 +14,15 @@ pub struct BarArBfCfgInfo<'a> {
 }
 
 pub type BarArBfS<ACFG> = CfgDeps<fn() -> ACFG, ()>;
+
+impl<'a> FromRef<'a, BarArBfCfgInfo<'a>> for AppCfgInfo {
+    fn from_ref(&'a self) -> BarArBfCfgInfo<'a> {
+        BarArBfCfgInfo {
+            u: self.y,
+            v: &self.x,
+        }
+    }
+}
 
 pub async fn bar_ar_bf_c<ACFG>(c: impl Make<ACFG>, sleep_millis: u64) -> String
 where
@@ -58,6 +68,13 @@ where
     // fn() -> ACFG: for<'a> GetCfg<'a, ACFG, BarArBfCfgInfo<'a>>,
 {
     let f = move |sleep_millis| bar_ar_bf_c(c.clone(), sleep_millis);
+    box_pin_async_fn(f)
+}
+
+/// Coded without use of [cfg_deps_boot_ar].
+/// Returns a boxed bar_ar_bf_closure.
+pub fn bar_ar_bf_boot_by_hand_mono(c: fn() -> AppCfgInfo) -> Box<BarArBfT> {
+    let f = move |sleep_millis| bar_ar_bf_c(c, sleep_millis);
     box_pin_async_fn(f)
 }
 
