@@ -3,7 +3,7 @@ use crate::fs;
 use common::config::AppCfgInfo;
 use common::fs_data::{FooArIn, FooArOut};
 use common::fs_util::foo_core;
-use common::fwk::{box_pin_async_fn, CfgDeps, FromRef, Make, PinFn};
+use common::fwk::{box_pin_async_fn, FromRef, Make, PinFn};
 use std::ops::Deref;
 use std::sync::Arc;
 use std::time::Duration;
@@ -21,8 +21,6 @@ pub struct FooArSflDeps {
     pub bar_ar_bf: Box<BarArBfT>,
 }
 
-pub type FooArSflS<MACFG> = CfgDeps<MACFG, FooArSflDeps>;
-
 impl<'a> FromRef<'a, FooArSflCfgInfo<'a>> for AppCfgInfo {
     fn from_ref(&'a self) -> FooArSflCfgInfo<'a> {
         FooArSflCfgInfo {
@@ -32,17 +30,16 @@ impl<'a> FromRef<'a, FooArSflCfgInfo<'a>> for AppCfgInfo {
     }
 }
 
-pub async fn foo_ar_sfl_c<MACFG, ACFG>(
-    s: impl Deref<Target = FooArSflS<MACFG>>,
+pub async fn foo_ar_sfl_c<ACFG>(
+    cfg_src: impl Make<ACFG>,
+    d: impl Deref<Target = FooArSflDeps>,
     input: FooArIn,
 ) -> FooArOut
 where
-    MACFG: Make<ACFG>,
     ACFG: for<'a> FromRef<'a, FooArSflCfgInfo<'a>>,
 {
-    let app_cfg_info = s.cfg.make();
+    let app_cfg_info = cfg_src.make();
     let c = app_cfg_info.from_ref();
-    let d = &s.deps;
     let FooArIn { sleep_millis } = input;
     sleep(Duration::from_millis(sleep_millis)).await;
     let a = c.a.to_owned();
@@ -55,29 +52,27 @@ where
 /// Coded without use of [cfg_deps_boot_ar].
 /// Returns a boxed foo_ar_sfl_closure.
 pub fn foo_ar_sfl_boot_by_hand<ACFG>(
-    app_cfg: impl Make<ACFG> + Send + Sync + Clone + 'static,
+    cfg_src: impl Make<ACFG> + Send + Sync + Clone + 'static,
 ) -> Box<FooArSflT>
 where
     ACFG: Send + Sync + 'static,
     ACFG: for<'a> FromRef<'a, FooArSflCfgInfo<'a>>,
     ACFG: for<'a> FromRef<'a, BarArBfCfgInfo<'a>>,
 {
-    let deps = FooArSflDeps {
-        bar_ar_bf: fs::bar_ar_bf_boot_by_hand(app_cfg.clone()),
-    };
-    let foo_ar_sfl_s = Arc::new(FooArSflS { cfg: app_cfg, deps });
-    let f = move |input| foo_ar_sfl_c(foo_ar_sfl_s.clone(), input);
+    let deps = Arc::new(FooArSflDeps {
+        bar_ar_bf: fs::bar_ar_bf_boot_by_hand(cfg_src.clone()),
+    });
+    let f = move |input| foo_ar_sfl_c(cfg_src.clone(), deps.clone(), input);
     box_pin_async_fn(f)
 }
 
 /// Coded without use of [cfg_deps_boot_ar].
 /// Returns a boxed foo_ar_sfl_closure.
-pub fn foo_ar_sfl_boot_by_hand_mono(app_cfg: fn() -> AppCfgInfo) -> Box<FooArSflT> {
-    let deps = FooArSflDeps {
-        bar_ar_bf: fs::bar_ar_bf_boot_by_hand_mono(app_cfg),
-    };
-    let foo_ar_sfl_s = Arc::new(FooArSflS { cfg: app_cfg, deps });
-    let f = move |input| foo_ar_sfl_c(foo_ar_sfl_s.clone(), input);
+pub fn foo_ar_sfl_boot_by_hand_mono(cfg_src: fn() -> AppCfgInfo) -> Box<FooArSflT> {
+    let deps = Arc::new(FooArSflDeps {
+        bar_ar_bf: fs::bar_ar_bf_boot_by_hand_mono(cfg_src),
+    });
+    let f = move |input| foo_ar_sfl_c(cfg_src.clone(), deps.clone(), input);
     box_pin_async_fn(f)
 }
 
