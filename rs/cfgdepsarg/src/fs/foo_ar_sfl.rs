@@ -1,9 +1,9 @@
-use super::{BarArBfCfgInfo, BarArBfT};
+use super::{bar_ar_bf_boot_lr, BarArBfCfgInfo, BarArBfT};
 use crate::fs;
 use common::config::AppCfgInfo;
 use common::fs_data::{FooArIn, FooArOut};
 use common::fs_util::foo_core;
-use common::fwk::{box_pin_async_fn, FromRef, Make, PinFn};
+use common::fwk::{box_pin_async_fn, cfg_deps_ar_boot, cfg_deps_ar_boot_lr, FromRef, Make, PinFn};
 use std::ops::Deref;
 use std::sync::Arc;
 use std::time::Duration;
@@ -76,34 +76,34 @@ pub fn foo_ar_sfl_boot_by_hand_mono(cfg_src: fn() -> AppCfgInfo) -> Box<FooArSfl
     box_pin_async_fn(f)
 }
 
-// /// Returns a boxed foo_ar_sfl_closure.
-// pub fn foo_ar_sfl_boot(app_cfg: &AppCfgInfo) -> Box<FooArSflT> {
-//     let deps = FooArSflDeps {
-//         bar_ar_bf: fs::bar_ar_bf_boot(app_cfg),
-//     };
-//     cfg_deps_ar_boot(foo_ar_sfl_c, foo_ar_sfl_cfg_adapter, app_cfg, deps)
-// }
+/// Returns a boxed foo_ar_sfl_closure.
+pub fn foo_ar_sfl_boot<ACFG>(
+    cfg_src: impl Make<ACFG> + Send + Sync + Clone + 'static,
+) -> Box<FooArSflT>
+where
+    ACFG: Send + Sync + 'static,
+    ACFG: for<'a> FromRef<'a, FooArSflCfgInfo<'a>>,
+    ACFG: for<'a> FromRef<'a, BarArBfCfgInfo<'a>>,
+{
+    let deps = FooArSflDeps {
+        bar_ar_bf: fs::bar_ar_bf_boot_by_hand(cfg_src.clone()),
+    };
+    cfg_deps_ar_boot(foo_ar_sfl_c, cfg_src, deps)
+}
 
-// /// Coded without use of [cfg_deps_boot_ar].
-// /// Returns a leaked static reference to a foo_ar_sfl closure.
-// /// The only benefit of this version over _boot is that it saves an Arc clone for this and its dependencies
-// /// for each call to the returned function.
-// pub fn foo_ar_sfl_boot_lr_by_hand(app_cfg: &AppCfgInfo) -> &'static FooArSflT {
-//     let cfg = foo_ar_sfl_cfg_adapter(&app_cfg);
-//     let deps = FooArSflDeps {
-//         bar_ar_bf: Box::new(bar_ar_bf_boot_lr(app_cfg)),
-//     };
-//     let foo_ar_sfl_s: &FooArSflS = Box::leak(Box::new(FooArSflS { cfg, deps }));
-//     let f = move |input| foo_ar_sfl_c(foo_ar_sfl_s, input);
-//     ref_pin_async_fn(f)
-// }
-
-// /// Returns a leaked static reference to a foo_ar_sfl closure.
-// /// The only benefit of this version over _boot is that it saves an Arc clone for this and its dependencies
-// /// for each call to the returned function.
-// pub fn foo_ar_sfl_boot_lr(app_cfg: &AppCfgInfo) -> &'static FooArSflT {
-//     let deps = FooArSflDeps {
-//         bar_ar_bf: Box::new(bar_ar_bf_boot_lr(app_cfg)),
-//     };
-//     cfg_deps_ar_boot_lr(foo_ar_sfl_c, foo_ar_sfl_cfg_adapter, app_cfg, deps)
-// }
+/// Returns a leaked static reference to a foo_ar_sfl closure.
+/// The only benefit of this version over _boot is that it saves an Arc clone for dependencies
+/// for each call to the returned function.
+pub fn foo_ar_sfl_boot_lr<ACFG>(
+    cfg_src: impl Make<ACFG> + Send + Sync + Clone + 'static,
+) -> &'static FooArSflT
+where
+    ACFG: Send + Sync + 'static,
+    ACFG: for<'a> FromRef<'a, FooArSflCfgInfo<'a>>,
+    ACFG: for<'a> FromRef<'a, BarArBfCfgInfo<'a>>,
+{
+    let deps = FooArSflDeps {
+        bar_ar_bf: Box::new(bar_ar_bf_boot_lr(cfg_src.clone())),
+    };
+    cfg_deps_ar_boot_lr(foo_ar_sfl_c, cfg_src, deps)
+}

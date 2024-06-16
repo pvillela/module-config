@@ -47,7 +47,7 @@ where
     T: 'static,
 {
     let cfg = cfg_factory(app_cfg.app_src, cfgdapter, app_cfg.refresh_mode);
-    let s = CfgDeps { cfg, deps: deps };
+    let s = CfgDeps { cfg, deps };
     let stereotype = move |input| f_c(&s, input);
     Box::new(stereotype)
 }
@@ -67,7 +67,7 @@ where
     T: 'static,
 {
     let cfg = cfg_factory(app_cfg.app_src, cfgdapter, app_cfg.refresh_mode);
-    let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps: deps }));
+    let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps }));
     let stereotype = move |input| f_c(s_ref_leak, input);
     Box::leak(Box::new(stereotype))
 }
@@ -77,7 +77,7 @@ where
 
 pub fn cfg_deps_i_boot<C, D, A, T, ACFG>(
     f_c: fn(&CfgDeps<C, D>, A) -> T,
-    cfg_aidapter: fn(&ACFG) -> C,
+    cfg_adapter: fn(&ACFG) -> C,
     app_cfg: impl Deref<Target = ACFG>,
     deps: D,
 ) -> Box<dyn Fn(A) -> T + Send + Sync>
@@ -88,15 +88,15 @@ where
     T: 'static,
     ACFG: 'static + Send + Sync,
 {
-    let cfg = cfg_aidapter(&app_cfg);
-    let s = CfgDeps { cfg, deps: deps };
+    let cfg = cfg_adapter(&app_cfg);
+    let s = CfgDeps { cfg, deps };
     let stereotype = move |input| f_c(&s, input);
     Box::new(stereotype)
 }
 
 pub fn cfg_deps_i_boot_lr<C, D, A, T, ACFG>(
     f_c: fn(&CfgDeps<C, D>, A) -> T,
-    cfg_aidapter: fn(&ACFG) -> C,
+    cfg_adapter: fn(&ACFG) -> C,
     app_cfg: impl Deref<Target = ACFG>,
     deps: D,
 ) -> &'static (dyn Fn(A) -> T + Send + Sync)
@@ -106,8 +106,8 @@ where
     A: 'static,
     T: 'static,
 {
-    let cfg = cfg_aidapter(&app_cfg);
-    let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps: deps }));
+    let cfg = cfg_adapter(&app_cfg);
+    let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps }));
     let stereotype = move |input| f_c(s_ref_leak, input);
     Box::leak(Box::new(stereotype))
 }
@@ -131,7 +131,7 @@ where
     FUT: Future<Output = T> + Send + Sync + 'static,
 {
     let cfg = cfg_factory(app_cfg.app_src, cfg_adapter, app_cfg.refresh_mode);
-    let s = Arc::new(CfgDeps { cfg, deps: deps });
+    let s = Arc::new(CfgDeps { cfg, deps });
     let stereotype = move |input| f_c(s.clone(), input);
     box_pin_async_fn(stereotype)
 }
@@ -151,7 +151,7 @@ where
     FUT: Future<Output = T> + Send + Sync + 'static,
 {
     let cfg = cfg_factory(app_cfg.app_src, cfg_adapter, app_cfg.refresh_mode);
-    let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps: deps }));
+    let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps }));
     let stereotype = move |input| f_c(s_ref_leak, input);
     ref_pin_async_fn(stereotype)
 }
@@ -162,7 +162,7 @@ where
 /// Returns a boxed async stereotype instance with immutable configuration.
 pub fn cfg_deps_ai_boot<C, D, A, T, FUT, ACFG>(
     f_c: fn(Arc<CfgDeps<C, D>>, A) -> FUT,
-    cfg_aidapter: fn(&ACFG) -> C,
+    cfg_adapter: fn(&ACFG) -> C,
     app_cfg: &ACFG,
     deps: D,
 ) -> BoxPinFn<A, T>
@@ -173,8 +173,8 @@ where
     T: 'static + Send + Sync,
     FUT: Future<Output = T> + Send + Sync + 'static,
 {
-    let cfg = cfg_aidapter(&app_cfg);
-    let s = Arc::new(CfgDeps { cfg, deps: deps });
+    let cfg = cfg_adapter(&app_cfg);
+    let s = Arc::new(CfgDeps { cfg, deps });
     let stereotype = move |input| f_c(s.clone(), input);
     box_pin_async_fn(stereotype)
 }
@@ -182,7 +182,7 @@ where
 /// Returns a leaked static reference to async stereotype instance with immutable configuration.
 pub fn cfg_deps_ai_boot_lr<C, D, A, T, FUT, ACFG>(
     f_c: fn(&'static CfgDeps<C, D>, A) -> FUT,
-    cfg_aidapter: fn(&ACFG) -> C,
+    cfg_adapter: fn(&ACFG) -> C,
     app_cfg: &ACFG,
     deps: D,
 ) -> &'static PinFn<A, T>
@@ -193,9 +193,48 @@ where
     T: 'static + Send + Sync,
     FUT: Future<Output = T> + Send + Sync + 'static,
 {
-    let cfg = cfg_aidapter(&app_cfg);
-    let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps: deps }));
+    let cfg = cfg_adapter(&app_cfg);
+    let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps }));
     let stereotype = move |input| f_c(s_ref_leak, input);
+    ref_pin_async_fn(stereotype)
+}
+
+//=================
+// _ar_boot
+
+/// Returns a boxed async stereotype instance with reference-based stereotype `CfgInfo`.
+pub fn cfg_deps_ar_boot<D, A, T, FUT, MACFG>(
+    f_c: fn(cfg_src: MACFG, d: Arc<D>, input: A) -> FUT,
+    cfg_src: MACFG,
+    deps: D,
+) -> BoxPinFn<A, T>
+where
+    D: 'static + Send + Sync,
+    A: 'static,
+    T: 'static + Send + Sync,
+    MACFG: Send + Sync + Clone + 'static,
+    FUT: Future<Output = T> + Send + Sync + 'static,
+{
+    let deps = Arc::new(deps);
+    let stereotype = move |input| f_c(cfg_src.clone(), deps.clone(), input);
+    box_pin_async_fn(stereotype)
+}
+
+/// Returns a leaked static reference to async stereotype instance with reference-based stereotype `CfgInfo`.
+pub fn cfg_deps_ar_boot_lr<D, A, T, FUT, MACFG>(
+    f_c: fn(cfg_src: MACFG, d: &'static D, input: A) -> FUT,
+    cfg_src: MACFG,
+    deps: D,
+) -> &'static PinFn<A, T>
+where
+    D: 'static + Send + Sync,
+    A: 'static,
+    T: 'static + Send + Sync,
+    MACFG: Send + Sync + Clone + 'static,
+    FUT: Future<Output = T> + Send + Sync + 'static,
+{
+    let deps: &D = Box::leak(Box::new(deps));
+    let stereotype = move |input| f_c(cfg_src.clone(), deps, input);
     ref_pin_async_fn(stereotype)
 }
 
@@ -219,7 +258,7 @@ where
     FUT: Future<Output = T> + 'static,
 {
     let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
-    let s = Arc::new(CfgDeps { cfg, deps: deps });
+    let s = Arc::new(CfgDeps { cfg, deps });
     let stereotype = move |input| f_c(s.clone(), input);
     box_pin_async_fn_wss(stereotype)
 }
@@ -257,7 +296,7 @@ where
     T: 'static + Send + Sync,
 {
     let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
-    let s = Arc::new(CfgDeps { cfg, deps: deps });
+    let s = Arc::new(CfgDeps { cfg, deps });
     move |input, tx| Box::pin(f_c(s.clone(), input, tx))
 }
 
@@ -317,7 +356,7 @@ where
 {
     // // Code without using cfg_deps_boot_at_free_tx_no_box:
     // let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
-    // let s = Arc::new(CfgDeps { cfg, deps: deps });
+    // let s = Arc::new(CfgDeps { cfg, deps });
     // Box::new(move |input, tx| Box::pin(f_c(s.clone(), input, tx)))
 
     let stereotype =
@@ -422,7 +461,7 @@ where
     T: 'static + Send + Sync,
 {
     let cfg = cfg_factory(app_cfg, cfg_adapter, refresh_mode);
-    let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps: deps }));
+    let s_ref_leak: &CfgDeps<C, D> = Box::leak(Box::new(CfgDeps { cfg, deps }));
     move |input, tx| Box::pin(f_c(s_ref_leak, input, tx))
 }
 
@@ -439,10 +478,7 @@ where
     T: 'static + Send + Sync,
     ACFG: 'static + Send + Sync,
 {
-    let s_ref_leak: &CfgDeps<ACFG, D> = Box::leak(Box::new(CfgDeps {
-        cfg: app_cfg,
-        deps: deps,
-    }));
+    let s_ref_leak: &CfgDeps<ACFG, D> = Box::leak(Box::new(CfgDeps { cfg: app_cfg, deps }));
     move |input, tx| Box::pin(f_c(s_ref_leak, input, tx))
 }
 

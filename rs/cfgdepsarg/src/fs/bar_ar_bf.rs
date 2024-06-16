@@ -1,6 +1,8 @@
 use common::config::AppCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{box_pin_async_fn, CfgDeps, FromRef, Make, PinFn};
+use common::fwk::{
+    box_pin_async_fn, cfg_deps_ar_boot, cfg_deps_ar_boot_lr, CfgDeps, FromRef, Make, PinFn,
+};
 use futures::Future;
 use std::pin::Pin;
 use std::time::Duration;
@@ -78,23 +80,23 @@ pub fn bar_ar_bf_boot_by_hand_mono(c: fn() -> AppCfgInfo) -> Box<BarArBfT> {
     box_pin_async_fn(f)
 }
 
-// /// Returns a boxed bar_ar_bf_closure.
-// pub fn bar_ar_bf_boot(app_cfg: &AppCfgInfo) -> Box<BarArBfT> {
-//     cfg_deps_ar_boot(bar_ar_bf_c, bar_ar_bf_cfg_adapter, app_cfg, ())
-// }
+/// Returns a boxed bar_ar_bf_closure.
+pub fn bar_ar_bf_boot<ACFG>(c: impl Make<ACFG> + Send + Sync + Clone + 'static) -> Box<BarArBfT>
+where
+    ACFG: Send + Sync + 'static,
+    ACFG: for<'a> FromRef<'a, BarArBfCfgInfo<'a>>,
+{
+    cfg_deps_ar_boot(|c, _, arg| bar_ar_bf_c(c, arg), c, ())
+}
 
-// /// Coded without use of [cfg_deps_boot_ar_lr].
-// /// Returns a leaked static reference to a bar_ar_bf closure.
-// /// Since bar_ar_bf has no dependencies, there is no benefit over _boot.
-// pub fn bar_ar_bf_boot_lr_by_hand(app_cfg: &AppCfgInfo) -> &'static BarArBfT {
-//     let cfg = bar_ar_bf_cfg_adapter(&app_cfg);
-//     let bar_ar_bf_s: &BarArBfS = Box::leak(Box::new(BarArBfS { cfg, deps: () }));
-//     let f = move |sleep_millis| bar_ar_bf_c(bar_ar_bf_s, sleep_millis);
-//     ref_pin_async_fn(f)
-// }
-
-// /// Returns a leaked static reference to a bar_ar_bf closure.
-// /// Since bar_ar_bf has no dependencies, there is no benefit over _boot.
-// pub fn bar_ar_bf_boot_lr(app_cfg: &AppCfgInfo) -> &'static BarArBfT {
-//     cfg_deps_ar_boot_lr(bar_ar_bf_c, bar_ar_bf_cfg_adapter, app_cfg, ())
-// }
+/// Returns a leaked static reference to a bar_ar_bf closure.
+/// Since bar_ar_bf has no dependencies, there is no benefit over _boot.
+pub fn bar_ar_bf_boot_lr<ACFG>(
+    c: impl Make<ACFG> + Send + Sync + Clone + 'static,
+) -> &'static BarArBfT
+where
+    ACFG: Send + Sync + 'static,
+    ACFG: for<'a> FromRef<'a, BarArBfCfgInfo<'a>>,
+{
+    cfg_deps_ar_boot_lr(|c, _, arg| bar_ar_bf_c(c, arg), c, ())
+}
