@@ -34,6 +34,9 @@ pub use cfg_ovd_def::*;
 mod dep;
 pub use dep::*;
 
+mod get_cfg;
+pub use get_cfg::*;
+
 mod utils;
 pub use utils::*;
 

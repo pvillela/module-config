@@ -1,10 +1,8 @@
 use common::config::AppCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{box_pin_async_fn, CfgDeps, PinFn};
+use common::fwk::{box_pin_async_fn, CfgDeps, GetCfg, GetCfg0, MakeAppCfg, PinFn};
 use futures::Future;
-use std::ops::Deref;
 use std::pin::Pin;
-use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -15,36 +13,67 @@ pub struct BarArBfCfgInfo<'a> {
     pub v: &'a str,
 }
 
-pub type BarArBfS = CfgDeps<fn() -> AppCfgInfo, ()>;
+impl<'a> GetCfg0<'a, AppCfgInfo, BarArBfCfgInfo<'a>> for fn() -> AppCfgInfo {
+    fn get_cfg(&self, app_cfg: &'a AppCfgInfo) -> BarArBfCfgInfo<'a> {
+        BarArBfCfgInfo {
+            u: app_cfg.y,
+            v: &app_cfg.x,
+        }
+    }
+}
 
-pub async fn bar_ar_bf_c(s: impl Deref<Target = BarArBfS>, sleep_millis: u64) -> String {
-    let app_cfg_info = (s.cfg)();
-    let cfg = bar_ar_bf_cfg_adapter(&app_cfg_info);
+pub type BarArBfS<ACFG> = CfgDeps<fn() -> ACFG, ()>;
+
+pub async fn bar_ar_bf_c_specific(
+    c: impl for<'a> GetCfg0<'a, AppCfgInfo, BarArBfCfgInfo<'a>>,
+    sleep_millis: u64,
+) -> String {
+    let app_cfg_info = c.make_app_cfg();
+    let cfg = c.get_cfg(&app_cfg_info);
     sleep(Duration::from_millis(sleep_millis)).await;
     let u = cfg.u;
     let v = cfg.v.to_owned();
     bar_core(u, v)
 }
 
-fn bar_ar_bf_cfg_adapter<'a>(app_cfg: &'a AppCfgInfo) -> BarArBfCfgInfo<'a> {
-    BarArBfCfgInfo {
-        u: app_cfg.y,
-        v: &app_cfg.x,
-    }
+pub async fn bar_ar_bf_c_generic_old<ACFG>(
+    c: impl for<'a> GetCfg0<'a, ACFG, BarArBfCfgInfo<'a>>,
+    sleep_millis: u64,
+) -> String {
+    let app_cfg_info = c.make_app_cfg();
+    let cfg = c.get_cfg(&app_cfg_info);
+    sleep(Duration::from_millis(sleep_millis)).await;
+    let u = cfg.u;
+    let v = cfg.v.to_owned();
+    bar_core(u, v)
+}
+
+pub async fn bar_ar_bf_c<ACFG>(c: impl MakeAppCfg<ACFG>, sleep_millis: u64) -> String
+where
+    ACFG: for<'a> GetCfg<'a, BarArBfCfgInfo<'a>>,
+{
+    let app_cfg_info = c.make_app_cfg();
+    let cfg = app_cfg_info.get_cfg();
+    sleep(Duration::from_millis(sleep_millis)).await;
+    let u = cfg.u;
+    let v = cfg.v.to_owned();
+    bar_core(u, v)
 }
 
 /// Coded without use of [cfg_deps_boot_ar].
 /// Returns a boxed bar_ar_bf_closure.
-pub fn bar_ar_bf_boot_by_hand0(
-    app_cfg: fn() -> AppCfgInfo,
-) -> impl Fn(u64) -> Pin<Box<dyn Future<Output = String> + Send + Sync>> + Send + Sync {
-    let bar_ar_bf_s = Arc::new(BarArBfS {
-        cfg: app_cfg,
-        deps: (),
-    });
+pub fn bar_ar_bf_boot_by_hand0<ACFG>(
+    // c: fn() -> ACFG,
+    c: impl MakeAppCfg<ACFG> + Send + Sync + Clone + 'static,
+) -> impl Fn(u64) -> Pin<Box<dyn Future<Output = String> + Send + Sync>> + Send + Sync
+where
+    ACFG: Send + Sync + 'static,
+    ACFG: for<'a> GetCfg<'a, BarArBfCfgInfo<'a>>,
+    // fn() -> ACFG: for<'a> GetCfg<'a, ACFG, BarArBfCfgInfo<'a>>,
+{
     let f = move |sleep_millis| {
-        let bar_ar_bf_s = bar_ar_bf_s.clone();
-        let x = bar_ar_bf_c(bar_ar_bf_s, sleep_millis);
+        // let bar_ar_bf_s = bar_ar_bf_s.clone();
+        let x = bar_ar_bf_c(c.clone(), sleep_millis);
         let b_d: Pin<Box<dyn Future<Output = String> + Send + Sync>> = Box::pin(x);
         b_d
     };
@@ -53,12 +82,16 @@ pub fn bar_ar_bf_boot_by_hand0(
 
 /// Coded without use of [cfg_deps_boot_ar].
 /// Returns a boxed bar_ar_bf_closure.
-pub fn bar_ar_bf_boot_by_hand(app_cfg: fn() -> AppCfgInfo) -> Box<BarArBfT> {
-    let bar_ar_bf_s = Arc::new(BarArBfS {
-        cfg: app_cfg,
-        deps: (),
-    });
-    let f = move |sleep_millis| bar_ar_bf_c(bar_ar_bf_s.clone(), sleep_millis);
+pub fn bar_ar_bf_boot_by_hand<ACFG>(
+    // c: fn() -> ACFG,
+    c: impl MakeAppCfg<ACFG> + Send + Sync + Clone + 'static,
+) -> Box<BarArBfT>
+where
+    ACFG: Send + Sync + 'static,
+    ACFG: for<'a> GetCfg<'a, BarArBfCfgInfo<'a>>,
+    // fn() -> ACFG: for<'a> GetCfg<'a, ACFG, BarArBfCfgInfo<'a>>,
+{
+    let f = move |sleep_millis| bar_ar_bf_c(c.clone(), sleep_millis);
     box_pin_async_fn(f)
 }
 
