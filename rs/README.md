@@ -23,7 +23,11 @@ Meaning of infix letters:
 
 - `_a_` -- async version.
 - `_i_` -- immediate, i.e., the stereotype's `CfgInfo` struct is injected directly instead of a `Cfg` object.
-- `_r_` -- reference-based stereotype `CfgInfo`. The stereotype `CfgInfo` is generated from a reference to `AppCfgInfo`, `CfgInfo` may contain references to fields in `AppCfgInfo`, and the lifetime of the `CfgInfo` instance is the same as that of the source reference.
+- `_r_` -- reference-based stereotype `CfgInfo`. The stereotype `CfgInfo` is generated from a reference to `AppCfgInfo`, `CfgInfo` may contain references to fields in `AppCfgInfo`, and the lifetime of the `CfgInfo` instance is the same as that of the source reference. This provides a simpler configuration model with good efficiency. The game plan is as follows:
+  - A raw config process updates a global `AppCfgInfo` object that may contain all sorts of stuff in it, like codes tables, database handles, etc.
+  - A stereotype has its own view of configuration through a stereotype-specific data structure, say `MyCfgInfo`, that picks and chooses relevant elements from the global config. It provides an implementation of its configuration view from a reference to the global config object by implementing the `RefInto` trait. `MyCfgInfo` can be efficiently instantiated if it just contains references to fields in `AppCfgInfo` or copies of small by-value fields.
+  - Whenever the global config is updated, the stereotype local view will reflect the new values.
+
 - `_s_` -- simple configuration, i.e., the stereotype uses the application-level configuration info directly and the latter is injected into the stereotype constructor function.
 - `_t_` -- transactional, i.e., additional transaction handle argument passed by reference.
 - `_ac_` -- async with `const` configuration.
