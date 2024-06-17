@@ -1,8 +1,6 @@
 use common::config::AppCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{
-    box_pin_async_fn, cfg_deps_ar_boot, cfg_deps_ar_boot_lr, CfgDeps, FromRef, Make, PinFn,
-};
+use common::fwk::{box_pin_async_fn, cfg_deps_ar_boot, cfg_deps_ar_boot_lr, FromRef, Make, PinFn};
 use futures::Future;
 use std::pin::Pin;
 use std::time::Duration;
@@ -15,8 +13,6 @@ pub struct BarArBfCfgInfo<'a> {
     pub v: &'a str,
 }
 
-pub type BarArBfS<ACFG> = CfgDeps<fn() -> ACFG, ()>;
-
 impl<'a> FromRef<'a, BarArBfCfgInfo<'a>> for AppCfgInfo {
     fn from_ref(&'a self) -> BarArBfCfgInfo<'a> {
         BarArBfCfgInfo {
@@ -26,7 +22,7 @@ impl<'a> FromRef<'a, BarArBfCfgInfo<'a>> for AppCfgInfo {
     }
 }
 
-pub async fn bar_ar_bf_c<ACFG>(c: impl Make<ACFG>, sleep_millis: u64) -> String
+pub async fn bar_ar_bf_c<ACFG, DUMMY>(c: impl Make<ACFG>, _deps: DUMMY, sleep_millis: u64) -> String
 where
     ACFG: for<'a> FromRef<'a, BarArBfCfgInfo<'a>>,
 {
@@ -51,7 +47,7 @@ where
 {
     let f = move |sleep_millis| {
         // let bar_ar_bf_s = bar_ar_bf_s.clone();
-        let x = bar_ar_bf_c(c.clone(), sleep_millis);
+        let x = bar_ar_bf_c(c.clone(), (), sleep_millis);
         let b_d: Pin<Box<dyn Future<Output = String> + Send + Sync>> = Box::pin(x);
         b_d
     };
@@ -69,14 +65,14 @@ where
     ACFG: for<'a> FromRef<'a, BarArBfCfgInfo<'a>>,
     // fn() -> ACFG: for<'a> GetCfg<'a, ACFG, BarArBfCfgInfo<'a>>,
 {
-    let f = move |sleep_millis| bar_ar_bf_c(c.clone(), sleep_millis);
+    let f = move |sleep_millis| bar_ar_bf_c(c.clone(), (), sleep_millis);
     box_pin_async_fn(f)
 }
 
 /// Coded without use of [cfg_deps_boot_ar].
 /// Returns a boxed bar_ar_bf_closure.
 pub fn bar_ar_bf_boot_by_hand_mono(c: fn() -> AppCfgInfo) -> Box<BarArBfT> {
-    let f = move |sleep_millis| bar_ar_bf_c(c, sleep_millis);
+    let f = move |sleep_millis| bar_ar_bf_c(c, (), sleep_millis);
     box_pin_async_fn(f)
 }
 
@@ -86,7 +82,7 @@ where
     ACFG: Send + Sync + 'static,
     ACFG: for<'a> FromRef<'a, BarArBfCfgInfo<'a>>,
 {
-    cfg_deps_ar_boot(|c, _, arg| bar_ar_bf_c(c, arg), c, ())
+    cfg_deps_ar_boot(bar_ar_bf_c, c, ())
 }
 
 /// Returns a leaked static reference to a bar_ar_bf closure.
@@ -98,5 +94,5 @@ where
     ACFG: Send + Sync + 'static,
     ACFG: for<'a> FromRef<'a, BarArBfCfgInfo<'a>>,
 {
-    cfg_deps_ar_boot_lr(|c, _, arg| bar_ar_bf_c(c, arg), c, ())
+    cfg_deps_ar_boot_lr(bar_ar_bf_c, c, ())
 }

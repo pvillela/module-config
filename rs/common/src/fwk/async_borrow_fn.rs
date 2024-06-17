@@ -50,6 +50,22 @@ where
     type Fut = Fut;
 }
 
+/// Represents an async function with 4 arguments; the first 3 are not references, the last is a reference.
+pub trait AsyncBorrowFn4b4<'a, A1, A2, A3, A4: ?Sized + 'a, Out>:
+    Fn(A1, A2, A3, &'a A4) -> Self::Fut + Send + Sync
+{
+    type Fut: Future<Output = Out> + Send + Sync + 'a;
+}
+
+impl<'a, A1, A2, A3, A4, Out, F, Fut> AsyncBorrowFn4b4<'a, A1, A2, A3, A4, Out> for F
+where
+    A4: ?Sized + 'a,
+    F: Fn(A1, A2, A3, &'a A4) -> Fut + Send + Sync + 'a,
+    Fut: Future<Output = Out> + Send + Sync + 'a,
+{
+    type Fut = Fut;
+}
+
 /// Partial application for async function, where the resulting closure returns a box-pinned future.
 pub fn partial_apply_async_borrow_fn_2b2_boxpin<A1, A2, T>(
     f: impl for<'a> AsyncBorrowFn2b2<'a, A1, A2, T>,

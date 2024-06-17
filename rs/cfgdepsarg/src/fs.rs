@@ -10,6 +10,9 @@ pub use bar_ar_bf::*;
 mod bar_aw_bf;
 pub use bar_aw_bf::*;
 
+mod bar_art_bf;
+pub use bar_art_bf::*;
+
 mod bar_ast_bf;
 pub use bar_ast_bf::*;
 
@@ -30,6 +33,9 @@ pub use foo_ai_sfl::*;
 
 mod foo_ar_sfl;
 pub use foo_ar_sfl::*;
+
+mod foo_art_sfl;
+pub use foo_art_sfl::*;
 
 mod foo_ast_sfl;
 pub use foo_ast_sfl::*;
