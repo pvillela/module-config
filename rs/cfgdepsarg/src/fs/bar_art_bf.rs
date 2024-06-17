@@ -1,8 +1,8 @@
 use common::config::AppCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::{
-    cfg_deps_art_boot_free_tx_lr, cfg_deps_art_partial_apply_free_tx_box, AppErr, FromRef, Make,
-    PinBorrowFn2b2Tx, Tx,
+    cfg_deps_art_boot_free_tx_lr, cfg_deps_art_partial_apply_free_tx_box, AppErr, Make,
+    PinBorrowFn2b2Tx, RefInto, Tx,
 };
 use std::time::Duration;
 use tokio::time::sleep;
@@ -15,8 +15,8 @@ pub struct BarArtBfCfgInfo<'a> {
     pub v: &'a str,
 }
 
-impl<'a> FromRef<'a, BarArtBfCfgInfo<'a>> for AppCfgInfo {
-    fn from_ref(&'a self) -> BarArtBfCfgInfo<'a> {
+impl<'a> RefInto<'a, BarArtBfCfgInfo<'a>> for AppCfgInfo {
+    fn ref_into(&'a self) -> BarArtBfCfgInfo<'a> {
         BarArtBfCfgInfo {
             u: self.y,
             v: &self.x,
@@ -32,10 +32,10 @@ pub async fn bar_art_bf_c<ACFG, DUMMY>(
     tx: &Tx<'_>,
 ) -> Result<String, AppErr>
 where
-    ACFG: for<'a> FromRef<'a, BarArtBfCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, BarArtBfCfgInfo<'a>>,
 {
     let app_cfg_info = cfg_src.make();
-    let cfg = app_cfg_info.from_ref();
+    let cfg = app_cfg_info.ref_into();
     sleep(Duration::from_millis(sleep_millis)).await;
     let u = cfg.u;
     let v = cfg.v.to_owned();
@@ -49,7 +49,7 @@ pub fn bar_art_bf_boot_box<ACFG>(
 ) -> Box<BarArtBfTxT>
 where
     ACFG: Send + Sync + 'static,
-    ACFG: for<'a> FromRef<'a, BarArtBfCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, BarArtBfCfgInfo<'a>>,
 {
     cfg_deps_art_partial_apply_free_tx_box(bar_art_bf_c, c, ())
 }
@@ -60,7 +60,7 @@ pub fn bar_art_bf_boot_lr<ACFG>(
 ) -> &'static BarArtBfTxT
 where
     ACFG: Send + Sync + 'static,
-    ACFG: for<'a> FromRef<'a, BarArtBfCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, BarArtBfCfgInfo<'a>>,
 {
     cfg_deps_art_boot_free_tx_lr(bar_art_bf_c, c, ())
 }

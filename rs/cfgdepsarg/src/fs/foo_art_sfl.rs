@@ -2,8 +2,8 @@ use common::config::AppCfgInfo;
 use common::fs_data::{FooArtIn, FooArtOut};
 use common::fs_util::foo_core;
 use common::fwk::{
-    cfg_deps_art_boot_free_tx_lr, cfg_deps_art_partial_apply_free_tx_arc, AppErr, FromRef, Make,
-    PinBorrowFn2b2Tx, PinFn, Tx,
+    cfg_deps_art_boot_free_tx_lr, cfg_deps_art_partial_apply_free_tx_arc, AppErr, Make,
+    PinBorrowFn2b2Tx, PinFn, RefInto, Tx,
 };
 use std::ops::Deref;
 use std::sync::Arc;
@@ -18,8 +18,8 @@ pub struct FooArtSflCfgInfo<'a> {
     pub b: i32,
 }
 
-impl<'a> FromRef<'a, FooArtSflCfgInfo<'a>> for AppCfgInfo {
-    fn from_ref(&'a self) -> FooArtSflCfgInfo<'a> {
+impl<'a> RefInto<'a, FooArtSflCfgInfo<'a>> for AppCfgInfo {
+    fn ref_into(&'a self) -> FooArtSflCfgInfo<'a> {
         FooArtSflCfgInfo {
             a: &self.x,
             b: self.y,
@@ -43,10 +43,10 @@ pub async fn foo_art_sfl_c<ACFG>(
     tx: &Tx<'_>,
 ) -> Result<FooArtOut, AppErr>
 where
-    ACFG: for<'a> FromRef<'a, FooArtSflCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, FooArtSflCfgInfo<'a>>,
 {
     let app_cfg_info = cfg_src.make();
-    let cfg = app_cfg_info.from_ref();
+    let cfg = app_cfg_info.ref_into();
     let FooArtIn { sleep_millis } = input;
     sleep(Duration::from_millis(sleep_millis)).await;
     let a = cfg.a.to_owned();
@@ -62,8 +62,8 @@ pub fn foo_art_sfl_boot_arc<ACFG>(
 ) -> Arc<FooArtSflTxT>
 where
     ACFG: Send + Sync + 'static,
-    ACFG: for<'a> FromRef<'a, BarArtBfCfgInfo<'a>>,
-    ACFG: for<'a> FromRef<'a, FooArtSflCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, BarArtBfCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, FooArtSflCfgInfo<'a>>,
 {
     let b = bar_art_bf_boot_box(c.clone());
     let deps = Arc::new(FooArtSflDeps { bar_art_bf: b });
@@ -76,8 +76,8 @@ pub fn foo_art_sfl_boot_lr<ACFG>(
 ) -> &'static FooArtSflTxT
 where
     ACFG: Send + Sync + 'static,
-    ACFG: for<'a> FromRef<'a, BarArtBfCfgInfo<'a>>,
-    ACFG: for<'a> FromRef<'a, FooArtSflCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, BarArtBfCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, FooArtSflCfgInfo<'a>>,
 {
     let b = Box::new(bar_art_bf_boot_lr(c.clone()));
     let deps = FooArtSflDeps { bar_art_bf: b };

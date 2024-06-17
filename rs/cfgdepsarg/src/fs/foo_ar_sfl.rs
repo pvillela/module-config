@@ -3,7 +3,7 @@ use crate::fs;
 use common::config::AppCfgInfo;
 use common::fs_data::{FooArIn, FooArOut};
 use common::fs_util::foo_core;
-use common::fwk::{box_pin_async_fn, cfg_deps_ar_boot, cfg_deps_ar_boot_lr, FromRef, Make, PinFn};
+use common::fwk::{box_pin_async_fn, cfg_deps_ar_boot, cfg_deps_ar_boot_lr, Make, PinFn, RefInto};
 use std::ops::Deref;
 use std::sync::Arc;
 use std::time::Duration;
@@ -21,8 +21,8 @@ pub struct FooArSflDeps {
     pub bar_ar_bf: Box<BarArBfT>,
 }
 
-impl<'a> FromRef<'a, FooArSflCfgInfo<'a>> for AppCfgInfo {
-    fn from_ref(&'a self) -> FooArSflCfgInfo<'a> {
+impl<'a> RefInto<'a, FooArSflCfgInfo<'a>> for AppCfgInfo {
+    fn ref_into(&'a self) -> FooArSflCfgInfo<'a> {
         FooArSflCfgInfo {
             a: &self.x,
             b: self.y,
@@ -36,10 +36,10 @@ pub async fn foo_ar_sfl_c<ACFG>(
     input: FooArIn,
 ) -> FooArOut
 where
-    ACFG: for<'a> FromRef<'a, FooArSflCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, FooArSflCfgInfo<'a>>,
 {
     let app_cfg_info = cfg_src.make();
-    let c = app_cfg_info.from_ref();
+    let c = app_cfg_info.ref_into();
     let FooArIn { sleep_millis } = input;
     sleep(Duration::from_millis(sleep_millis)).await;
     let a = c.a.to_owned();
@@ -56,8 +56,8 @@ pub fn foo_ar_sfl_boot_by_hand<ACFG>(
 ) -> Box<FooArSflT>
 where
     ACFG: Send + Sync + 'static,
-    ACFG: for<'a> FromRef<'a, FooArSflCfgInfo<'a>>,
-    ACFG: for<'a> FromRef<'a, BarArBfCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, FooArSflCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, BarArBfCfgInfo<'a>>,
 {
     let deps = Arc::new(FooArSflDeps {
         bar_ar_bf: fs::bar_ar_bf_boot_by_hand(cfg_src.clone()),
@@ -82,8 +82,8 @@ pub fn foo_ar_sfl_boot<ACFG>(
 ) -> Box<FooArSflT>
 where
     ACFG: Send + Sync + 'static,
-    ACFG: for<'a> FromRef<'a, FooArSflCfgInfo<'a>>,
-    ACFG: for<'a> FromRef<'a, BarArBfCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, FooArSflCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, BarArBfCfgInfo<'a>>,
 {
     let deps = FooArSflDeps {
         bar_ar_bf: fs::bar_ar_bf_boot_by_hand(cfg_src.clone()),
@@ -99,8 +99,8 @@ pub fn foo_ar_sfl_boot_lr<ACFG>(
 ) -> &'static FooArSflT
 where
     ACFG: Send + Sync + 'static,
-    ACFG: for<'a> FromRef<'a, FooArSflCfgInfo<'a>>,
-    ACFG: for<'a> FromRef<'a, BarArBfCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, FooArSflCfgInfo<'a>>,
+    ACFG: for<'a> RefInto<'a, BarArBfCfgInfo<'a>>,
 {
     let deps = FooArSflDeps {
         bar_ar_bf: Box::new(bar_ar_bf_boot_lr(cfg_src.clone())),
