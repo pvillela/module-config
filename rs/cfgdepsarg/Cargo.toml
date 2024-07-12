@@ -15,4 +15,6 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
 axum = "0.7"
 tracing = "0.1"
-latency_trace = { path = "/home/pvillela/DEV/Rust/latency-trace/latency_trace" }
+latency_trace = { path = "/home/pvillela/DEV/Rust/latency-trace/latency_trace", features = [
+    "tokio",
+] }
