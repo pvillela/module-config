@@ -5,7 +5,6 @@ use common_test_art::{BarBfCfgTestInput, CfgTestInput, FooSflCfgTestInput};
 use tokio;
 
 mod t1 {
-
     use super::*;
 
     #[tokio::test]
@@ -28,7 +27,6 @@ mod t1 {
 }
 
 mod t2 {
-
     use super::*;
 
     #[tokio::test]

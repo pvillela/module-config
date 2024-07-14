@@ -459,6 +459,19 @@ where
     move |input, tx| Box::pin(f_c(cfg_src.clone(), deps.clone(), input, tx))
 }
 
+/// Returns an async stereotype instance with a free transaction argument,
+/// for a transactional stereotype constructor.
+pub fn cfg_deps_artc_partial_apply_free_tx_impl<D, A, T>(
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, D, A, Tx<'a>, T> + 'static,
+    deps: D,
+) -> impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
+where
+    D: 'static + Send + Sync + Clone,
+    T: 'static + Send + Sync,
+{
+    move |input, tx| Box::pin(f_c(deps.clone(), input, tx))
+}
+
 /// Returns a boxed async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_art_partial_apply_free_tx_box<MACFG, D, A, T>(
@@ -478,6 +491,23 @@ where
     Box::new(stereotype)
 }
 
+/// Returns a boxed async stereotype instance with a free transaction argument,
+/// for a transactional stereotype constructor.
+pub fn cfg_deps_artc_partial_apply_free_tx_box<D, A, T>(
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, D, A, Tx<'a>, T> + 'static,
+    deps: D,
+) -> Box<
+    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+>
+where
+    D: 'static + Send + Sync + Clone,
+    A: 'static,
+    T: 'static + Send + Sync,
+{
+    let stereotype = cfg_deps_artc_partial_apply_free_tx_impl(f_c, deps);
+    Box::new(stereotype)
+}
+
 /// Returns an arced async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_art_partial_apply_free_tx_arc<MACFG, D, A, T>(
@@ -494,6 +524,23 @@ where
     T: 'static + Send + Sync,
 {
     let stereotype = cfg_deps_art_partial_apply_free_tx_impl(f_c, cfg_src, deps);
+    Arc::new(stereotype)
+}
+
+/// Returns an arced async stereotype instance with a free transaction argument,
+/// for a transactional stereotype constructor.
+pub fn cfg_deps_artc_partial_apply_free_tx_arc<D, A, T>(
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, D, A, Tx<'a>, T> + 'static,
+    deps: D,
+) -> Arc<
+    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+>
+where
+    D: 'static + Send + Sync + Clone,
+    A: 'static,
+    T: 'static + Send + Sync,
+{
+    let stereotype = cfg_deps_artc_partial_apply_free_tx_impl(f_c, deps);
     Arc::new(stereotype)
 }
 

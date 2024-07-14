@@ -27,7 +27,6 @@ Meaning of infix letters:
   - A raw config process updates a global `AppCfgInfo` object that may contain all sorts of stuff in it, like codes tables, database handles, etc.
   - A stereotype has its own view of configuration through a stereotype-specific data structure, say `MyCfgInfo`, that picks and chooses relevant elements from the global config. It provides an implementation of its configuration view from a reference to the global config object by implementing the `RefInto` trait. `MyCfgInfo` can be efficiently instantiated if it just contains references to fields in `AppCfgInfo` or copies of small by-value fields.
   - Whenever the global config is updated, the stereotype local view will reflect the new values.
-
 - `_s_` -- simple configuration, i.e., the stereotype uses the application-level configuration info directly and the latter is injected into the stereotype constructor function.
 - `_t_` -- transactional, i.e., additional transaction handle argument passed by reference.
 - `_ac_` -- async with `const` configuration.
@@ -35,6 +34,8 @@ Meaning of infix letters:
 - `_ar_` -- async + reference-based.
 - `_at_` -- async + transactional.
 - `_aw_` -- async using `CfgRefCellId` instead of `CfgArcSwapArc`. Can be used with Axum but not Actix.
+- `_art_` -- async + reference-based + transactional.
+- `_artc_` -- async + context-and-reference-based + transactional. Builds on `_art_` but uses a context type parameter to provide an app configuration source instead of injecting a function.
 - `_ast_` -- async + simple + transactional.
 
 ## Observations on Different `pushdepstovar` Configuration Injection Approaches

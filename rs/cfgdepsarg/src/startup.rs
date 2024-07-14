@@ -13,6 +13,9 @@ pub use make_sfls_ai::*;
 mod make_sfls_art;
 pub use make_sfls_art::*;
 
+mod make_sfls_artc;
+pub use make_sfls_artc::*;
+
 mod make_sfls_ast;
 pub use make_sfls_ast::*;
 
