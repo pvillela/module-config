@@ -1,3 +1,4 @@
+use crate::fs::CfgSrc;
 use common::config::AppCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::{cfg_deps_artc_partial_apply_free_tx_box, AppErr, PinBorrowFn2b2Tx, RefInto, Tx};
@@ -19,12 +20,6 @@ impl<'a> RefInto<'a, BarArtcBfCfgInfo<'a>> for AppCfgInfo {
             v: &self.x,
         }
     }
-}
-
-pub trait CfgSrc {
-    type AppCfg;
-
-    fn cfg_src() -> Self::AppCfg;
 }
 
 #[instrument(level = "trace", skip_all)]

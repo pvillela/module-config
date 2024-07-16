@@ -35,7 +35,8 @@ Meaning of infix letters:
 - `_at_` -- async + transactional.
 - `_aw_` -- async using `CfgRefCellId` instead of `CfgArcSwapArc`. Can be used with Axum but not Actix.
 - `_art_` -- async + reference-based + transactional.
-- `_artc_` -- async + context-and-reference-based + transactional. Builds on `_art_` but uses a context type parameter to provide an app configuration source instead of injecting a function.
+- `_artc_` -- async + transactional + reference-based + context-based. Builds on `_art_` but uses a context type parameter to provide an app configuration source instead of injecting a function.
+- `_artct_` -- async + transactional + reference-based + context-based + trait-based. Builds on `_artc_` but uses trait methods to provide dependencies instead of injecting them with a struct.
 - `_ast_` -- async + simple + transactional.
 
 ## Observations on Different `pushdepstovar` Configuration Injection Approaches
