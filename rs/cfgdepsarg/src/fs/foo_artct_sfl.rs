@@ -31,9 +31,9 @@ pub trait FooArtctSfl<CTX> {
     async fn foo_artct_sfl(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr>;
 }
 
-pub trait FooCtx: CfgSrc<AppCfg: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>> {}
+pub trait FooOnlyCtx: CfgSrc<AppCfg: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>> {}
 
-impl<CTX> FooCtx for CTX
+impl<CTX> FooOnlyCtx for CTX
 where
     CTX: CfgSrc,
     CTX::AppCfg: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>,
@@ -42,7 +42,7 @@ where
 
 pub trait FooArtctSflC<CTX>: BarArtctBf<CTX>
 where
-    CTX: FooCtx,
+    CTX: FooOnlyCtx,
 {
     #[instrument(level = "trace", skip_all)]
     #[allow(async_fn_in_trait)]
@@ -62,19 +62,19 @@ where
 //==================
 // Addition of type dependencies
 
-pub trait FooCtxAll: FooCtx + BarCtx {}
+pub trait FooCtx: FooOnlyCtx + BarCtx {}
 
-impl<CTX> FooCtxAll for CTX where CTX: FooCtx + BarCtx {}
+impl<CTX> FooCtx for CTX where CTX: FooOnlyCtx + BarCtx {}
 
 pub struct FooArtctSflI<CTX>(PhantomData<CTX>);
 
 impl<CTX> BarArtctBfBoot<CTX> for FooArtctSflI<CTX> where CTX: BarCtx {}
-impl<CTX> FooArtctSflC<CTX> for FooArtctSflI<CTX> where CTX: FooCtxAll {}
-impl<CTX> FooArtctSflBoot<CTX> for FooArtctSflI<CTX> where CTX: FooCtxAll {}
+impl<CTX> FooArtctSflC<CTX> for FooArtctSflI<CTX> where CTX: FooCtx {}
+impl<CTX> FooArtctSflBoot<CTX> for FooArtctSflI<CTX> where CTX: FooCtx {}
 
 pub trait FooArtctSflBoot<CTX>
 where
-    CTX: FooCtxAll,
+    CTX: FooCtx,
 {
     #[allow(async_fn_in_trait)]
     async fn foo_artct_sfl_boot(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr> {
@@ -85,7 +85,7 @@ where
 impl<CTX, T> FooArtctSfl<CTX> for T
 where
     T: FooArtctSflBoot<CTX>,
-    CTX: FooCtxAll,
+    CTX: FooCtx,
 {
     async fn foo_artct_sfl(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr> {
         T::foo_artct_sfl_boot(input, tx).await

@@ -1,5 +1,5 @@
 use cfgdepsarg::fs::{
-    AsyncFnTx, BarArtctBfCfgInfo, FooArtctOut, FooArtctSflCfgInfo, FooArtctSflI, FooCtxAll,
+    AsyncFnTx, BarArtctBfCfgInfo, FooArtctOut, FooArtctSflCfgInfo, FooArtctSflI, FooCtx,
 };
 use cfgdepsarg::fs::{CfgSrc, FooArtctIn};
 use common::fwk::{AppErr, RefInto};
@@ -40,7 +40,7 @@ impl<'a> RefInto<'a, FooArtctSflCfgInfo<'a>> for CfgTestInput {
 
 async fn foo_artct_sfl<CTX>(input: FooArtctIn) -> Result<FooArtctOut, AppErr>
 where
-    CTX: FooCtxAll,
+    CTX: FooCtx,
 {
     FooArtctSflI::<CTX>::exec_with_transaction(input).await
 }
