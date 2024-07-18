@@ -1,4 +1,4 @@
-use crate::fs::{AsyncFnTx, CfgSrc, FooArtctIn, FooArtctOut, FooArtctSflBootI};
+use crate::fs::{AsyncFnTx, CfgSrc, FooArtctIn, FooArtctOut, FooArtctSflI};
 use common::config::{get_app_configuration, AppCfgInfo};
 use common::fwk::AppErr;
 
@@ -13,5 +13,5 @@ impl CfgSrc for Ctx {
 }
 
 pub async fn foo_artct_sfl(input: FooArtctIn) -> Result<FooArtctOut, AppErr> {
-    FooArtctSflBootI::<Ctx>::exec_with_transaction(input).await
+    FooArtctSflI::<Ctx>::exec_with_transaction(input).await
 }

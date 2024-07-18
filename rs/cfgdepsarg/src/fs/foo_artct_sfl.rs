@@ -1,13 +1,13 @@
 use common::config::AppCfgInfo;
 use common::fs_data::{FooArtIn, FooArtOut};
 use common::fs_util::foo_core;
-use common::fwk::{AppErr, PinBorrowFn2b2Tx, PinFn, RefInto, Tx};
+use common::fwk::{AppErr, RefInto, Tx};
 use std::marker::PhantomData;
 use std::time::Duration;
 use tokio::time::sleep;
 use tracing::instrument;
 
-use super::{AsyncFnTx, BarArtctBf, BarArtctBfBoot, BarArtctBfCfgInfo, CfgSrc};
+use super::{AsyncFnTx, BarArtctBf, BarArtctBfBoot, BarCtx, CfgSrc};
 
 pub type FooArtctIn = FooArtIn;
 pub type FooArtctOut = FooArtOut;
@@ -26,19 +26,23 @@ impl<'a> RefInto<'a, FooArtctSflCfgInfo<'a>> for AppCfgInfo {
     }
 }
 
-pub type FooArtctSflTxT = PinBorrowFn2b2Tx<FooArtIn, Result<FooArtOut, AppErr>>;
-
-pub type FooArtctSflT = PinFn<FooArtIn, Result<FooArtOut, AppErr>>;
-
 pub trait FooArtctSfl<CTX> {
     #[allow(async_fn_in_trait)]
     async fn foo_artct_sfl(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr>;
 }
 
-pub trait FooArtctSflC<CTX>: BarArtctBf<CTX>
+pub trait FooCtx: CfgSrc<AppCfg: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>> {}
+
+impl<CTX> FooCtx for CTX
 where
     CTX: CfgSrc,
     CTX::AppCfg: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>,
+{
+}
+
+pub trait FooArtctSflC<CTX>: BarArtctBf<CTX>
+where
+    CTX: FooCtx,
 {
     #[instrument(level = "trace", skip_all)]
     #[allow(async_fn_in_trait)]
@@ -55,56 +59,40 @@ where
     }
 }
 
-pub struct FooArtctSflBootI<CTX>(PhantomData<CTX>);
+//==================
+// Addition of type dependencies
 
-impl<CTX> BarArtctBfBoot<CTX> for FooArtctSflBootI<CTX>
-where
-    CTX: CfgSrc,
-    CTX::AppCfg: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>,
-{
-}
+pub trait FooCtxAll: FooCtx + BarCtx {}
 
-impl<CTX> FooArtctSflC<CTX> for FooArtctSflBootI<CTX>
-where
-    CTX: CfgSrc,
-    CTX::AppCfg: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>,
-    CTX::AppCfg: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>,
-{
-}
+impl<CTX> FooCtxAll for CTX where CTX: FooCtx + BarCtx {}
 
-impl<CTX> FooArtctSflBoot<CTX> for FooArtctSflBootI<CTX>
-where
-    CTX: CfgSrc,
-    CTX::AppCfg: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>,
-    CTX::AppCfg: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>,
-{
-}
+pub struct FooArtctSflI<CTX>(PhantomData<CTX>);
+
+impl<CTX> BarArtctBfBoot<CTX> for FooArtctSflI<CTX> where CTX: BarCtx {}
+impl<CTX> FooArtctSflC<CTX> for FooArtctSflI<CTX> where CTX: FooCtxAll {}
+impl<CTX> FooArtctSflBoot<CTX> for FooArtctSflI<CTX> where CTX: FooCtxAll {}
 
 pub trait FooArtctSflBoot<CTX>
 where
-    CTX: CfgSrc,
-    CTX::AppCfg: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>,
-    CTX::AppCfg: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>,
+    CTX: FooCtxAll,
 {
     #[allow(async_fn_in_trait)]
     async fn foo_artct_sfl_boot(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr> {
-        FooArtctSflBootI::<CTX>::foo_artct_sfl_c(input, tx).await
+        FooArtctSflI::<CTX>::foo_artct_sfl_c(input, tx).await
     }
 }
 
-impl<T, CTX> FooArtctSfl<CTX> for T
+impl<CTX, T> FooArtctSfl<CTX> for T
 where
     T: FooArtctSflBoot<CTX>,
-    CTX: CfgSrc,
-    CTX::AppCfg: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>,
-    CTX::AppCfg: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>,
+    CTX: FooCtxAll,
 {
     async fn foo_artct_sfl(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr> {
         T::foo_artct_sfl_boot(input, tx).await
     }
 }
 
-impl<T, CTX> AsyncFnTx<CTX, FooArtctIn, FooArtctOut> for T
+impl<CTX, T> AsyncFnTx<CTX, FooArtctIn, FooArtctOut> for T
 where
     T: FooArtctSfl<CTX>,
 {

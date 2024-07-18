@@ -1,6 +1,6 @@
 use common::config::AppCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{AppErr, PinBorrowFn2b2Tx, RefInto, Tx};
+use common::fwk::{AppErr, RefInto, Tx};
 use std::marker::PhantomData;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -8,7 +8,10 @@ use tracing::instrument;
 
 use crate::fs::context::CfgSrc;
 
-pub type BarArtctBfTxT = PinBorrowFn2b2Tx<u64, Result<String, AppErr>>;
+use super::AsyncFnTx;
+
+pub type BarArtctIn = u64;
+pub type BarArtctOut = String;
 
 pub struct BarArtctBfCfgInfo<'a> {
     pub u: i32,
@@ -29,10 +32,18 @@ pub trait BarArtctBf<CTX> {
     async fn bar_artct_bf(sleep_millis: u64, tx: &Tx<'_>) -> Result<String, AppErr>;
 }
 
-pub trait BarArtctBfBoot<CTX>
+pub trait BarCtx: CfgSrc<AppCfg: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>> {}
+
+impl<CTX> BarCtx for CTX
 where
     CTX: CfgSrc,
     CTX::AppCfg: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>,
+{
+}
+
+pub trait BarArtctBfBoot<CTX>
+where
+    CTX: BarCtx,
 {
     #[instrument(level = "trace", skip_all)]
     #[allow(async_fn_in_trait)]
@@ -50,8 +61,7 @@ where
 impl<CTX, T> BarArtctBf<CTX> for T
 where
     T: BarArtctBfBoot<CTX>,
-    CTX: CfgSrc,
-    CTX::AppCfg: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>,
+    CTX: BarCtx,
 {
     async fn bar_artct_bf(sleep_millis: u64, tx: &Tx<'_>) -> Result<String, AppErr> {
         Self::bar_artct_bf_boot(sleep_millis, tx).await
@@ -60,9 +70,13 @@ where
 
 pub struct BarArtctBfBootI<CTX>(PhantomData<CTX>);
 
-impl<CTX> BarArtctBfBoot<CTX> for BarArtctBfBootI<CTX>
+impl<CTX> BarArtctBfBoot<CTX> for BarArtctBfBootI<CTX> where CTX: BarCtx {}
+
+impl<CTX, T> AsyncFnTx<CTX, BarArtctIn, BarArtctOut> for T
 where
-    CTX: CfgSrc,
-    CTX::AppCfg: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>,
+    T: BarArtctBf<CTX>,
 {
+    async fn f(input: BarArtctIn, tx: &Tx<'_>) -> Result<BarArtctOut, AppErr> {
+        T::bar_artct_bf(input, tx).await
+    }
 }
