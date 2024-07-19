@@ -1,4 +1,4 @@
-use cfgdepsarg::fs::{bar_artc_bf_c, foo_artc_sfl_c, CfgSrc, FooArtcIn, FooArtcSflDeps};
+use cfgdepsarg::fs::{bar_artc_bf_c, foo_artc_sfl_c, Cfg, CfgParam, FooArtcIn, FooArtcSflDeps};
 use cfgdepsarg::fs::{BarArtcBfCfgInfo, FooArtcSflCfgInfo};
 use common::config::get_pool;
 use common::fwk::{
@@ -43,7 +43,7 @@ impl<'a> RefInto<'a, FooArtcSflCfgInfo<'a>> for CfgTestInput {
 
 pub async fn common_test<CTX>() -> Option<String>
 where
-    CTX: CfgSrc<CfgInfo = CfgTestInput> + 'static,
+    CTX: CfgParam<Cfg: Cfg<Info = CfgTestInput>> + 'static,
 {
     let bar_artc_bf_tx = cfg_deps_artc_partial_apply_free_tx_box(bar_artc_bf_c::<CTX, ()>, ());
 

@@ -10,7 +10,7 @@ use std::time::Duration;
 use tokio::time::sleep;
 use tracing::instrument;
 
-use super::{bar_artc_bf_boot_box, BarArtcBfCfgInfo, BarArtcBfTxT, CfgSrc};
+use super::{bar_artc_bf_boot_box, BarArtcBfCfgInfo, BarArtcBfTxT, Cfg, CfgParam};
 
 pub type FooArtcIn = FooArtIn;
 type FooArtcOut = FooArtOut;
@@ -44,10 +44,10 @@ pub async fn foo_artc_sfl_c<CTX>(
     tx: &Tx<'_>,
 ) -> Result<FooArtcOut, AppErr>
 where
-    CTX: CfgSrc,
-    CTX::CfgInfo: for<'a> RefInto<'a, FooArtcSflCfgInfo<'a>>,
+    CTX: CfgParam,
+    <CTX::Cfg as Cfg>::Info: for<'a> RefInto<'a, FooArtcSflCfgInfo<'a>>,
 {
-    let app_cfg_info = CTX::cfg_src();
+    let app_cfg_info = CTX::Cfg::cfg();
     let cfg = app_cfg_info.ref_into();
     let FooArtcIn { sleep_millis } = input;
     sleep(Duration::from_millis(sleep_millis)).await;
@@ -61,10 +61,10 @@ where
 /// Returns an arced foo_artc_sfl closure with free Tx parameter.
 pub fn foo_artc_sfl_boot_arc<CTX>() -> Arc<FooArtcSflTxT>
 where
-    CTX: CfgSrc + 'static,
-    CTX::CfgInfo: Send + Sync + 'static,
-    CTX::CfgInfo: for<'a> RefInto<'a, BarArtcBfCfgInfo<'a>>,
-    CTX::CfgInfo: for<'a> RefInto<'a, FooArtcSflCfgInfo<'a>>,
+    CTX: CfgParam + 'static,
+    <CTX::Cfg as Cfg>::Info: Send + Sync + 'static,
+    <CTX::Cfg as Cfg>::Info: for<'a> RefInto<'a, BarArtcBfCfgInfo<'a>>,
+    <CTX::Cfg as Cfg>::Info: for<'a> RefInto<'a, FooArtcSflCfgInfo<'a>>,
 {
     let b = bar_artc_bf_boot_box::<CTX>();
     let deps = Arc::new(FooArtcSflDeps { bar_artc_bf: b });

@@ -1,20 +1,20 @@
 mod common_test_artc;
 
-use cfgdepsarg::fs::CfgSrc;
+use cfgdepsarg::fs::{Cfg, CfgParam};
 use common_test_artc::common_test;
 use common_test_artc::{BarBfCfgTestInput, CfgTestInput, FooSflCfgTestInput};
 use tokio;
 
 mod t1 {
-
     use super::*;
 
     struct Ctx;
+    struct CtxCfg;
 
-    impl CfgSrc for Ctx {
-        type CfgInfo = CfgTestInput;
+    impl Cfg for CtxCfg {
+        type Info = CfgTestInput;
 
-        fn cfg_src() -> Self::CfgInfo {
+        fn cfg() -> Self::Info {
             CfgTestInput {
                 foo: FooSflCfgTestInput {
                     a: "foo_artc_test1".to_owned(),
@@ -26,6 +26,10 @@ mod t1 {
                 },
             }
         }
+    }
+
+    impl CfgParam for Ctx {
+        type Cfg = CtxCfg;
     }
 
     #[tokio::test]
@@ -41,11 +45,12 @@ mod t2 {
     use super::*;
 
     struct Ctx;
+    struct CtxCfg;
 
-    impl CfgSrc for Ctx {
-        type CfgInfo = CfgTestInput;
+    impl Cfg for CtxCfg {
+        type Info = CfgTestInput;
 
-        fn cfg_src() -> Self::CfgInfo {
+        fn cfg() -> Self::Info {
             CfgTestInput {
                 foo: FooSflCfgTestInput {
                     a: "foo_artc_test2".to_owned(),
@@ -57,6 +62,10 @@ mod t2 {
                 },
             }
         }
+    }
+
+    impl CfgParam for Ctx {
+        type Cfg = CtxCfg;
     }
 
     #[tokio::test]

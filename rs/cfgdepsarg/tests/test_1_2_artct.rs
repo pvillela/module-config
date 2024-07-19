@@ -1,7 +1,7 @@
 mod common_test_artct;
 
-use cfgdepsarg::fs::CfgSrc;
-use common::fwk::TxParamDefault;
+use cfgdepsarg::fs::{Cfg, CfgParam};
+use common::fwk::{DbClientDefault, DbClientParam};
 use common_test_artct::{common_test, BarBfCfgTestInput, CfgTestInput, FooSflCfgTestInput};
 use tokio;
 
@@ -9,23 +9,35 @@ mod t1 {
     use super::*;
 
     struct Ctx;
-    impl TxParamDefault for Ctx {}
+    struct CtxCfg;
 
-    impl CfgSrc for Ctx {
-        type CfgInfo = CfgTestInput;
+    impl Cfg for CtxCfg {
+        type Info = CfgTestInput;
 
-        fn cfg_src() -> Self::CfgInfo {
+        fn cfg() -> Self::Info {
             CfgTestInput {
                 foo: FooSflCfgTestInput {
-                    a: "foo_artct_test1".to_owned(),
+                    a: "foo_artc_test1".to_owned(),
                     b: 1,
                 },
                 bar: BarBfCfgTestInput {
                     u: 11,
-                    v: "bar_artct_test1".to_owned(),
+                    v: "bar_artc_test1".to_owned(),
                 },
             }
         }
+    }
+
+    impl CfgParam for Ctx {
+        type Cfg = CtxCfg;
+    }
+
+    struct CtxDbClient;
+
+    impl DbClientDefault for CtxDbClient {}
+
+    impl DbClientParam for Ctx {
+        type DbClient = CtxDbClient;
     }
 
     #[tokio::test]
@@ -41,23 +53,35 @@ mod t2 {
     use super::*;
 
     struct Ctx;
-    impl TxParamDefault for Ctx {}
+    struct CtxCfg;
 
-    impl CfgSrc for Ctx {
-        type CfgInfo = CfgTestInput;
+    impl Cfg for CtxCfg {
+        type Info = CfgTestInput;
 
-        fn cfg_src() -> Self::CfgInfo {
+        fn cfg() -> Self::Info {
             CfgTestInput {
                 foo: FooSflCfgTestInput {
-                    a: "foo_artct_test2".to_owned(),
+                    a: "foo_artc_test2".to_owned(),
                     b: 2,
                 },
                 bar: BarBfCfgTestInput {
                     u: 22,
-                    v: "bar_artct_test2".to_owned(),
+                    v: "bar_artc_test2".to_owned(),
                 },
             }
         }
+    }
+
+    impl CfgParam for Ctx {
+        type Cfg = CtxCfg;
+    }
+
+    struct CtxDbClient;
+
+    impl DbClientDefault for CtxDbClient {}
+
+    impl DbClientParam for Ctx {
+        type DbClient = CtxDbClient;
     }
 
     #[tokio::test]

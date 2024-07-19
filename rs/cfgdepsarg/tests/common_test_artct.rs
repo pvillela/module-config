@@ -1,8 +1,8 @@
 use cfgdepsarg::fs::{
-    AsyncFnTx, BarArtctBfCfgInfo, FooArtctOut, FooArtctSflCfgInfo, FooArtctSflI, FooCtx,
+    AsyncFnTx, BarArtctBfCfgInfo, CfgParam, FooArtctOut, FooArtctSflCfgInfo, FooArtctSflI, FooCtx,
 };
-use cfgdepsarg::fs::{CfgSrc, FooArtctIn};
-use common::fwk::{AppErr, RefInto, TxParam};
+use cfgdepsarg::fs::{Cfg, FooArtctIn};
+use common::fwk::{AppErr, DbClientParam, RefInto};
 use tokio;
 
 pub struct BarBfCfgTestInput {
@@ -40,14 +40,14 @@ impl<'a> RefInto<'a, FooArtctSflCfgInfo<'a>> for CfgTestInput {
 
 async fn foo_artct_sfl<CTX>(input: FooArtctIn) -> Result<FooArtctOut, AppErr>
 where
-    CTX: FooCtx + TxParam,
+    CTX: FooCtx + DbClientParam,
 {
     FooArtctSflI::<CTX>::exec_with_transaction(input).await
 }
 
 pub async fn common_test<CTX>() -> Option<String>
 where
-    CTX: CfgSrc<CfgInfo = CfgTestInput> + TxParam + 'static,
+    CTX: CfgParam<Cfg: Cfg<Info = CfgTestInput>> + DbClientParam + 'static,
 {
     let handle =
         tokio::spawn(async move { foo_artct_sfl::<CTX>(FooArtctIn { sleep_millis: 0 }).await });

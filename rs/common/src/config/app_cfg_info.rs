@@ -1,4 +1,4 @@
-use crate::fwk::{DbCfg, DbPool};
+use crate::fwk::{DbCfg, DummyDbPool};
 use arc_swap::{ArcSwap, ArcSwapAny};
 use std::sync::{
     atomic::{AtomicU32, Ordering},
@@ -56,14 +56,14 @@ pub fn get_app_configuration() -> AppCfgInfo {
 }
 
 impl DbCfg for AppCfgInfo {
-    fn get_pool(&self) -> &DbPool {
+    fn get_pool(&self) -> &DummyDbPool {
         // TODO: implement this properly
-        static POOL: OnceLock<DbPool> = OnceLock::new();
-        POOL.get_or_init(|| DbPool)
+        static POOL: OnceLock<DummyDbPool> = OnceLock::new();
+        POOL.get_or_init(|| DummyDbPool)
     }
 }
 
-pub fn get_pool() -> &'static DbPool {
+pub fn get_pool() -> &'static DummyDbPool {
     static CFG: OnceLock<AppCfgInfo> = OnceLock::new();
     let cfg = CFG.get_or_init(|| get_app_configuration().clone());
     cfg.get_pool()

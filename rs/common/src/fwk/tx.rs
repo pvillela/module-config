@@ -17,34 +17,38 @@ pub trait Transaction {
     fn transaction<'a>(&'a mut self) -> impl Future<Output = Result<Tx<'a>, Self::DbErr>> + Send;
 }
 
-pub trait TxParam {
+pub trait DbClient {
     type DbClient: Transaction + Send;
     type Tx<'a>;
 
     #[allow(async_fn_in_trait)]
     fn db_client(
-    ) -> impl Future<Output = Result<Self::DbClient, <DbClient as Transaction>::DbErr>> + Send;
+    ) -> impl Future<Output = Result<Self::DbClient, <DummyDbClient as Transaction>::DbErr>> + Send;
 }
 
-pub trait TxParamDefault {}
+pub trait DbClientParam {
+    type DbClient: DbClient;
+}
 
-impl<T> TxParam for T
+pub trait DbClientDefault {}
+
+impl<T> DbClient for T
 where
-    T: TxParamDefault,
+    T: DbClientDefault,
 {
-    type DbClient = DbClient;
+    type DbClient = DummyDbClient;
     type Tx<'a> = Tx<'a>;
 
     #[allow(async_fn_in_trait)]
-    async fn db_client() -> Result<DbClient, DbErr> {
+    async fn db_client() -> Result<DummyDbClient, DbErr> {
         let pool = get_pool();
         get_connection(pool).await
     }
 }
 
-pub struct DbClient;
+pub struct DummyDbClient;
 
-pub struct DbPool;
+pub struct DummyDbPool;
 
 #[derive(Debug)]
 pub struct DbErr;
@@ -58,20 +62,20 @@ impl Display for DbErr {
 impl Error for DbErr {}
 
 pub trait DbCfg {
-    fn get_pool(&self) -> &DbPool;
+    fn get_pool(&self) -> &DummyDbPool;
 }
 
-pub async fn get_connection(_pool: &DbPool) -> Result<DbClient, DbErr> {
+pub async fn get_connection(_pool: &DummyDbPool) -> Result<DummyDbClient, DbErr> {
     // TODO: implement this properly
-    Ok(DbClient)
+    Ok(DummyDbClient)
 }
 
 pub struct Tx<'a> {
     #[allow(unused)]
-    db: &'a mut DbClient,
+    db: &'a mut DummyDbClient,
 }
 
-impl DbClient {
+impl DummyDbClient {
     pub async fn transaction<'a>(&'a mut self) -> Result<Tx<'a>, DbErr> {
         // TODO: implement this properly
         // println!("Db.transaction() called");
@@ -79,7 +83,7 @@ impl DbClient {
     }
 }
 
-impl Transaction for DbClient {
+impl Transaction for DummyDbClient {
     type Tx<'a> = Tx<'a>;
     type DbErr = DbErr;
 
@@ -108,7 +112,7 @@ impl<'a> Tx<'a> {
 }
 
 async fn exec_fn2_with_transaction<'p, A, T, AppErr>(
-    pool: &'p DbPool,
+    pool: &'p DummyDbPool,
     f: impl for<'a> FnOnce(
             A,
             &'a Tx<'a>,
@@ -133,7 +137,7 @@ where
 }
 
 async fn exec_fn2_arc_with_transaction<'p, A, T, AppErr>(
-    pool: &'p DbPool,
+    pool: &'p DummyDbPool,
     f: Arc<
         dyn for<'a> Fn(
                 A,
@@ -163,7 +167,7 @@ where
 /// returns a closure which, for each input,
 /// returns the result of executing `f` with the input and a `&Tx` in a transactional context.
 pub fn fn2_with_transaction<'p, A, T, AppErr>(
-    pool: &'p DbPool,
+    pool: &'p DummyDbPool,
     f: impl for<'a> Fn(
             A,
             &'a Tx<'a>,
@@ -188,7 +192,7 @@ where
 /// returns a closure which, for each input,
 /// returns the result of executing `f` with the input and a `&Tx` in a transactional context.
 pub fn fn2_arc_with_transaction<'p, A, T, AppErr>(
-    pool: &'p DbPool,
+    pool: &'p DummyDbPool,
     f: Arc<
         dyn for<'a> Fn(
                 A,
@@ -214,7 +218,7 @@ where
 /// returns a closure which, for each input,
 /// returns the result of executing `f` with the input and a `&Tx` in a transactional context.
 pub fn fn2_static_ref_with_transaction<'p, A, T, AppErr>(
-    pool: &'p DbPool,
+    pool: &'p DummyDbPool,
     f: &'static (dyn for<'a> Fn(
         A,
         &'a Tx<'a>,

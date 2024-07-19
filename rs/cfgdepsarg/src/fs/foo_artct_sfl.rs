@@ -1,13 +1,13 @@
 use common::config::AppCfgInfo;
 use common::fs_data::{FooArtIn, FooArtOut};
 use common::fs_util::foo_core;
-use common::fwk::{AppErr, RefInto, Tx, TxParam};
+use common::fwk::{AppErr, DbClientParam, RefInto, Tx};
 use std::marker::PhantomData;
 use std::time::Duration;
 use tokio::time::sleep;
 use tracing::instrument;
 
-use super::{AsyncFnTx, BarArtctBf, BarArtctBfBoot, BarCtx, CfgSrc};
+use super::{AsyncFnTx, BarArtctBf, BarArtctBfBoot, BarCtx, Cfg, CfgParam};
 
 pub type FooArtctIn = FooArtIn;
 pub type FooArtctOut = FooArtOut;
@@ -31,12 +31,15 @@ pub trait FooArtctSfl<CTX> {
     async fn foo_artct_sfl(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr>;
 }
 
-pub trait FooOnlyCtx: CfgSrc<CfgInfo: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>> {}
+pub trait FooOnlyCtx:
+    CfgParam<Cfg: Cfg<Info: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>>>
+{
+}
 
 impl<CTX> FooOnlyCtx for CTX
 where
-    CTX: CfgSrc,
-    CTX::CfgInfo: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>,
+    CTX: CfgParam,
+    <CTX::Cfg as Cfg>::Info: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>,
 {
 }
 
@@ -47,7 +50,7 @@ where
     #[instrument(level = "trace", skip_all)]
     #[allow(async_fn_in_trait)]
     async fn foo_artct_sfl_c(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr> {
-        let app_cfg_info = CTX::cfg_src();
+        let app_cfg_info = CTX::Cfg::cfg();
         let cfg = app_cfg_info.ref_into();
         let FooArtctIn { sleep_millis } = input;
         sleep(Duration::from_millis(sleep_millis)).await;
@@ -94,7 +97,7 @@ where
 
 impl<CTX, T> AsyncFnTx<CTX, FooArtctIn, FooArtctOut> for T
 where
-    CTX: TxParam,
+    CTX: DbClientParam,
     T: FooArtctSfl<CTX>,
 {
     async fn f(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr> {
