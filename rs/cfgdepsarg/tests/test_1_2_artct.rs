@@ -1,20 +1,20 @@
 mod common_test_artct;
 
 use cfgdepsarg::fs::CfgSrc;
-use common_test_artct::common_test;
-use common_test_artct::{BarBfCfgTestInput, CfgTestInput, FooSflCfgTestInput};
+use common::fwk::TxParamDefault;
+use common_test_artct::{common_test, BarBfCfgTestInput, CfgTestInput, FooSflCfgTestInput};
 use tokio;
 
 mod t1 {
-
     use super::*;
 
     struct Ctx;
+    impl TxParamDefault for Ctx {}
 
     impl CfgSrc for Ctx {
-        type AppCfg = CfgTestInput;
+        type CfgInfo = CfgTestInput;
 
-        fn cfg_src() -> Self::AppCfg {
+        fn cfg_src() -> Self::CfgInfo {
             CfgTestInput {
                 foo: FooSflCfgTestInput {
                     a: "foo_artct_test1".to_owned(),
@@ -41,11 +41,12 @@ mod t2 {
     use super::*;
 
     struct Ctx;
+    impl TxParamDefault for Ctx {}
 
     impl CfgSrc for Ctx {
-        type AppCfg = CfgTestInput;
+        type CfgInfo = CfgTestInput;
 
-        fn cfg_src() -> Self::AppCfg {
+        fn cfg_src() -> Self::CfgInfo {
             CfgTestInput {
                 foo: FooSflCfgTestInput {
                     a: "foo_artct_test2".to_owned(),

@@ -30,7 +30,7 @@ pub async fn bar_artc_bf_c<CTX, DUMMY>(
 ) -> Result<String, AppErr>
 where
     CTX: CfgSrc,
-    CTX::AppCfg: for<'a> RefInto<'a, BarArtcBfCfgInfo<'a>>,
+    CTX::CfgInfo: for<'a> RefInto<'a, BarArtcBfCfgInfo<'a>>,
 {
     let app_cfg_info = CTX::cfg_src();
     let cfg = app_cfg_info.ref_into();
@@ -45,8 +45,8 @@ where
 pub fn bar_artc_bf_boot_box<CTX>() -> Box<BarArtcBfTxT>
 where
     CTX: CfgSrc + 'static,
-    CTX::AppCfg: Send + Sync + 'static,
-    CTX::AppCfg: for<'a> RefInto<'a, BarArtcBfCfgInfo<'a>>,
+    CTX::CfgInfo: Send + Sync + 'static,
+    CTX::CfgInfo: for<'a> RefInto<'a, BarArtcBfCfgInfo<'a>>,
 {
     cfg_deps_artc_partial_apply_free_tx_box(bar_artc_bf_c::<CTX, ()>, ())
 }

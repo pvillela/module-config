@@ -1,13 +1,14 @@
 use crate::fs::{AsyncFnTx, CfgSrc, FooArtctIn, FooArtctOut, FooArtctSflI};
 use common::config::{get_app_configuration, AppCfgInfo};
-use common::fwk::AppErr;
+use common::fwk::{AppErr, TxParamDefault};
 
 struct Ctx;
+impl TxParamDefault for Ctx {}
 
 impl CfgSrc for Ctx {
-    type AppCfg = AppCfgInfo;
+    type CfgInfo = AppCfgInfo;
 
-    fn cfg_src() -> Self::AppCfg {
+    fn cfg_src() -> Self::CfgInfo {
         get_app_configuration()
     }
 }

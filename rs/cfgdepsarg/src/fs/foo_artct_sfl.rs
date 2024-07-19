@@ -1,7 +1,7 @@
 use common::config::AppCfgInfo;
 use common::fs_data::{FooArtIn, FooArtOut};
 use common::fs_util::foo_core;
-use common::fwk::{AppErr, RefInto, Tx};
+use common::fwk::{AppErr, RefInto, Tx, TxParam};
 use std::marker::PhantomData;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -31,12 +31,12 @@ pub trait FooArtctSfl<CTX> {
     async fn foo_artct_sfl(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr>;
 }
 
-pub trait FooOnlyCtx: CfgSrc<AppCfg: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>> {}
+pub trait FooOnlyCtx: CfgSrc<CfgInfo: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>> {}
 
 impl<CTX> FooOnlyCtx for CTX
 where
     CTX: CfgSrc,
-    CTX::AppCfg: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>,
+    CTX::CfgInfo: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>,
 {
 }
 
@@ -94,6 +94,7 @@ where
 
 impl<CTX, T> AsyncFnTx<CTX, FooArtctIn, FooArtctOut> for T
 where
+    CTX: TxParam,
     T: FooArtctSfl<CTX>,
 {
     async fn f(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr> {

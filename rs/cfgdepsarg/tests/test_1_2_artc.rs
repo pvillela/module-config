@@ -12,9 +12,9 @@ mod t1 {
     struct Ctx;
 
     impl CfgSrc for Ctx {
-        type AppCfg = CfgTestInput;
+        type CfgInfo = CfgTestInput;
 
-        fn cfg_src() -> Self::AppCfg {
+        fn cfg_src() -> Self::CfgInfo {
             CfgTestInput {
                 foo: FooSflCfgTestInput {
                     a: "foo_artc_test1".to_owned(),
@@ -43,9 +43,9 @@ mod t2 {
     struct Ctx;
 
     impl CfgSrc for Ctx {
-        type AppCfg = CfgTestInput;
+        type CfgInfo = CfgTestInput;
 
-        fn cfg_src() -> Self::AppCfg {
+        fn cfg_src() -> Self::CfgInfo {
             CfgTestInput {
                 foo: FooSflCfgTestInput {
                     a: "foo_artc_test2".to_owned(),

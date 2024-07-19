@@ -1,6 +1,6 @@
 use common::config::AppCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{AppErr, RefInto, Tx};
+use common::fwk::{AppErr, RefInto, Tx, TxParam};
 use std::marker::PhantomData;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -32,12 +32,12 @@ pub trait BarArtctBf<CTX> {
     async fn bar_artct_bf(sleep_millis: u64, tx: &Tx<'_>) -> Result<String, AppErr>;
 }
 
-pub trait BarCtx: CfgSrc<AppCfg: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>> {}
+pub trait BarCtx: CfgSrc<CfgInfo: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>> {}
 
 impl<CTX> BarCtx for CTX
 where
     CTX: CfgSrc,
-    CTX::AppCfg: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>,
+    CTX::CfgInfo: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>,
 {
 }
 
@@ -74,6 +74,7 @@ impl<CTX> BarArtctBfBoot<CTX> for BarArtctBfBootI<CTX> where CTX: BarCtx {}
 
 impl<CTX, T> AsyncFnTx<CTX, BarArtctIn, BarArtctOut> for T
 where
+    CTX: TxParam,
     T: BarArtctBf<CTX>,
 {
     async fn f(input: BarArtctIn, tx: &Tx<'_>) -> Result<BarArtctOut, AppErr> {

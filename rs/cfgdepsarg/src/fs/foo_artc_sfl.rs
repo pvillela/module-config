@@ -45,7 +45,7 @@ pub async fn foo_artc_sfl_c<CTX>(
 ) -> Result<FooArtcOut, AppErr>
 where
     CTX: CfgSrc,
-    CTX::AppCfg: for<'a> RefInto<'a, FooArtcSflCfgInfo<'a>>,
+    CTX::CfgInfo: for<'a> RefInto<'a, FooArtcSflCfgInfo<'a>>,
 {
     let app_cfg_info = CTX::cfg_src();
     let cfg = app_cfg_info.ref_into();
@@ -62,9 +62,9 @@ where
 pub fn foo_artc_sfl_boot_arc<CTX>() -> Arc<FooArtcSflTxT>
 where
     CTX: CfgSrc + 'static,
-    CTX::AppCfg: Send + Sync + 'static,
-    CTX::AppCfg: for<'a> RefInto<'a, BarArtcBfCfgInfo<'a>>,
-    CTX::AppCfg: for<'a> RefInto<'a, FooArtcSflCfgInfo<'a>>,
+    CTX::CfgInfo: Send + Sync + 'static,
+    CTX::CfgInfo: for<'a> RefInto<'a, BarArtcBfCfgInfo<'a>>,
+    CTX::CfgInfo: for<'a> RefInto<'a, FooArtcSflCfgInfo<'a>>,
 {
     let b = bar_artc_bf_boot_box::<CTX>();
     let deps = Arc::new(FooArtcSflDeps { bar_artc_bf: b });

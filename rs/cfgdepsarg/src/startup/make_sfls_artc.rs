@@ -5,9 +5,9 @@ use common::fwk::fn2_arc_with_transaction;
 struct Ctx;
 
 impl CfgSrc for Ctx {
-    type AppCfg = AppCfgInfo;
+    type CfgInfo = AppCfgInfo;
 
-    fn cfg_src() -> Self::AppCfg {
+    fn cfg_src() -> Self::CfgInfo {
         get_app_configuration()
     }
 }

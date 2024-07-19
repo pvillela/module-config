@@ -1,6 +1,46 @@
-use crate::fwk::AsyncBorrowFn2b2;
+use crate::{config::get_pool, fwk::AsyncBorrowFn2b2};
 use futures::Future;
-use std::{pin::Pin, sync::Arc};
+use std::{
+    error::Error,
+    fmt::{Debug, Display},
+    pin::Pin,
+    sync::Arc,
+};
+
+use super::AppErr;
+
+pub trait Transaction {
+    type Tx<'a>;
+    type DbErr: Error + Into<AppErr> + Send;
+
+    #[allow(async_fn_in_trait)]
+    fn transaction<'a>(&'a mut self) -> impl Future<Output = Result<Tx<'a>, Self::DbErr>> + Send;
+}
+
+pub trait TxParam {
+    type DbClient: Transaction + Send;
+    type Tx<'a>;
+
+    #[allow(async_fn_in_trait)]
+    fn db_client(
+    ) -> impl Future<Output = Result<Self::DbClient, <DbClient as Transaction>::DbErr>> + Send;
+}
+
+pub trait TxParamDefault {}
+
+impl<T> TxParam for T
+where
+    T: TxParamDefault,
+{
+    type DbClient = DbClient;
+    type Tx<'a> = Tx<'a>;
+
+    #[allow(async_fn_in_trait)]
+    async fn db_client() -> Result<DbClient, DbErr> {
+        let pool = get_pool();
+        get_connection(pool).await
+    }
+}
 
 pub struct DbClient;
 
@@ -8,6 +48,14 @@ pub struct DbPool;
 
 #[derive(Debug)]
 pub struct DbErr;
+
+impl Display for DbErr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt(&self, f)
+    }
+}
+
+impl Error for DbErr {}
 
 pub trait DbCfg {
     fn get_pool(&self) -> &DbPool;
@@ -28,6 +76,15 @@ impl DbClient {
         // TODO: implement this properly
         // println!("Db.transaction() called");
         Ok(Tx { db: self })
+    }
+}
+
+impl Transaction for DbClient {
+    type Tx<'a> = Tx<'a>;
+    type DbErr = DbErr;
+
+    async fn transaction<'a>(&'a mut self) -> Result<Tx<'a>, Self::DbErr> {
+        self.transaction().await
     }
 }
 
