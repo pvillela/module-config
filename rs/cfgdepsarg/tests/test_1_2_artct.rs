@@ -17,12 +17,12 @@ mod t1 {
         fn cfg() -> Self::Info {
             CfgTestInput {
                 foo: FooSflCfgTestInput {
-                    a: "foo_artc_test1".to_owned(),
+                    a: "foo_artct_test1".to_owned(),
                     b: 1,
                 },
                 bar: BarBfCfgTestInput {
                     u: 11,
-                    v: "bar_artc_test1".to_owned(),
+                    v: "bar_artct_test1".to_owned(),
                 },
             }
         }
@@ -61,12 +61,12 @@ mod t2 {
         fn cfg() -> Self::Info {
             CfgTestInput {
                 foo: FooSflCfgTestInput {
-                    a: "foo_artc_test2".to_owned(),
+                    a: "foo_artct_test2".to_owned(),
                     b: 2,
                 },
                 bar: BarBfCfgTestInput {
                     u: 22,
-                    v: "bar_artc_test2".to_owned(),
+                    v: "bar_artct_test2".to_owned(),
                 },
             }
         }

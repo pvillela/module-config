@@ -3,7 +3,7 @@ use common::fs_data::{FooArtIn, FooArtOut};
 use common::fs_util::foo_core;
 use common::fwk::{
     cfg_deps_art_boot_free_tx_lr, cfg_deps_art_partial_apply_free_tx_arc, AppErr, Make,
-    PinBorrowFn2b2Tx, PinFn, RefInto, Tx,
+    PinBorrowFn2b2Tx, PinFn, RefInto, DummyTx,
 };
 use std::ops::Deref;
 use std::sync::Arc;
@@ -40,7 +40,7 @@ pub async fn foo_art_sfl_c<ACFG>(
     cfg_src: impl Make<ACFG>,
     d: impl Deref<Target = FooArtSflDeps>,
     input: FooArtIn,
-    tx: &Tx<'_>,
+    tx: &DummyTx<'_>,
 ) -> Result<FooArtOut, AppErr>
 where
     ACFG: for<'a> RefInto<'a, FooArtSflCfgInfo<'a>>,

@@ -2,7 +2,7 @@ use common::config::AppCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::{
     cfg_deps_ast_boot_free_tx_box, cfg_deps_ast_boot_free_tx_lr, AppErr, CfgDeps, PinBorrowFn2b2Tx,
-    Tx,
+    DummyTx,
 };
 use std::ops::Deref;
 use std::time::Duration;
@@ -17,7 +17,7 @@ pub type BarAstBfS = CfgDeps<AppCfgInfo, ()>;
 pub async fn bar_ast_bf_c(
     s: impl Deref<Target = BarAstBfS>,
     sleep_millis: u64,
-    tx: &Tx<'_>,
+    tx: &DummyTx<'_>,
 ) -> Result<String, AppErr> {
     let cfg = &s.cfg;
     sleep(Duration::from_millis(sleep_millis)).await;

@@ -5,7 +5,7 @@ use common::fs_data::{FooAtIn, FooAtOut, FooAtSflCfgInfo};
 use common::fs_util::foo_core;
 use common::fwk::{
     cfg_deps_at_boot_free_tx_arc, cfg_deps_at_boot_free_tx_lr, AppErr, CfgArcSwapArc, CfgDeps,
-    PinBorrowFn2b2Tx, PinFn, RefreshMode, Tx,
+    PinBorrowFn2b2Tx, PinFn, RefreshMode, DummyTx,
 };
 use std::ops::Deref;
 use std::sync::Arc;
@@ -29,7 +29,7 @@ pub type FooAtSflS = CfgDeps<FooAtSflCfg, FooAtSflDeps>;
 pub async fn foo_at_sfl_c(
     s: impl Deref<Target = FooAtSflS> + Send + Sync,
     input: FooAtIn,
-    tx: &Tx<'_>,
+    tx: &DummyTx<'_>,
 ) -> Result<FooAtOut, AppErr> {
     let c = s.cfg.get_cfg();
     let d = &s.deps;

@@ -1,7 +1,7 @@
 use common::config::AppCfgInfo;
 use common::fs_data::{FooArtIn, FooArtOut};
 use common::fs_util::foo_core;
-use common::fwk::{AppErr, DbClientParam, RefInto, Tx};
+use common::fwk::{AppErr, DbClientParam, DummyTx, RefInto};
 use std::marker::PhantomData;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -28,7 +28,7 @@ impl<'a> RefInto<'a, FooArtctSflCfgInfo<'a>> for AppCfgInfo {
 
 pub trait FooArtctSfl<CTX> {
     #[allow(async_fn_in_trait)]
-    async fn foo_artct_sfl(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr>;
+    async fn foo_artct_sfl(input: FooArtctIn, tx: &DummyTx<'_>) -> Result<FooArtctOut, AppErr>;
 }
 
 pub trait FooOnlyCtx:
@@ -49,7 +49,7 @@ where
 {
     #[instrument(level = "trace", skip_all)]
     #[allow(async_fn_in_trait)]
-    async fn foo_artct_sfl_c(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr> {
+    async fn foo_artct_sfl_c(input: FooArtctIn, tx: &DummyTx<'_>) -> Result<FooArtctOut, AppErr> {
         let app_cfg_info = CTX::Cfg::cfg();
         let cfg = app_cfg_info.ref_into();
         let FooArtctIn { sleep_millis } = input;
@@ -80,7 +80,10 @@ where
     CTX: FooCtx,
 {
     #[allow(async_fn_in_trait)]
-    async fn foo_artct_sfl_boot(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr> {
+    async fn foo_artct_sfl_boot(
+        input: FooArtctIn,
+        tx: &DummyTx<'_>,
+    ) -> Result<FooArtctOut, AppErr> {
         FooArtctSflI::<CTX>::foo_artct_sfl_c(input, tx).await
     }
 }
@@ -90,7 +93,7 @@ where
     T: FooArtctSflBoot<CTX>,
     CTX: FooCtx,
 {
-    async fn foo_artct_sfl(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr> {
+    async fn foo_artct_sfl(input: FooArtctIn, tx: &DummyTx<'_>) -> Result<FooArtctOut, AppErr> {
         T::foo_artct_sfl_boot(input, tx).await
     }
 }
@@ -100,7 +103,7 @@ where
     CTX: DbClientParam,
     T: FooArtctSfl<CTX>,
 {
-    async fn f(input: FooArtctIn, tx: &Tx<'_>) -> Result<FooArtctOut, AppErr> {
+    async fn f(input: FooArtctIn, tx: &DummyTx<'_>) -> Result<FooArtctOut, AppErr> {
         T::foo_artct_sfl(input, tx).await
     }
 }

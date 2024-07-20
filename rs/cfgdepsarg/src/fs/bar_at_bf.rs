@@ -3,7 +3,7 @@ use common::fs_data::BarAtBfCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::{
     cfg_deps_at_boot_free_tx_box, cfg_deps_at_boot_free_tx_lr, AppErr, CfgArcSwapArc, CfgDeps,
-    PinBorrowFn2b2Tx, RefreshMode, Tx,
+    PinBorrowFn2b2Tx, RefreshMode, DummyTx,
 };
 use std::ops::Deref;
 use std::time::Duration;
@@ -20,7 +20,7 @@ pub type BarAtBfS = CfgDeps<BarAtBfCfg, ()>;
 pub async fn bar_at_bf_c(
     s: impl Deref<Target = BarAtBfS> + Send + Sync,
     sleep_millis: u64,
-    tx: &Tx<'_>,
+    tx: &DummyTx<'_>,
 ) -> Result<String, AppErr> {
     let cfg = s.cfg.get_cfg();
     sleep(Duration::from_millis(sleep_millis)).await;

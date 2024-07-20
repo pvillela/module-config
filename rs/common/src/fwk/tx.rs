@@ -14,16 +14,14 @@ pub trait Transaction {
     type DbErr: Error + Into<AppErr> + Send;
 
     #[allow(async_fn_in_trait)]
-    fn transaction<'a>(&'a mut self) -> impl Future<Output = Result<Tx<'a>, Self::DbErr>> + Send;
+    fn transaction<'a>(&'a mut self) -> impl Future<Output = Result<DummyTx<'a>, Self::DbErr>> + Send;
 }
 
 pub trait DbClient {
-    type DbClient: Transaction + Send;
-    type Tx<'a>;
+    type Db: Transaction + Send;
 
     #[allow(async_fn_in_trait)]
-    fn db_client(
-    ) -> impl Future<Output = Result<Self::DbClient, <DummyDbClient as Transaction>::DbErr>> + Send;
+    fn db_client() -> impl Future<Output = Result<Self::Db, <Self::Db as Transaction>::DbErr>> + Send;
 }
 
 pub trait DbClientParam {
@@ -36,8 +34,7 @@ impl<T> DbClient for T
 where
     T: DbClientDefault,
 {
-    type DbClient = DummyDbClient;
-    type Tx<'a> = Tx<'a>;
+    type Db = DummyDbClient;
 
     #[allow(async_fn_in_trait)]
     async fn db_client() -> Result<DummyDbClient, DbErr> {
@@ -70,29 +67,29 @@ pub async fn get_connection(_pool: &DummyDbPool) -> Result<DummyDbClient, DbErr>
     Ok(DummyDbClient)
 }
 
-pub struct Tx<'a> {
+pub struct DummyTx<'a> {
     #[allow(unused)]
     db: &'a mut DummyDbClient,
 }
 
 impl DummyDbClient {
-    pub async fn transaction<'a>(&'a mut self) -> Result<Tx<'a>, DbErr> {
+    pub async fn transaction<'a>(&'a mut self) -> Result<DummyTx<'a>, DbErr> {
         // TODO: implement this properly
         // println!("Db.transaction() called");
-        Ok(Tx { db: self })
+        Ok(DummyTx { db: self })
     }
 }
 
 impl Transaction for DummyDbClient {
-    type Tx<'a> = Tx<'a>;
+    type Tx<'a> = DummyTx<'a>;
     type DbErr = DbErr;
 
-    async fn transaction<'a>(&'a mut self) -> Result<Tx<'a>, Self::DbErr> {
+    async fn transaction<'a>(&'a mut self) -> Result<DummyTx<'a>, Self::DbErr> {
         self.transaction().await
     }
 }
 
-impl<'a> Tx<'a> {
+impl<'a> DummyTx<'a> {
     pub async fn commit(self) -> Result<(), DbErr> {
         // TODO: implement this properly
         // println!("Tx.commit() called");
@@ -115,7 +112,7 @@ async fn exec_fn2_with_transaction<'p, A, T, AppErr>(
     pool: &'p DummyDbPool,
     f: impl for<'a> FnOnce(
             A,
-            &'a Tx<'a>,
+            &'a DummyTx<'a>,
         )
             -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'a>>
         + Send
@@ -126,7 +123,7 @@ where
     AppErr: From<DbErr>,
 {
     let mut db = get_connection(pool).await?;
-    let tx: Tx = db.transaction().await?;
+    let tx: DummyTx = db.transaction().await?;
     let res = f(input, &tx).await;
     if res.is_ok() {
         tx.commit().await?;
@@ -141,7 +138,7 @@ async fn exec_fn2_arc_with_transaction<'p, A, T, AppErr>(
     f: Arc<
         dyn for<'a> Fn(
                 A,
-                &'a Tx<'a>,
+                &'a DummyTx<'a>,
             )
                 -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'a>>
             + Send
@@ -153,7 +150,7 @@ where
     AppErr: From<DbErr>,
 {
     let mut db = get_connection(pool).await?;
-    let tx: Tx = db.transaction().await?;
+    let tx: DummyTx = db.transaction().await?;
     let res = f(input, &tx).await;
     if res.is_ok() {
         tx.commit().await?;
@@ -170,7 +167,7 @@ pub fn fn2_with_transaction<'p, A, T, AppErr>(
     pool: &'p DummyDbPool,
     f: impl for<'a> Fn(
             A,
-            &'a Tx<'a>,
+            &'a DummyTx<'a>,
         ) -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'a>>
         + Send
         + Sync
@@ -196,7 +193,7 @@ pub fn fn2_arc_with_transaction<'p, A, T, AppErr>(
     f: Arc<
         dyn for<'a> Fn(
                 A,
-                &'a Tx<'a>,
+                &'a DummyTx<'a>,
             )
                 -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'a>>
             + Send
@@ -221,7 +218,7 @@ pub fn fn2_static_ref_with_transaction<'p, A, T, AppErr>(
     pool: &'p DummyDbPool,
     f: &'static (dyn for<'a> Fn(
         A,
-        &'a Tx<'a>,
+        &'a DummyTx<'a>,
     )
         -> Pin<Box<dyn Future<Output = Result<T, AppErr>> + Send + Sync + 'a>>
                   + Send
@@ -238,14 +235,14 @@ where
     }
 }
 
-pub type PinBorrowFn2b2Tx<S1, T> = dyn for<'a> Fn(S1, &'a Tx<'a>) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>>
+pub type PinBorrowFn2b2Tx<S1, T> = dyn for<'a> Fn(S1, &'a DummyTx<'a>) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>>
     + Send
     + Sync;
 
 /// Transforms an async closure with a `Tx` reference argument into a closure that returns a pinned-boxed future.
 pub fn pin_async_borrow_fn_2b2_tx<S, T>(
-    f: impl for<'a> AsyncBorrowFn2b2<'a, S, Tx<'a>, T>,
-) -> impl for<'a> Fn(S, &'a Tx<'a>) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> {
+    f: impl for<'a> AsyncBorrowFn2b2<'a, S, DummyTx<'a>, T>,
+) -> impl for<'a> Fn(S, &'a DummyTx<'a>) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> {
     move |s, tx| {
         let x = f(s, tx);
         Box::pin(x)

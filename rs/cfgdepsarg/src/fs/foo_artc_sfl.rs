@@ -2,7 +2,7 @@ use common::config::AppCfgInfo;
 use common::fs_data::{FooArtIn, FooArtOut};
 use common::fs_util::foo_core;
 use common::fwk::{
-    cfg_deps_artc_partial_apply_free_tx_arc, AppErr, PinBorrowFn2b2Tx, PinFn, RefInto, Tx,
+    cfg_deps_artc_partial_apply_free_tx_arc, AppErr, PinBorrowFn2b2Tx, PinFn, RefInto, DummyTx,
 };
 use std::ops::Deref;
 use std::sync::Arc;
@@ -41,7 +41,7 @@ pub struct FooArtcSflDeps {
 pub async fn foo_artc_sfl_c<CTX>(
     d: impl Deref<Target = FooArtcSflDeps>,
     input: FooArtcIn,
-    tx: &Tx<'_>,
+    tx: &DummyTx<'_>,
 ) -> Result<FooArtcOut, AppErr>
 where
     CTX: CfgParam,

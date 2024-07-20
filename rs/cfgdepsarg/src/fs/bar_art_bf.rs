@@ -2,7 +2,7 @@ use common::config::AppCfgInfo;
 use common::fs_util::bar_core;
 use common::fwk::{
     cfg_deps_art_boot_free_tx_lr, cfg_deps_art_partial_apply_free_tx_box, AppErr, Make,
-    PinBorrowFn2b2Tx, RefInto, Tx,
+    PinBorrowFn2b2Tx, RefInto, DummyTx,
 };
 use std::time::Duration;
 use tokio::time::sleep;
@@ -29,7 +29,7 @@ pub async fn bar_art_bf_c<ACFG, DUMMY>(
     cfg_src: impl Make<ACFG>,
     _: DUMMY,
     sleep_millis: u64,
-    tx: &Tx<'_>,
+    tx: &DummyTx<'_>,
 ) -> Result<String, AppErr>
 where
     ACFG: for<'a> RefInto<'a, BarArtBfCfgInfo<'a>>,

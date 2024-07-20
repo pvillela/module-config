@@ -1,7 +1,7 @@
 use crate::fs::Cfg;
 use common::config::AppCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{cfg_deps_artc_partial_apply_free_tx_box, AppErr, PinBorrowFn2b2Tx, RefInto, Tx};
+use common::fwk::{cfg_deps_artc_partial_apply_free_tx_box, AppErr, PinBorrowFn2b2Tx, RefInto, DummyTx};
 use std::time::Duration;
 use tokio::time::sleep;
 use tracing::instrument;
@@ -28,7 +28,7 @@ impl<'a> RefInto<'a, BarArtcBfCfgInfo<'a>> for AppCfgInfo {
 pub async fn bar_artc_bf_c<CTX, DUMMY>(
     _: DUMMY,
     sleep_millis: u64,
-    tx: &Tx<'_>,
+    tx: &DummyTx<'_>,
 ) -> Result<String, AppErr>
 where
     CTX: CfgParam,

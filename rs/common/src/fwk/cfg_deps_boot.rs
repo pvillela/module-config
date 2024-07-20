@@ -18,7 +18,7 @@
 //! - `app_cfg`: application config info or function that returns application config info
 //! - `refresh_mode`: cache refresh specification used in case of mutable configuration
 
-use super::{AsyncBorrowFn3b3, AsyncBorrowFn4b4, Tx};
+use super::{AsyncBorrowFn3b3, AsyncBorrowFn4b4, DummyTx};
 use crate::fwk::cfg::AppCfg;
 use crate::fwk::{
     box_pin_async_fn, box_pin_async_fn_wss, ref_pin_async_fn, PinFn, PinFnWss, RefreshMode,
@@ -269,9 +269,9 @@ where
 /// Returns an async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_at_partial_apply_free_tx_impl<CD, A, T>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, CD, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, CD, A, DummyTx<'a>, T> + 'static,
     s: CD,
-) -> impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
+) -> impl for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
 where
     CD: 'static + Send + Sync + Clone,
     T: 'static + Send + Sync,
@@ -282,13 +282,13 @@ where
 /// Returns an async stereotype instance with refreshable configuration and a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_at_boot_free_tx_impl<C, D, A, T, ACFG, SCFG>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, DummyTx<'a>, T> + 'static,
     cfg_factory: impl Fn(fn() -> ACFG, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
     app_cfg: fn() -> ACFG,
     refresh_mode: RefreshMode,
     deps: D,
-) -> impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
+) -> impl for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
 where
     C: 'static + Send + Sync,
     D: 'static + Send + Sync,
@@ -303,10 +303,10 @@ where
 /// Returns a boxed async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_at_partial_apply_free_tx_box<CD, A, T>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, CD, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, CD, A, DummyTx<'a>, T> + 'static,
     s: CD,
 ) -> Box<
-    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+    dyn for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
 >
 where
     CD: 'static + Send + Sync + Clone,
@@ -320,14 +320,14 @@ where
 /// Returns a boxed async stereotype instance with refreshable configuration and a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_at_boot_free_tx_box<C, D, A, T, ACFG, SCFG>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, DummyTx<'a>, T> + 'static,
     cfg_factory: impl Fn(fn() -> ACFG, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
     cfg_adapter: fn(&ACFG) -> SCFG,
     app_cfg: fn() -> ACFG,
     refresh_mode: RefreshMode,
     deps: D,
 ) -> Box<
-    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+    dyn for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
 >
 where
     C: 'static + Send + Sync,
@@ -350,10 +350,10 @@ where
 /// Returns an arced async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_at_partial_apply_free_tx_arc<CD, A, T>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, CD, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, CD, A, DummyTx<'a>, T> + 'static,
     s: CD,
 ) -> Arc<
-    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+    dyn for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
 >
 where
     CD: 'static + Send + Sync + Clone,
@@ -367,14 +367,14 @@ where
 /// Returns an arced async stereotype instance with refreshable configuration and a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_at_boot_free_tx_arc<C, D, A, T, ACFG, SCFG>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<C, D>>, A, DummyTx<'a>, T> + 'static,
     cfg_factory: impl Fn(fn() -> ACFG, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
     cfg_adapter: fn(&ACFG) -> SCFG,
     app_cfg: fn() -> ACFG,
     refresh_mode: RefreshMode,
     deps: D,
 ) -> Arc<
-    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+    dyn for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
 >
 where
     C: 'static + Send + Sync,
@@ -392,13 +392,13 @@ where
 /// Returns an async stereotype instance with refreshable configuration, leaked CfgDeps,
 /// and a free transaction argument, for a transactional stereotype constructor.
 fn cfg_deps_at_boot_free_tx_lr_impl<C, D, A, T, ACFG, SCFG>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, DummyTx<'a>, T> + 'static,
     cfg_factory: impl Fn(fn() -> ACFG, fn(&ACFG) -> SCFG, RefreshMode) -> C,
     cfg_adapter: fn(&ACFG) -> SCFG,
     app_cfg: fn() -> ACFG,
     refresh_mode: RefreshMode,
     deps: D,
-) -> impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
+) -> impl for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
 where
     C: 'static + Send + Sync,
     D: 'static + Send + Sync,
@@ -413,13 +413,13 @@ where
 /// Returns a leaked reference to an async stereotype instance with refreshable configuration, leaked CfgDeps,
 /// and a free transaction argument, for a transactional stereotype constructor.
 pub fn cfg_deps_at_boot_free_tx_lr<C, D, A, T, ACFG, SCFG>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<C, D>, A, DummyTx<'a>, T> + 'static,
     cfg_factory: impl Fn(fn() -> ACFG, fn(&ACFG) -> SCFG, RefreshMode) -> C + 'static,
     cfg_adapter: fn(&ACFG) -> SCFG,
     app_cfg: fn() -> ACFG,
     refresh_mode: RefreshMode,
     deps: D,
-) -> &'static (dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>>
+) -> &'static (dyn for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>>
                  + Send
                  + Sync)
 where
@@ -447,10 +447,10 @@ where
 /// Returns an async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_art_partial_apply_free_tx_impl<MACFG, D, A, T>(
-    f_c: impl for<'a> AsyncBorrowFn4b4<'a, MACFG, D, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn4b4<'a, MACFG, D, A, DummyTx<'a>, T> + 'static,
     cfg_src: MACFG,
     deps: D,
-) -> impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
+) -> impl for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
 where
     MACFG: 'static + Send + Sync + Clone,
     D: 'static + Send + Sync + Clone,
@@ -462,9 +462,9 @@ where
 /// Returns an async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_artc_partial_apply_free_tx_impl<D, A, T>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, D, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, D, A, DummyTx<'a>, T> + 'static,
     deps: D,
-) -> impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
+) -> impl for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
 where
     D: 'static + Send + Sync + Clone,
     T: 'static + Send + Sync,
@@ -475,11 +475,11 @@ where
 /// Returns a boxed async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_art_partial_apply_free_tx_box<MACFG, D, A, T>(
-    f_c: impl for<'a> AsyncBorrowFn4b4<'a, MACFG, D, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn4b4<'a, MACFG, D, A, DummyTx<'a>, T> + 'static,
     cfg_src: MACFG,
     deps: D,
 ) -> Box<
-    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+    dyn for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
 >
 where
     MACFG: 'static + Send + Sync + Clone,
@@ -494,10 +494,10 @@ where
 /// Returns a boxed async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_artc_partial_apply_free_tx_box<D, A, T>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, D, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, D, A, DummyTx<'a>, T> + 'static,
     deps: D,
 ) -> Box<
-    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+    dyn for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
 >
 where
     D: 'static + Send + Sync + Clone,
@@ -511,11 +511,11 @@ where
 /// Returns an arced async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_art_partial_apply_free_tx_arc<MACFG, D, A, T>(
-    f_c: impl for<'a> AsyncBorrowFn4b4<'a, MACFG, D, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn4b4<'a, MACFG, D, A, DummyTx<'a>, T> + 'static,
     cfg_src: MACFG,
     deps: D,
 ) -> Arc<
-    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+    dyn for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
 >
 where
     MACFG: 'static + Send + Sync + Clone,
@@ -530,10 +530,10 @@ where
 /// Returns an arced async stereotype instance with a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_artc_partial_apply_free_tx_arc<D, A, T>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, D, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, D, A, DummyTx<'a>, T> + 'static,
     deps: D,
 ) -> Arc<
-    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+    dyn for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
 >
 where
     D: 'static + Send + Sync + Clone,
@@ -547,10 +547,10 @@ where
 /// Returns an async stereotype instance with leaked deps,
 /// and a free transaction argument, for a transactional stereotype constructor.
 pub fn cfg_deps_art_boot_free_tx_lr_impl<MACFG, D, A, T>(
-    f_c: impl for<'a> AsyncBorrowFn4b4<'a, MACFG, &'static D, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn4b4<'a, MACFG, &'static D, A, DummyTx<'a>, T> + 'static,
     cfg_src: MACFG,
     deps: D,
-) -> impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
+) -> impl for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
 where
     MACFG: 'static + Send + Sync + Clone,
     D: 'static + Send + Sync,
@@ -564,10 +564,10 @@ where
 /// Returns a leaked reference to an async stereotype instance with leaked deps,
 /// and a free transaction argument, for a transactional stereotype constructor.
 pub fn cfg_deps_art_boot_free_tx_lr<MACFG, D, A, T>(
-    f_c: impl for<'a> AsyncBorrowFn4b4<'a, MACFG, &'static D, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn4b4<'a, MACFG, &'static D, A, DummyTx<'a>, T> + 'static,
     cfg_src: MACFG,
     deps: D,
-) -> &'static (dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>>
+) -> &'static (dyn for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>>
                  + Send
                  + Sync)
 where
@@ -586,10 +586,10 @@ where
 /// Returns an async stereotype instance with simple configuration and a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_ast_boot_free_tx_impl<D, A, T, ACFG>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<ACFG, D>>, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<ACFG, D>>, A, DummyTx<'a>, T> + 'static,
     app_cfg: ACFG,
     deps: D,
-) -> impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
+) -> impl for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
 where
     D: 'static + Send + Sync,
     A: 'static,
@@ -603,11 +603,11 @@ where
 /// Returns a boxed async stereotype instance with simple configuration and a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_ast_boot_free_tx_box<D, A, T, ACFG>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<ACFG, D>>, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<ACFG, D>>, A, DummyTx<'a>, T> + 'static,
     app_cfg: ACFG,
     deps: D,
 ) -> Box<
-    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+    dyn for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
 >
 where
     D: 'static + Send + Sync,
@@ -622,11 +622,11 @@ where
 /// Returns an arced async stereotype instance with simple configuration and a free transaction argument,
 /// for a transactional stereotype constructor.
 pub fn cfg_deps_ast_boot_free_tx_arc<D, A, T, ACFG>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<ACFG, D>>, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, Arc<CfgDeps<ACFG, D>>, A, DummyTx<'a>, T> + 'static,
     app_cfg: ACFG,
     deps: D,
 ) -> Arc<
-    dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
+    dyn for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync,
 >
 where
     D: 'static + Send + Sync,
@@ -641,10 +641,10 @@ where
 /// Returns an async stereotype instance with refreshable configuration, leaked CfgDeps,
 /// and a free transaction argument, for a transactional stereotype constructor.
 fn cfg_deps_ast_boot_free_tx_lr_impl<D, A, T, ACFG>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<ACFG, D>, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<ACFG, D>, A, DummyTx<'a>, T> + 'static,
     app_cfg: ACFG,
     deps: D,
-) -> impl for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
+) -> impl for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>> + Send + Sync
 where
     D: 'static + Send + Sync,
     A: 'static,
@@ -658,10 +658,10 @@ where
 /// Returns a leaked reference to an async stereotype instance with simple configuration, leaked CfgDeps,
 /// and a free transaction argument, for a transactional stereotype constructor.
 pub fn cfg_deps_ast_boot_free_tx_lr<D, A, T, ACFG>(
-    f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<ACFG, D>, A, Tx<'a>, T> + 'static,
+    f_c: impl for<'a> AsyncBorrowFn3b3<'a, &'static CfgDeps<ACFG, D>, A, DummyTx<'a>, T> + 'static,
     app_cfg: ACFG,
     deps: D,
-) -> &'static (dyn for<'a> Fn(A, &'a Tx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>>
+) -> &'static (dyn for<'a> Fn(A, &'a DummyTx) -> Pin<Box<dyn Future<Output = T> + Send + Sync + 'a>>
                  + Send
                  + Sync)
 where
