@@ -14,23 +14,25 @@ pub trait Transaction {
     type DbErr: Error + Into<AppErr> + Send;
 
     #[allow(async_fn_in_trait)]
-    fn transaction<'a>(&'a mut self) -> impl Future<Output = Result<DummyTx<'a>, Self::DbErr>> + Send;
+    fn transaction<'a>(
+        &'a mut self,
+    ) -> impl Future<Output = Result<DummyTx<'a>, Self::DbErr>> + Send;
 }
 
-pub trait DbClient {
+pub trait Db {
     type Db: Transaction + Send;
 
     #[allow(async_fn_in_trait)]
     fn db_client() -> impl Future<Output = Result<Self::Db, <Self::Db as Transaction>::DbErr>> + Send;
 }
 
-pub trait DbClientParam {
-    type DbClient: DbClient;
+pub trait DbCtx {
+    type DbClient: Db;
 }
 
 pub trait DbClientDefault {}
 
-impl<T> DbClient for T
+impl<T> Db for T
 where
     T: DbClientDefault,
 {

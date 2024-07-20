@@ -1,13 +1,13 @@
 use common::config::AppCfgInfo;
 use common::fs_data::{FooArtIn, FooArtOut};
 use common::fs_util::foo_core;
-use common::fwk::{AppErr, DbClientParam, DummyTx, RefInto};
+use common::fwk::{AppErr, DbCtx, DummyTx, RefInto};
 use std::marker::PhantomData;
 use std::time::Duration;
 use tokio::time::sleep;
 use tracing::instrument;
 
-use super::{AsyncFnTx, BarArtctBf, BarArtctBfBoot, BarCtx, Cfg, CfgParam};
+use super::{AsyncFnTx, BarArtctBf, BarArtctBfBoot, BarCtx, Cfg, CfgCtx};
 
 pub type FooArtctIn = FooArtIn;
 pub type FooArtctOut = FooArtOut;
@@ -32,13 +32,13 @@ pub trait FooArtctSfl<CTX> {
 }
 
 pub trait FooOnlyCtx:
-    CfgParam<Cfg: Cfg<Info: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>>>
+    CfgCtx<Cfg: Cfg<Info: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>>>
 {
 }
 
 impl<CTX> FooOnlyCtx for CTX
 where
-    CTX: CfgParam,
+    CTX: CfgCtx,
     <CTX::Cfg as Cfg>::Info: for<'a> RefInto<'a, FooArtctSflCfgInfo<'a>>,
 {
 }
@@ -100,7 +100,7 @@ where
 
 impl<CTX, T> AsyncFnTx<CTX, FooArtctIn, FooArtctOut> for T
 where
-    CTX: DbClientParam,
+    CTX: DbCtx,
     T: FooArtctSfl<CTX>,
 {
     async fn f(input: FooArtctIn, tx: &DummyTx<'_>) -> Result<FooArtctOut, AppErr> {

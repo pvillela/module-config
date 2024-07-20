@@ -10,7 +10,7 @@ use std::time::Duration;
 use tokio::time::sleep;
 use tracing::instrument;
 
-use super::{bar_artc_bf_boot_box, BarArtcBfCfgInfo, BarArtcBfTxT, Cfg, CfgParam};
+use super::{bar_artc_bf_boot_box, BarArtcBfCfgInfo, BarArtcBfTxT, Cfg, CfgCtx};
 
 pub type FooArtcIn = FooArtIn;
 type FooArtcOut = FooArtOut;
@@ -44,7 +44,7 @@ pub async fn foo_artc_sfl_c<CTX>(
     tx: &DummyTx<'_>,
 ) -> Result<FooArtcOut, AppErr>
 where
-    CTX: CfgParam,
+    CTX: CfgCtx,
     <CTX::Cfg as Cfg>::Info: for<'a> RefInto<'a, FooArtcSflCfgInfo<'a>>,
 {
     let app_cfg_info = CTX::Cfg::cfg();
@@ -61,7 +61,7 @@ where
 /// Returns an arced foo_artc_sfl closure with free Tx parameter.
 pub fn foo_artc_sfl_boot_arc<CTX>() -> Arc<FooArtcSflTxT>
 where
-    CTX: CfgParam + 'static,
+    CTX: CfgCtx + 'static,
     <CTX::Cfg as Cfg>::Info: Send + Sync + 'static,
     <CTX::Cfg as Cfg>::Info: for<'a> RefInto<'a, BarArtcBfCfgInfo<'a>>,
     <CTX::Cfg as Cfg>::Info: for<'a> RefInto<'a, FooArtcSflCfgInfo<'a>>,

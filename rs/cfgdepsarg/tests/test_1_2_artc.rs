@@ -1,6 +1,6 @@
 mod common_test_artc;
 
-use cfgdepsarg::fs::{Cfg, CfgParam};
+use cfgdepsarg::fs::{Cfg, CfgCtx};
 use common_test_artc::common_test;
 use common_test_artc::{BarBfCfgTestInput, CfgTestInput, FooSflCfgTestInput};
 use tokio;
@@ -28,7 +28,7 @@ mod t1 {
         }
     }
 
-    impl CfgParam for Ctx {
+    impl CfgCtx for Ctx {
         type Cfg = CtxCfg;
     }
 
@@ -64,7 +64,7 @@ mod t2 {
         }
     }
 
-    impl CfgParam for Ctx {
+    impl CfgCtx for Ctx {
         type Cfg = CtxCfg;
     }
 

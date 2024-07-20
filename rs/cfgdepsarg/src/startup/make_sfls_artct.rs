@@ -1,6 +1,6 @@
-use crate::fs::{AsyncFnTx, Cfg, CfgParam, FooArtctIn, FooArtctOut, FooArtctSflI};
+use crate::fs::{AsyncFnTx, Cfg, CfgCtx, FooArtctIn, FooArtctOut, FooArtctSflI};
 use common::config::{get_app_configuration, AppCfgInfo};
-use common::fwk::{AppErr, DbClientDefault, DbClientParam};
+use common::fwk::{AppErr, DbClientDefault, DbCtx};
 
 struct Ctx;
 
@@ -14,7 +14,7 @@ impl Cfg for CtxCfg {
     }
 }
 
-impl CfgParam for Ctx {
+impl CfgCtx for Ctx {
     type Cfg = CtxCfg;
 }
 
@@ -22,7 +22,7 @@ struct CtxDbClient;
 
 impl DbClientDefault for CtxDbClient {}
 
-impl DbClientParam for Ctx {
+impl DbCtx for Ctx {
     type DbClient = CtxDbClient;
 }
 

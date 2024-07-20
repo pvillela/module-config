@@ -1,4 +1,4 @@
-use crate::fs::{foo_artc_sfl_boot_arc, Cfg, CfgParam, FooAtSflT};
+use crate::fs::{foo_artc_sfl_boot_arc, Cfg, CfgCtx, FooAtSflT};
 use common::config::{get_app_configuration, get_pool, AppCfgInfo};
 use common::fwk::fn2_arc_with_transaction;
 
@@ -13,7 +13,7 @@ impl Cfg for CtxCfg {
     }
 }
 
-impl CfgParam for Ctx {
+impl CfgCtx for Ctx {
     type Cfg = CtxCfg;
 }
 

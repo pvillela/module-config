@@ -1,7 +1,7 @@
 mod common_test_artct;
 
-use cfgdepsarg::fs::{Cfg, CfgParam};
-use common::fwk::{DbClientDefault, DbClientParam};
+use cfgdepsarg::fs::{Cfg, CfgCtx};
+use common::fwk::{DbClientDefault, DbCtx};
 use common_test_artct::{common_test, BarBfCfgTestInput, CfgTestInput, FooSflCfgTestInput};
 use tokio;
 
@@ -28,7 +28,7 @@ mod t1 {
         }
     }
 
-    impl CfgParam for Ctx {
+    impl CfgCtx for Ctx {
         type Cfg = CtxCfg;
     }
 
@@ -36,7 +36,7 @@ mod t1 {
 
     impl DbClientDefault for CtxDbClient {}
 
-    impl DbClientParam for Ctx {
+    impl DbCtx for Ctx {
         type DbClient = CtxDbClient;
     }
 
@@ -72,7 +72,7 @@ mod t2 {
         }
     }
 
-    impl CfgParam for Ctx {
+    impl CfgCtx for Ctx {
         type Cfg = CtxCfg;
     }
 
@@ -80,7 +80,7 @@ mod t2 {
 
     impl DbClientDefault for CtxDbClient {}
 
-    impl DbClientParam for Ctx {
+    impl DbCtx for Ctx {
         type DbClient = CtxDbClient;
     }
 

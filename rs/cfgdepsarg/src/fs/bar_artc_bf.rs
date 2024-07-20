@@ -1,12 +1,14 @@
 use crate::fs::Cfg;
 use common::config::AppCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{cfg_deps_artc_partial_apply_free_tx_box, AppErr, PinBorrowFn2b2Tx, RefInto, DummyTx};
+use common::fwk::{
+    cfg_deps_artc_partial_apply_free_tx_box, AppErr, DummyTx, PinBorrowFn2b2Tx, RefInto,
+};
 use std::time::Duration;
 use tokio::time::sleep;
 use tracing::instrument;
 
-use super::CfgParam;
+use super::CfgCtx;
 
 pub type BarArtcBfTxT = PinBorrowFn2b2Tx<u64, Result<String, AppErr>>;
 
@@ -31,7 +33,7 @@ pub async fn bar_artc_bf_c<CTX, DUMMY>(
     tx: &DummyTx<'_>,
 ) -> Result<String, AppErr>
 where
-    CTX: CfgParam,
+    CTX: CfgCtx,
     <CTX::Cfg as Cfg>::Info: for<'a> RefInto<'a, BarArtcBfCfgInfo<'a>>,
 {
     let app_cfg_info = CTX::Cfg::cfg();
@@ -46,7 +48,7 @@ where
 /// Returns a boxed bar_artc_bf closure with free Tx parameter.
 pub fn bar_artc_bf_boot_box<CTX>() -> Box<BarArtcBfTxT>
 where
-    CTX: CfgParam + 'static,
+    CTX: CfgCtx + 'static,
     <CTX::Cfg as Cfg>::Info: Send + Sync + 'static + for<'a> RefInto<'a, BarArtcBfCfgInfo<'a>>,
 {
     cfg_deps_artc_partial_apply_free_tx_box(bar_artc_bf_c::<CTX, ()>, ())

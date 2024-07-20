@@ -1,4 +1,4 @@
-use common::fwk::{AppErr, DbClient, DbClientParam, DummyTx, Transaction};
+use common::fwk::{AppErr, Db, DbCtx, DummyTx, Transaction};
 
 pub trait Cfg {
     type Info;
@@ -6,13 +6,13 @@ pub trait Cfg {
     fn cfg() -> Self::Info;
 }
 
-pub trait CfgParam {
+pub trait CfgCtx {
     type Cfg: Cfg;
 }
 
 pub trait AsyncFnTx<CTX, IN, OUT>
 where
-    CTX: DbClientParam,
+    CTX: DbCtx,
 {
     #[allow(async_fn_in_trait)]
     async fn f(input: IN, tx: &DummyTx<'_>) -> Result<OUT, AppErr>;

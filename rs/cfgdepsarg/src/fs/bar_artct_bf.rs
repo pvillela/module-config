@@ -1,6 +1,6 @@
 use common::config::AppCfgInfo;
 use common::fs_util::bar_core;
-use common::fwk::{AppErr, DbClientParam, RefInto, DummyTx};
+use common::fwk::{AppErr, DbCtx, DummyTx, RefInto};
 use std::marker::PhantomData;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -8,7 +8,7 @@ use tracing::instrument;
 
 use crate::fs::context::Cfg;
 
-use super::{AsyncFnTx, CfgParam};
+use super::{AsyncFnTx, CfgCtx};
 
 pub type BarArtctIn = u64;
 pub type BarArtctOut = String;
@@ -32,11 +32,11 @@ pub trait BarArtctBf<CTX> {
     async fn bar_artct_bf(sleep_millis: u64, tx: &DummyTx<'_>) -> Result<String, AppErr>;
 }
 
-pub trait BarCtx: CfgParam<Cfg: Cfg<Info: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>>> {}
+pub trait BarCtx: CfgCtx<Cfg: Cfg<Info: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>>> {}
 
 impl<CTX> BarCtx for CTX
 where
-    CTX: CfgParam,
+    CTX: CfgCtx,
     <CTX::Cfg as Cfg>::Info: for<'a> RefInto<'a, BarArtctBfCfgInfo<'a>>,
 {
 }
@@ -74,7 +74,7 @@ impl<CTX> BarArtctBfBoot<CTX> for BarArtctBfBootI<CTX> where CTX: BarCtx {}
 
 impl<CTX, T> AsyncFnTx<CTX, BarArtctIn, BarArtctOut> for T
 where
-    CTX: DbClientParam,
+    CTX: DbCtx,
     T: BarArtctBf<CTX>,
 {
     async fn f(input: BarArtctIn, tx: &DummyTx<'_>) -> Result<BarArtctOut, AppErr> {
