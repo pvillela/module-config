@@ -33,7 +33,7 @@ Meaning of infix letters:
 - `_ai_` -- async + immediate.
 - `_ar_` -- async + reference-based.
 - `_at_` -- async + transactional.
-- `_aw_` -- async using `CfgRefCellId` instead of `CfgArcSwapArc`. Can be used with Axum but not Actix.
+- `_aw_` -- async using `CfgRefCellId` instead of `CfgArcSwapArc`. Can be used with Actix but not Axum.
 - `_art_` -- async + reference-based + transactional.
 - `_artc_` -- async + transactional + reference-based + context-based. Builds on `_art_` but uses a context type parameter to provide an app configuration source instead of injecting a function.
 - `_artct_` -- async + transactional + reference-based + context-based + trait-based. Builds on `_artc_` but uses trait methods to provide dependencies instead of injecting them with a struct.
